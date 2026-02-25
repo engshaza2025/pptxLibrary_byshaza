@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Shaza pptx library</title>
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+    <style>
+        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f3f2f1; overflow: hidden; }
+        .top-bar { background-color: #ffffff; padding: 10px 15px 0 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10; display: flex; flex-direction: column; gap: 8px; }
+        .top-bar h3 { color: #0078d4; margin: 0; font-size: 16px; text-align: center; }
+        
+        .controls-panel { display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
+        .controls-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
+        .control-box { display: flex; align-items: center; gap: 5px; background-color: #f8f8f8; padding: 4px 8px; border-radius: 6px; border: 1px solid #edebe9; flex: 1; min-width: 80px; justify-content: center; }
+        .control-box label { font-size: 11px; color: #605e5c; font-weight: bold; margin: 0; }
+        .control-box input[type="number"], .control-box select { padding: 2px; font-size: 11px; border: 1px solid #c8c6c4; border-radius: 4px; text-align: center; }
+        .control-box input[type="number"] { width: 35px; }
+        .control-box input[type="color"] { width: 20px; height: 20px; padding: 0; border: none; cursor: pointer; background: none; }
+        
+        .shape-selector { background-color: #f8f8f8; padding: 8px; border-radius: 6px; border: 1px solid #edebe9; margin-bottom: 5px; display: flex; flex-direction: column; gap: 8px; }
+        .shape-options { display: flex; gap: 10px; justify-content: center; border-bottom: 1px solid #e1dfdd; padding-bottom: 5px; }
+        .shape-option { display: flex; align-items: center; gap: 3px; font-size: 10px; cursor: pointer; }
+        .shape-details { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
+        
+        .tabs-container { display: flex; gap: 5px; border-bottom: 1px solid #edebe9; margin-top: 2px; }
+        .tab-btn { flex: 1; background: none; border: none; padding: 8px 5px; cursor: pointer; font-size: 12px; color: #323130; border-bottom: 3px solid transparent; }
+        .tab-btn.active { font-weight: bold; color: #0078d4; border-bottom: 3px solid #0078d4; }
+        
+        .main-content { flex-grow: 1; padding: 12px; overflow-y: auto; background-color: #f3f2f1; }
+        .btn-select { background-color: #0078d4; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 12px; margin-bottom: 12px; font-weight: bold;}
+        .icon-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+        .icon-box { width: 55px; height: 55px; background-color: white; border: 1px solid #c8c6c4; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; transition: transform 0.1s; }
+        .icon-box:hover { transform: scale(1.05); border-color: #0078d4; }
+        .icon-box img { max-width: 100%; max-height: 100%; pointer-events: none; }
+        
+        .group-title { color: #323130; font-size: 12px; border-bottom: 2px solid #e1dfdd; padding: 6px 5px; margin-top: 5px; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        #notification { position: fixed; bottom: 15px; left: 15px; right: 15px; padding: 8px; background: #323130; color: white; border-radius: 4px; font-size: 11px; text-align: center; display: none; z-index: 100; }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <h3>Shaza pptx library</h3>
+        <div id="global-controls" class="controls-panel">
+            <div class="controls-row">
+                <div class="control-box">
+                    <label>الحجم:</label>
+                    <input type="number" id="icon-width" value="50">
+                </div>
+                <div class="control-box" id="color-control-group">
+                    <input type="checkbox" id="apply-color" checked>
+                    <label>تلوين</label>
+                    <input type="color" id="icon-color" value="#4472C4">
+                </div>
+            </div>
+            <div id="shape-selector-group" class="shape-selector">
+                <div class="shape-options">
+                    <span style="font-size: 10px; font-weight: bold; color: #0078d4;">الشكل الحاوي:</span>
+                    <label class="shape-option"><input type="radio" name="bg-shape" value="none" checked> لا شيء</label>
+                    <label class="shape-option"><input type="radio" name="bg-shape" value="circle"> دائرة</label>
+                    <label class="shape-option"><input type="radio" name="bg-shape" value="square"> مربع</label>
+                    <label class="shape-option"><input type="radio" name="bg-shape" value="rounded"> مربع ناعم</label>
+                </div>
+                <div id="bg-details" class="shape-details" style="display: none;">
+                    <div style="display: flex; align-items: center; gap: 3px;">
+                        <label style="font-size: 10px;">الخلفية:</label>
+                        <input type="color" id="bg-color" value="#ffffff">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 3px;">
+                        <label style="font-size: 10px;">الإطار:</label>
+                        <input type="color" id="outline-color" value="#00000000">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 3px;">
+                        <label style="font-size: 10px;">السماكة:</label>
+                        <select id="outline-width" style="font-size: 10px;">
+                            <option value="0">بلا إطار</option>
+                            <option value="1">1 px</option>
+                            <option value="2">2 px</option>
+                            <option value="3">3 px</option>
+                            <option value="4">4 px</option>
+                            <option value="5">5 px</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('logos')" id="tab-logos">الشعارات</button>
+            <button class="tab-btn" onclick="switchTab('icons')" id="tab-icons">الأيقونات</button>
+            <button class="tab-btn" onclick="switchTab('shapes')" id="tab-shapes">الأشكال</button>
+        </div>
+    </div>
+    <div class="main-content">
+        <div id="section-logos">
+            <button class="btn-select" onclick="loadLogosFolder()">تحديد مجلد الشعارات</button>
+            <div id="grid-logos" class="icon-grid"></div>
+        </div>
+        <div id="section-icons" style="display: none;">
+            <button class="btn-select" onclick="loadIconsFolder()">تحديد مجلد الأيقونات</button>
+            <div id="grid-icons-container"></div>
+        </div>
+        <div id="section-shapes" style="display: none;">
+            <button class="btn-select" onclick="loadShapesFolder()">تحديد مجلد الأشكال</button>
+            <div id="grid-shapes" class="icon-grid"></div>
+        </div>
+    </div>
+    <div id="notification"></div>
+
+    <script>
+        let currentTab = 'logos';
+
+        function switchTab(tabName) {
+            currentTab = tabName;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            document.getElementById('section-logos').style.display = 'none';
+            document.getElementById('section-icons').style.display = 'none';
+            document.getElementById('section-shapes').style.display = 'none';
+            document.getElementById('section-' + tabName).style.display = 'block';
+            
+            const globalControls = document.getElementById('global-controls');
+            if (tabName === 'shapes') {
+                globalControls.style.display = 'none';
+            } else {
+                globalControls.style.display = 'flex';
+                const isIcons = (tabName === 'icons');
+                document.getElementById('color-control-group').style.display = isIcons ? 'flex' : 'none';
+                document.getElementById('shape-selector-group').style.display = isIcons ? 'flex' : 'none';
+            }
+        }
+
+        document.querySelectorAll('input[name="bg-shape"]').forEach(r => {
+            r.onchange = (e) => {
+                document.getElementById('bg-details').style.display = e.target.value === 'none' ? 'none' : 'flex';
+            };
+        });
+
+        function showNotification(msg) {
+            const n = document.getElementById('notification');
+            n.innerText = msg; n.style.display = 'block';
+            setTimeout(() => n.style.display = 'none', 3000);
+        }
+
+        async function loadLogosFolder() {
+            try {
+                const h = await window.showDirectoryPicker();
+                const g = document.getElementById('grid-logos');
+                g.innerHTML = ''; await extract(h, g);
+                showNotification('تم تحميل الشعارات');
+            } catch(e) {}
+        }
+
+        async function loadIconsFolder() {
+            try {
+                const h = await window.showDirectoryPicker();
+                const c = document.getElementById('grid-icons-container');
+                c.innerHTML = '';
+                for await (const entry of h.values()) {
+                    if (entry.kind === 'directory') {
+                        const title = document.createElement('div');
+                        title.className = 'group-title';
+                        title.innerHTML = `<span>${entry.name}</span> <span>▼</span>`;
+                        const grid = document.createElement('div');
+                        grid.className = 'icon-grid';
+                        title.onclick = () => grid.style.display = grid.style.display === 'none' ? 'flex' : 'none';
+                        c.appendChild(title);
+                        const sub = await h.getDirectoryHandle(entry.name);
+                        await extract(sub, grid);
+                        c.appendChild(grid);
+                    }
+                }
+                showNotification('تم تحميل مجلدات الأيقونات');
+            } catch(e) {}
+        }
+
+        async function loadShapesFolder() {
+            try {
+                const h = await window.showDirectoryPicker();
+                const g = document.getElementById('grid-shapes');
+                g.innerHTML = ''; await extract(h, g);
+                showNotification('تم تحميل الأشكال');
+            } catch(e) {}
+        }
+
+        async function extract(h, g) {
+            for await (const e of h.values()) {
+                if (e.kind === 'file' && e.name.toLowerCase().endsWith('.svg')) {
+                    const f = await e.getFile();
+                    const t = await f.text();
+                    const box = document.createElement('div');
+                    box.className = 'icon-box';
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(f);
+                    box.appendChild(img);
+                    box.onclick = () => insert(t);
+                    g.appendChild(box);
+                }
+            }
+        }
+
+        function hexToRgb(hex) {
+            hex = hex.replace('#', '');
+            if (hex.length === 8) hex = hex.substring(0, 6);
+            return hex.toUpperCase();
+        }
+
+        // محرك تلوين SVG دقيق يضمن استبدال كافة الألوان السوداء بلون الثيم أو اللون المختار
+        function deepColorSVG(svgString, fillColor) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(svgString, "image/svg+xml");
+            const elements = doc.querySelectorAll('*');
+            
+            elements.forEach(el => {
+                // استبدال fill إذا كان أسود أو غير موجود
+                const fill = el.getAttribute('fill');
+                if (!fill || fill === '#000' || fill === '#000000' || fill === 'black' || (fill !== 'none' && fill !== 'transparent')) {
+                    el.setAttribute('fill', fillColor);
+                }
+                
+                // استبدال stroke إذا كان أسود أو غير موجود
+                const stroke = el.getAttribute('stroke');
+                if (stroke && stroke !== 'none' && stroke !== 'transparent') {
+                    el.setAttribute('stroke', fillColor);
+                }
+                
+                // استبدال الستايل المضمن
+                const style = el.getAttribute('style');
+                if (style) {
+                    let newStyle = style.replace(/fill\s*:\s*[^;]+/g, `fill:${fillColor}`);
+                    newStyle = newStyle.replace(/stroke\s*:\s*[^;]+/g, `stroke:${fillColor}`);
+                    el.setAttribute('style', newStyle);
+                }
+            });
+            
+            return new XMLSerializer().serializeToString(doc);
+        }
+
+        function insert(svg) {
+            if (currentTab === 'shapes') {
+                Office.context.document.setSelectedDataAsync(svg, { coercionType: Office.CoercionType.XmlSvg });
+                return;
+            }
+
+            const w = parseInt(document.getElementById('icon-width').value) || 50;
+            const applyColor = document.getElementById('apply-color').checked;
+            const iconColor = '#' + hexToRgb(document.getElementById('icon-color').value);
+            const shape = document.querySelector('input[name="bg-shape"]:checked').value;
+            const bgColor = '#' + hexToRgb(document.getElementById('bg-color').value);
+            const outlineColor = '#' + hexToRgb(document.getElementById('outline-color').value);
+            const outlineWidth = parseInt(document.getElementById('outline-width').value);
+
+            try {
+                let processedSvg = svg;
+                if (applyColor) {
+                    processedSvg = deepColorSVG(svg, iconColor);
+                }
+
+                let finalContent = processedSvg;
+                if (shape !== 'none') {
+                    const padding = w * 0.40;
+                    const containerSize = w + (padding * 2);
+                    const c = containerSize / 2;
+                    let shapeHtml = '';
+                    const strokeAttr = outlineWidth > 0 ? `stroke="${outlineColor}" stroke-width="${outlineWidth}"` : '';
+
+                    if (shape === 'circle') shapeHtml = `<circle cx="${c}" cy="${c}" r="${containerSize/2 - 5}" fill="${bgColor}" ${strokeAttr} />`;
+                    else if (shape === 'square') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" fill="${bgColor}" ${strokeAttr} />`;
+                    else if (shape === 'rounded') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.1}" fill="${bgColor}" ${strokeAttr} />`;
+
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(processedSvg, "image/svg+xml");
+                    const svgInner = new XMLSerializer().serializeToString(doc.documentElement).replace(/<\/?svg[^>]*>/g, '');
+
+                    finalContent = `<svg width="${containerSize}" height="${containerSize}" viewBox="0 0 ${containerSize} ${containerSize}" xmlns="http://www.w3.org/2000/svg">
+                        ${shapeHtml}
+                        <g transform="translate(${padding},${padding})">
+                            <svg width="${w}" height="${w}" viewBox="0 0 ${w} ${w}">${svgInner}</svg>
+                        </g>
+                    </svg>`;
+                }
+
+                Office.context.document.setSelectedDataAsync(finalContent, { coercionType: Office.CoercionType.XmlSvg }, (result) => {
+                    if (result.status === Office.AsyncResultStatus.Succeeded) {
+                        showNotification('تم الإدراج بنجاح ✨');
+                    } else {
+                        showNotification('حدث خطأ في الإدراج');
+                    }
+                });
+            } catch(err) { 
+                console.error(err);
+                showNotification('حدث خطأ: ' + err.message);
+            }
+        }
+
+        function updateThemeColor() {
+            if (Office.context && Office.context.officeTheme) {
+                const accent1 = Office.context.officeTheme.accent1;
+                if (accent1) {
+                    document.getElementById('icon-color').value = accent1;
+                }
+            }
+        }
+
+        Office.onReady((info) => {
+            if (info.host === Office.HostType.PowerPoint) {
+                updateThemeColor();
+                Office.context.document.addHandlerAsync(Office.EventType.OfficeThemeChanged, updateThemeColor);
+            }
+            switchTab('logos');
+        });
+    </script>
+</body>
+</html>

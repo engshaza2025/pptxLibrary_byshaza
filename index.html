@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Shaza pptx library</title>
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+
+    <style>
+        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f3f2f1; overflow: hidden; }
+        .top-bar { background-color: #ffffff; padding: 10px 15px 0 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10; display: flex; flex-direction: column; gap: 8px; }
+        .top-bar h3 { color: #0078d4; margin: 0; font-size: 16px; text-align: center; }
+
+        .controls-panel { display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
+        .controls-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
+
+        .control-box { display: flex; align-items: center; gap: 5px; background-color: #f8f8f8; padding: 4px 8px; border-radius: 6px; border: 1px solid #edebe9; flex: 1; min-width: 80px; justify-content: center; }
+        .control-box label { font-size: 11px; color: #605e5c; font-weight: bold; margin: 0; }
+
+        .control-box input[type="number"] { width: 40px; padding: 2px; font-size: 11px; text-align: center; }
+        .control-box input[type="color"] { width: 20px; height: 20px; padding: 0; border: none; cursor: pointer; background: none; }
+
+        .tabs-container { display: flex; gap: 5px; border-bottom: 1px solid #edebe9; margin-top: 2px; }
+        .tab-btn { flex: 1; background: none; border: none; padding: 8px 5px; cursor: pointer; font-size: 12px; color: #323130; border-bottom: 3px solid transparent; }
+        .tab-btn.active { font-weight: bold; color: #0078d4; border-bottom: 3px solid #0078d4; }
+
+        .main-content { flex-grow: 1; padding: 12px; overflow-y: auto; background-color: #f3f2f1; }
+        .btn-select { background-color: #0078d4; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 12px; margin-bottom: 12px; font-weight: bold;}
+
+        .icon-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+        .icon-box { width: 55px; height: 55px; background-color: white; border: 1px solid #c8c6c4; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; transition: transform 0.1s; }
+        .icon-box:hover { transform: scale(1.05); border-color: #0078d4; }
+        .icon-box img { max-width: 100%; max-height: 100%; pointer-events: none; }
+
+        #notification { position: fixed; bottom: 15px; left: 15px; right: 15px; padding: 8px; background: #323130; color: white; border-radius: 4px; font-size: 11px; text-align: center; display: none; z-index: 100; }
+    </style>
+</head>
+
+<body>
+<div class="top-bar">
+    <h3>Shaza pptx library</h3>
+
+    <div class="controls-panel">
+        <div class="controls-row">
+            <div class="control-box">
+                <label>الحجم:</label>
+                <input type="number" id="icon-width" value="50">
+            </div>
+            <div class="control-box">
+                <input type="checkbox" id="apply-color" checked>
+                <label>تلوين</label>
+                <input type="color" id="icon-color" value="#4472C4">
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab('icons')" id="tab-icons">الأيقونات</button>
+    </div>
+</div>
+
+<div class="main-content">
+    <div id="section-icons">
+        <button class="btn-select" onclick="loadIconsFolder()">تحديد مجلد الأيقونات</button>
+        <div id="grid-icons" class="icon-grid"></div>
+    </div>
+</div>
+
+<div id="notification"></div>
+
+<script>
+let currentTab = 'icons';
+
+function showNotification(msg) {
+    const n = document.getElementById('notification');
+    n.innerText = msg;
+    n.style.display = 'block';
+    setTimeout(() => n.style.display = 'none', 3000);
+}
+
+async function loadIconsFolder() {
+    try {
+        const h = await window.showDirectoryPicker();
+        const g = document.getElementById('grid-icons');
+        g.innerHTML = '';
+
+        for await (const e of h.values()) {
+            if (e.kind === 'file' && e.name.toLowerCase().endsWith('.svg')) {
+                const f = await e.getFile();
+                const t = await f.text();
+
+                const box = document.createElement('div');
+                box.className = 'icon-box';
+
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(f);
+
+                box.appendChild(img);
+                box.onclick = () => insertIcon(t);
+
+                g.appendChild(box);
+            }
+        }
+
+        showNotification('تم تحميل أيقونات Flaticon بنجاح ✨');
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+/* 🔥 محرك التلوين الاحترافي – مخصص للأيقونات الفلات السوداء */
+function deepColorSVG(svgString, fillColor) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgString, "image/svg+xml");
+    const svg = doc.documentElement;
+
+    // حذف أي ستايل أو class قد يفرض لون أسود
+    svg.removeAttribute("style");
+    svg.removeAttribute("class");
+
+    // استهداف كل العناصر الرسومية فقط
+    const elements = svg.querySelectorAll("path, rect, circle, ellipse, polygon, polyline");
+
+    elements.forEach(el => {
+        // إجبار الفل على اللون المختار (مهما كان اللون الأصلي)
+        el.setAttribute("fill", fillColor);
+
+        // إزالة stroke للحفاظ على فلات 100%
+        el.setAttribute("stroke", "none");
+
+        // حذف أي ألوان مخزنة داخل style
+        if (el.hasAttribute("style")) {
+            el.removeAttribute("style");
+        }
+
+        if (el.hasAttribute("class")) {
+            el.removeAttribute("class");
+        }
+    });
+
+    // تأكيد اللون على مستوى SVG كامل
+    svg.setAttribute("fill", fillColor);
+
+    return new XMLSerializer().serializeToString(svg);
+}
+
+function insertIcon(svg) {
+    const w = parseInt(document.getElementById('icon-width').value) || 50;
+    const applyColor = document.getElementById('apply-color').checked;
+    const color = document.getElementById('icon-color').value;
+
+    try {
+        let finalSVG = svg;
+
+        // 🔥 التلوين الإجباري للأيقونات الفلات
+        if (applyColor) {
+            finalSVG = deepColorSVG(svg, color);
+        }
+
+        // ضبط الحجم داخل PowerPoint
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(finalSVG, "image/svg+xml");
+        const svgEl = doc.documentElement;
+        svgEl.setAttribute("width", w);
+        svgEl.setAttribute("height", w);
+
+        finalSVG = new XMLSerializer().serializeToString(svgEl);
+
+        Office.context.document.setSelectedDataAsync(
+            finalSVG,
+            { coercionType: Office.CoercionType.XmlSvg },
+            (result) => {
+                if (result.status === Office.AsyncResultStatus.Succeeded) {
+                    showNotification('تم إدراج الأيقونة وتلوينها بنجاح 🎨');
+                } else {
+                    showNotification('فشل الإدراج');
+                }
+            }
+        );
+
+    } catch(err) {
+        console.error(err);
+        showNotification('خطأ: ' + err.message);
+    }
+}
+
+Office.onReady(() => {
+    // جاهز للـ PowerPoint Add-in
+});
+</script>
+</body>
+</html>
