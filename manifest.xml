@@ -6,8 +6,8 @@
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Shaza pptx library"/>
   <Description DefaultValue="Advanced OOXML Drawing Objects and SVG Icon Library for PowerPoint with theme support."/>
-  <IconUrl DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza//assets/icon-32.png"/>
-  <HighResolutionIconUrl DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza//assets/icon-64.png"/>
+  <IconUrl DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza/assets/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza/assets/icon-64.png"/>
   <SupportUrl DefaultValue="https://www.contoso.com/help"/>
   <AppDomains>
     <AppDomain>https://engshaza2025.github.io/pptxLibrary_byshaza/</AppDomain>
