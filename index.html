@@ -214,22 +214,36 @@
             elements.forEach(el => {
                 // استبدال fill إذا كان أسود أو غير موجود
                 const fill = el.getAttribute('fill');
-                if (!fill || fill === '#000' || fill === '#000000' || fill === 'black' || (fill !== 'none' && fill !== 'transparent')) {
+                if (fill && (fill === '#000' || fill === '#000000' || fill === 'black' || fill.toLowerCase() === '#2c3030')) {
                     el.setAttribute('fill', fillColor);
                 }
                 
-                // استبدال stroke إذا كان أسود أو غير موجود
+                // استبدال stroke فقط إذا كان موجوداً وأسود، لتجنب إضافة حدود غير ضرورية
                 const stroke = el.getAttribute('stroke');
-                if (stroke && stroke !== 'none' && stroke !== 'transparent') {
+                if (stroke && (stroke === '#000' || stroke === '#000000' || stroke === 'black' || stroke.toLowerCase() === '#2c3030')) {
                     el.setAttribute('stroke', fillColor);
                 }
                 
                 // استبدال الستايل المضمن
                 const style = el.getAttribute('style');
                 if (style) {
-                    let newStyle = style.replace(/fill\s*:\s*[^;]+/g, `fill:${fillColor}`);
-                    newStyle = newStyle.replace(/stroke\s*:\s*[^;]+/g, `stroke:${fillColor}`);
+                    let newStyle = style;
+                    if (style.includes('fill')) {
+                        newStyle = newStyle.replace(/fill\s*:\s*(#000|#000000|black|#2c3030)/gi, `fill:${fillColor}`);
+                    }
+                    if (style.includes('stroke')) {
+                        newStyle = newStyle.replace(/stroke\s*:\s*(#000|#000000|black|#2c3030)/gi, `stroke:${fillColor}`);
+                    }
                     el.setAttribute('style', newStyle);
+                }
+
+                // التعامل مع وسم <style> داخل SVG
+                if (el.tagName.toLowerCase() === 'style') {
+                    let cssText = el.textContent;
+                    // استبدال الألوان السوداء أو الداكنة في CSS الداخلي
+                    cssText = cssText.replace(/fill\s*:\s*(#000|#000000|black|#2c3030)/gi, `fill:${fillColor}`);
+                    cssText = cssText.replace(/stroke\s*:\s*(#000|#000000|black|#2c3030)/gi, `stroke:${fillColor}`);
+                    el.textContent = cssText;
                 }
             });
             
