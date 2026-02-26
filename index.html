@@ -16,7 +16,7 @@
         .control-box label { font-size: 11px; color: #605e5c; font-weight: bold; margin: 0; }
         .control-box input[type="number"], .control-box select { padding: 2px; font-size: 11px; border: 1px solid #c8c6c4; border-radius: 4px; text-align: center; }
         .control-box input[type="number"] { width: 35px; }
-        .control-box input[type="color"] { width: 20px; height: 20px; padding: 0; border: none; cursor: pointer; background: none; }
+        .control-box input[type="color"] { width: 24px; height: 24px; padding: 0; border: 1px solid #c8c6c4; border-radius: 4px; cursor: pointer; background: none; vertical-align: middle; }
         
         .shape-selector { background-color: #f8f8f8; padding: 8px; border-radius: 6px; border: 1px solid #edebe9; margin-bottom: 5px; display: flex; flex-direction: column; gap: 8px; }
         .shape-options { display: flex; gap: 10px; justify-content: center; border-bottom: 1px solid #e1dfdd; padding-bottom: 5px; }
@@ -36,6 +36,8 @@
         
         .group-title { color: #323130; font-size: 12px; border-bottom: 2px solid #e1dfdd; padding: 6px 5px; margin-top: 5px; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         #notification { position: fixed; bottom: 15px; left: 15px; right: 15px; padding: 8px; background: #323130; color: white; border-radius: 4px; font-size: 11px; text-align: center; display: none; z-index: 100; }
+        
+        .color-picker-wrapper { display: flex; align-items: center; gap: 4px; }
     </style>
 </head>
 <body>
@@ -49,7 +51,7 @@
                 </div>
                 <div class="control-box" id="color-control-group">
                     <input type="checkbox" id="apply-color" checked>
-                    <label>تلوين</label>
+                    <label>تلوين الأيقونة:</label>
                     <input type="color" id="icon-color" value="#4472C4">
                 </div>
             </div>
@@ -62,11 +64,11 @@
                     <label class="shape-option"><input type="radio" name="bg-shape" value="rounded"> مربع ناعم</label>
                 </div>
                 <div id="bg-details" class="shape-details" style="display: none;">
-                    <div style="display: flex; align-items: center; gap: 3px;">
+                    <div class="color-picker-wrapper">
                         <label style="font-size: 10px;">الخلفية:</label>
                         <input type="color" id="bg-color" value="#ffffff">
                     </div>
-                    <div style="display: flex; align-items: center; gap: 3px;">
+                    <div class="color-picker-wrapper">
                         <label style="font-size: 10px;">الإطار:</label>
                         <input type="color" id="outline-color" value="#00000000">
                     </div>
@@ -76,10 +78,14 @@
                             <option value="0">بلا إطار</option>
                             <option value="1">1 px</option>
                             <option value="2">2 px</option>
-                            <option value="3">3 px</option>
                             <option value="4">4 px</option>
-                            <option value="5">5 px</option>
+                            <option value="6">6 px</option>
+                            <option value="8">8 px</option>
                         </select>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 3px; margin-right: 5px;">
+                        <input type="checkbox" id="apply-shadow">
+                        <label style="font-size: 10px; font-weight: bold;">إضافة ظل</label>
                     </div>
                 </div>
             </div>
@@ -205,26 +211,22 @@
             return hex.toUpperCase();
         }
 
-        // محرك تلوين SVG دقيق يضمن استبدال كافة الألوان السوداء بلون الثيم أو اللون المختار
         function deepColorSVG(svgString, fillColor) {
             const parser = new DOMParser();
             const doc = parser.parseFromString(svgString, "image/svg+xml");
             const elements = doc.querySelectorAll('*');
             
             elements.forEach(el => {
-                // استبدال fill إذا كان أسود أو غير موجود
                 const fill = el.getAttribute('fill');
                 if (fill && (fill === '#000' || fill === '#000000' || fill === 'black' || fill.toLowerCase() === '#2c3030')) {
                     el.setAttribute('fill', fillColor);
                 }
                 
-                // استبدال stroke فقط إذا كان موجوداً وأسود، لتجنب إضافة حدود غير ضرورية
                 const stroke = el.getAttribute('stroke');
                 if (stroke && (stroke === '#000' || stroke === '#000000' || stroke === 'black' || stroke.toLowerCase() === '#2c3030')) {
                     el.setAttribute('stroke', fillColor);
                 }
                 
-                // استبدال الستايل المضمن
                 const style = el.getAttribute('style');
                 if (style) {
                     let newStyle = style;
@@ -237,10 +239,8 @@
                     el.setAttribute('style', newStyle);
                 }
 
-                // التعامل مع وسم <style> داخل SVG
                 if (el.tagName.toLowerCase() === 'style') {
                     let cssText = el.textContent;
-                    // استبدال الألوان السوداء أو الداكنة في CSS الداخلي
                     cssText = cssText.replace(/fill\s*:\s*(#000|#000000|black|#2c3030)/gi, `fill:${fillColor}`);
                     cssText = cssText.replace(/stroke\s*:\s*(#000|#000000|black|#2c3030)/gi, `stroke:${fillColor}`);
                     el.textContent = cssText;
@@ -263,6 +263,7 @@
             const bgColor = '#' + hexToRgb(document.getElementById('bg-color').value);
             const outlineColor = '#' + hexToRgb(document.getElementById('outline-color').value);
             const outlineWidth = parseInt(document.getElementById('outline-width').value);
+            const applyShadow = document.getElementById('apply-shadow').checked;
 
             try {
                 let processedSvg = svg;
@@ -277,16 +278,42 @@
                     const c = containerSize / 2;
                     let shapeHtml = '';
                     const strokeAttr = outlineWidth > 0 ? `stroke="${outlineColor}" stroke-width="${outlineWidth}"` : '';
+                    
+                    // تعريف الظل بالمواصفات المطلوبة: شفافية 80%، قياس 110%، بلر 20%
+                    let shadowDef = '';
+                    let filterAttr = '';
+                    if (applyShadow) {
+                        const shadowBlur = containerSize * 0.20; // بلر 20%
+                        const shadowScale = 1.1; // قياس 110%
+                        const shadowOpacity = 0.8; // شفافية 80%
+                        
+                        shadowDef = `
+                        <defs>
+                            <filter id="dropShadow" x="-20%" y="-20%" width="150%" height="150%">
+                                <feGaussianBlur in="SourceAlpha" stdDeviation="${shadowBlur/2}" />
+                                <feOffset dx="0" dy="2" result="offsetblur" />
+                                <feComponentTransfer>
+                                    <feFuncA type="linear" slope="${shadowOpacity}" />
+                                </feComponentTransfer>
+                                <feMerge>
+                                    <feMergeNode />
+                                    <feMergeNode in="SourceGraphic" />
+                                </feMerge>
+                            </filter>
+                        </defs>`;
+                        filterAttr = 'filter="url(#dropShadow)"';
+                    }
 
-                    if (shape === 'circle') shapeHtml = `<circle cx="${c}" cy="${c}" r="${containerSize/2 - 5}" fill="${bgColor}" ${strokeAttr} />`;
-                    else if (shape === 'square') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" fill="${bgColor}" ${strokeAttr} />`;
-                    else if (shape === 'rounded') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.1}" fill="${bgColor}" ${strokeAttr} />`;
+                    if (shape === 'circle') shapeHtml = `<circle cx="${c}" cy="${c}" r="${containerSize/2 - 5}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
+                    else if (shape === 'square') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
+                    else if (shape === 'rounded') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.1}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
 
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(processedSvg, "image/svg+xml");
                     const svgInner = new XMLSerializer().serializeToString(doc.documentElement).replace(/<\/?svg[^>]*>/g, '');
 
                     finalContent = `<svg width="${containerSize}" height="${containerSize}" viewBox="0 0 ${containerSize} ${containerSize}" xmlns="http://www.w3.org/2000/svg">
+                        ${shadowDef}
                         ${shapeHtml}
                         <g transform="translate(${padding},${padding})">
                             <svg width="${w}" height="${w}" viewBox="0 0 ${w} ${w}">${svgInner}</svg>
