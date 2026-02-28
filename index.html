@@ -6,122 +6,531 @@
     <title>Shaza pptx library</title>
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
     <style>
-        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f3f2f1; overflow: hidden; }
-        .top-bar { background-color: #ffffff; padding: 10px 15px 0 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10; display: flex; flex-direction: column; gap: 8px; }
-        .top-bar h3 { color: #0078d4; margin: 0; font-size: 16px; text-align: center; }
-        
-        .controls-panel { display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
-        .controls-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
-        .control-box { display: flex; align-items: center; gap: 5px; background-color: #f8f8f8; padding: 4px 8px; border-radius: 6px; border: 1px solid #edebe9; flex: 1; min-width: 80px; justify-content: center; }
-        .control-box label { font-size: 11px; color: #605e5c; font-weight: bold; margin: 0; }
-        .control-box input[type="number"], .control-box select { padding: 2px; font-size: 11px; border: 1px solid #c8c6c4; border-radius: 4px; text-align: center; }
-        .control-box input[type="number"] { width: 35px; }
-        .control-box input[type="color"] { width: 20px; height: 20px; padding: 0; border: none; cursor: pointer; background: none; }
-        
-        /* تحسينات أداة القطارة ومربعات الألوان */
-        .color-tools { display: flex; align-items: center; gap: 4px; }
-        .quick-color { width: 14px; height: 14px; border: 1px solid #c8c6c4; border-radius: 2px; cursor: pointer; }
-        .color-black { background-color: #000000; }
-        .color-white { background-color: #ffffff; }
-        .eyedropper-btn { background: none; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: background 0.2s; }
-        .eyedropper-btn:hover { background-color: #edebe9; }
-        .eyedropper-btn svg { width: 14px; height: 14px; fill: #605e5c; }
+        :root {
+            --primary-color: #0078d4;
+            --hover-color: #106ebe;
+            --border-color: #edebe9;
+            --bg-light: #f8f8f8;
+            --text-primary: #323130;
+            --text-secondary: #605e5c;
+            --transition-speed: 0.15s;
+        }
 
-        .shape-selector { background-color: #f8f8f8; padding: 8px; border-radius: 6px; border: 1px solid #edebe9; margin-bottom: 5px; display: flex; flex-direction: column; gap: 8px; }
-        .shape-options { display: flex; gap: 10px; justify-content: center; border-bottom: 1px solid #e1dfdd; padding-bottom: 5px; }
-        .shape-option { display: flex; align-items: center; gap: 3px; font-size: 10px; cursor: pointer; }
-        .shape-details { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
+        * { box-sizing: border-box; }
+
+        body { 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            font-family: 'Calibri', 'Segoe UI', Tahoma, sans-serif; 
+            background-color: #f3f2f1; 
+            overflow: hidden; 
+        }
+
+        .top-bar { 
+            background-color: #ffffff; 
+            padding: 10px 12px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08); 
+            z-index: 10; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            max-height: 48vh; 
+            overflow-y: auto;
+        }
+
+        .top-bar h3 { 
+            color: var(--primary-color); 
+            margin: 0; 
+            font-size: 15px; 
+            text-align: center; 
+            font-weight: 600;
+        }
         
-        .tabs-container { display: flex; gap: 5px; border-bottom: 1px solid #edebe9; margin-top: 2px; }
-        .tab-btn { flex: 1; background: none; border: none; padding: 8px 5px; cursor: pointer; font-size: 12px; color: #323130; border-bottom: 3px solid transparent; }
-        .tab-btn.active { font-weight: bold; color: #0078d4; border-bottom: 3px solid #0078d4; }
+        .controls-panel { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
+            padding-bottom: 4px; 
+        }
+
+        /* تحسين تخطيط التحكم */
+        .control-section {
+            background-color: var(--bg-light);
+            padding: 6px 8px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            font-size: 10px;
+        }
+
+        .control-section-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-row { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 6px; 
+            align-items: center;
+        }
+
+        .control-box { 
+            display: flex; 
+            align-items: center; 
+            gap: 4px; 
+            background-color: #ffffff; 
+            padding: 3px 6px; 
+            border-radius: 4px; 
+            border: 1px solid var(--border-color);
+            flex: 1; 
+            min-width: 70px;
+        }
+
+        .control-box label { 
+            font-size: 10px; 
+            color: var(--text-secondary); 
+            font-weight: 500; 
+            margin: 0; 
+            white-space: nowrap;
+        }
+
+        .control-box input[type="number"] { 
+            padding: 2px 4px; 
+            font-size: 10px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 3px; 
+            text-align: center;
+            width: 35px;
+            transition: border-color var(--transition-speed);
+        }
+
+        .control-box input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .control-box input[type="color"] { 
+            width: 18px; 
+            height: 18px; 
+            padding: 0; 
+            border: 1px solid var(--border-color); 
+            cursor: pointer; 
+            background: none;
+            border-radius: 3px;
+            transition: transform var(--transition-speed);
+        }
+
+        .control-box input[type="color"]:hover {
+            transform: scale(1.1);
+        }
+
+        /* لوحة الألوان الاحترافية */
+        .color-palette {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .palette-color { 
+            width: 16px; 
+            height: 16px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 3px; 
+            cursor: pointer; 
+            transition: all var(--transition-speed);
+            flex-shrink: 0;
+        }
+
+        .palette-color:hover { 
+            transform: scale(1.2);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        /* أزرار التدرج */
+        .gradient-options {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .gradient-btn {
+            padding: 3px 6px;
+            font-size: 9px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            white-space: nowrap;
+        }
+
+        .gradient-btn:hover {
+            background-color: #e1dfdd;
+            border-color: var(--primary-color);
+        }
+
+        .gradient-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* أزرار سماكة الإطار */
+        .border-width-options {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .border-width-btn {
+            padding: 3px 6px;
+            font-size: 9px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            min-width: 28px;
+            text-align: center;
+        }
+
+        .border-width-btn:hover {
+            background-color: #e1dfdd;
+            border-color: var(--primary-color);
+        }
+
+        .border-width-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* أشكال الحاوية */
+        .shape-selector {
+            background-color: var(--bg-light);
+            padding: 6px 8px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 0;
+        }
+
+        .shape-options {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 5px;
+        }
+
+        .shape-option {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .shape-option input[type="radio"] {
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        .shape-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .shape-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 10px;
+        }
+
+        /* التبويبات */
+        .tabs-container { 
+            display: flex; 
+            gap: 2px; 
+            border-bottom: 2px solid var(--border-color); 
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn { 
+            flex: 1; 
+            background: none; 
+            border: none; 
+            padding: 6px 8px; 
+            cursor: pointer; 
+            font-size: 11px; 
+            color: var(--text-primary); 
+            border-bottom: 2px solid transparent;
+            min-width: 50px;
+            transition: all var(--transition-speed);
+            font-weight: 500;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .tab-btn.active { 
+            font-weight: 600; 
+            color: var(--primary-color); 
+            border-bottom: 2px solid var(--primary-color); 
+        }
         
-        .main-content { flex-grow: 1; padding: 12px; overflow-y: auto; background-color: #f3f2f1; }
-        .btn-select { background-color: #0078d4; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 12px; margin-bottom: 12px; font-weight: bold;}
-        .icon-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
-        .icon-box { width: 55px; height: 55px; background-color: white; border: 1px solid #c8c6c4; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; transition: transform 0.1s; }
-        .icon-box:hover { transform: scale(1.05); border-color: #0078d4; }
-        .icon-box img { max-width: 100%; max-height: 100%; pointer-events: none; }
+        .main-content { 
+            flex-grow: 1; 
+            padding: 10px; 
+            overflow-y: auto; 
+            background-color: #f3f2f1;
+        }
+
+        .btn-select { 
+            background-color: var(--primary-color); 
+            color: white; 
+            border: none; 
+            padding: 6px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            width: 100%; 
+            font-size: 11px; 
+            margin-bottom: 8px; 
+            font-weight: 600;
+            transition: all var(--transition-speed);
+        }
+
+        .btn-select:hover {
+            background-color: var(--hover-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-select:active {
+            transform: scale(0.98);
+        }
+
+        .icon-grid { 
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+            gap: 6px; 
+            margin-bottom: 10px;
+        }
+
+        .icon-box { 
+            width: 100%;
+            aspect-ratio: 1;
+            background-color: white; 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 4px; 
+            transition: all var(--transition-speed);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .icon-box:hover { 
+            transform: scale(1.08);
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .icon-box:active {
+            transform: scale(0.95);
+        }
+
+        .icon-box img, .icon-box svg { 
+            max-width: 90%; 
+            max-height: 90%; 
+            pointer-events: none;
+            display: block;
+        }
         
-        .group-title { color: #323130; font-size: 12px; border-bottom: 2px solid #e1dfdd; padding: 6px 5px; margin-top: 5px; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        #notification { position: fixed; bottom: 15px; left: 15px; right: 15px; padding: 8px; background: #323130; color: white; border-radius: 4px; font-size: 11px; text-align: center; display: none; z-index: 100; }
+        .group-title { 
+            color: var(--text-primary); 
+            font-size: 11px; 
+            border-bottom: 1px solid var(--border-color); 
+            padding: 5px 4px; 
+            margin-top: 8px; 
+            margin-bottom: 6px; 
+            font-weight: 600; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+
+        .group-title:hover {
+            background-color: var(--bg-light);
+        }
+
+        .search-box { 
+            width: 100%; 
+            padding: 6px 8px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 4px; 
+            font-size: 11px; 
+            margin-bottom: 8px;
+            transition: all var(--transition-speed);
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0,120,212,0.1);
+        }
+
+        #notification { 
+            position: fixed; 
+            bottom: 12px; 
+            left: 12px; 
+            right: 12px; 
+            padding: 8px 12px; 
+            background: var(--text-primary); 
+            color: white; 
+            border-radius: 4px; 
+            font-size: 10px; 
+            text-align: center; 
+            display: none; 
+            z-index: 100;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* شريط التمرير المخصص */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c8c6c4;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a19f9d;
+        }
     </style>
 </head>
 <body>
     <div class="top-bar">
-        <h3>Shaza pptx library</h3>
+        <h3>✨ Shaza pptx library</h3>
         <div id="global-controls" class="controls-panel">
-            <div class="controls-row">
-                <div class="control-box">
-                    <label>الحجم:</label>
-                    <input type="number" id="icon-width" value="50">
-                </div>
-                <div class="control-box" id="color-control-group">
-                    <input type="checkbox" id="apply-color" checked>
-                    <label>تلوين</label>
-                    <div class="color-tools">
-                        <input type="color" id="icon-color" value="#4472C4">
-                        <button class="eyedropper-btn" onclick="pickColor('icon-color')" title="قطارة اللون">
-                            <svg viewBox="0 0 24 24"><path d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8.5L11,12L2,21L3,22L12,13L15.5,9.5L14.5,8.5M19.35,2.5C19.1,2.5 18.85,2.6 18.65,2.8L17.56,3.89L20.11,6.44L21.2,5.35C21.6,4.95 21.6,4.3 21.2,3.9L20.1,2.8C19.9,2.6 19.65,2.5 19.35,2.5Z"/></svg>
-                        </button>
-                        <div class="quick-color color-black" onclick="setQuickColor('icon-color', '#000000')" title="أسود"></div>
-                        <div class="quick-color color-white" onclick="setQuickColor('icon-color', '#ffffff')" title="أبيض"></div>
+            <!-- قسم الحجم -->
+            <div class="control-section">
+                <div class="control-row">
+                    <div class="control-box">
+                        <label>الحجم:</label>
+                        <input type="number" id="icon-width" value="50" min="20" max="200">
                     </div>
                 </div>
             </div>
-            <div id="shape-selector-group" class="shape-selector">
+
+            <!-- قسم الألوان -->
+            <div class="control-section">
+                <div class="control-section-title">الألوان</div>
+                <div class="control-row">
+                    <div class="control-box">
+                        <input type="checkbox" id="apply-color" checked>
+                        <label>تلوين:</label>
+                        <input type="color" id="icon-color" value="#4472C4">
+                    </div>
+                </div>
+                <div class="color-palette" id="professional-colors"></div>
+            </div>
+
+            <!-- قسم التدرجات -->
+            <div class="control-section" id="gradient-section" style="display: none;">
+                <div class="control-section-title">التدرج اللوني</div>
+                <div class="gradient-options">
+                    <button class="gradient-btn" onclick="setGradientType('none')">بدون</button>
+                    <button class="gradient-btn" onclick="setGradientType('linear')">خطي →</button>
+                    <button class="gradient-btn" onclick="setGradientType('radial')">دائري ◯</button>
+                    <button class="gradient-btn" onclick="setGradientType('diagonal')">مائل ↗</button>
+                </div>
+                <div class="control-row" style="margin-top: 4px;">
+                    <div class="control-box">
+                        <label>اللون الثاني:</label>
+                        <input type="color" id="gradient-color" value="#FF6B6B">
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم الشكل الحاوي -->
+            <div class="shape-selector">
+                <div class="control-section-title">الشكل الحاوي</div>
                 <div class="shape-options">
-                    <span style="font-size: 10px; font-weight: bold; color: #0078d4;">الشكل الحاوي:</span>
                     <label class="shape-option"><input type="radio" name="bg-shape" value="none" checked> لا شيء</label>
                     <label class="shape-option"><input type="radio" name="bg-shape" value="circle"> دائرة</label>
                     <label class="shape-option"><input type="radio" name="bg-shape" value="square"> مربع</label>
-                    <label class="shape-option"><input type="radio" name="bg-shape" value="rounded"> مربع ناعم</label>
+                    <label class="shape-option"><input type="radio" name="bg-shape" value="rounded"> ناعم</label>
+                    <label class="shape-option"><input type="radio" name="bg-shape" value="super-rounded"> ناعم جداً</label>
                 </div>
                 <div id="bg-details" class="shape-details" style="display: none;">
-                    <div style="display: flex; align-items: center; gap: 3px;">
-                        <label style="font-size: 10px;">الخلفية:</label>
-                        <div class="color-tools">
-                            <input type="color" id="bg-color" value="#ffffff">
-                            <button class="eyedropper-btn" onclick="pickColor('bg-color')" title="قطارة اللون">
-                                <svg viewBox="0 0 24 24"><path d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8.5L11,12L2,21L3,22L12,13L15.5,9.5L14.5,8.5M19.35,2.5C19.1,2.5 18.85,2.6 18.65,2.8L17.56,3.89L20.11,6.44L21.2,5.35C21.6,4.95 21.6,4.3 21.2,3.9L20.1,2.8C19.9,2.6 19.65,2.5 19.35,2.5Z"/></svg>
-                            </button>
-                            <div class="quick-color color-black" onclick="setQuickColor('bg-color', '#000000')" title="أسود"></div>
-                            <div class="quick-color color-white" onclick="setQuickColor('bg-color', '#ffffff')" title="أبيض"></div>
-                        </div>
+                    <div class="shape-detail-item">
+                        <label>الخلفية:</label>
+                        <input type="color" id="bg-color" value="#ffffff">
                     </div>
-                    <div style="display: flex; align-items: center; gap: 3px;">
-                        <label style="font-size: 10px;">الإطار:</label>
-                        <div class="color-tools">
-                            <input type="color" id="outline-color" value="#00000000">
-                            <button class="eyedropper-btn" onclick="pickColor('outline-color')" title="قطارة اللون">
-                                <svg viewBox="0 0 24 24"><path d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8.5L11,12L2,21L3,22L12,13L15.5,9.5L14.5,8.5M19.35,2.5C19.1,2.5 18.85,2.6 18.65,2.8L17.56,3.89L20.11,6.44L21.2,5.35C21.6,4.95 21.6,4.3 21.2,3.9L20.1,2.8C19.9,2.6 19.65,2.5 19.35,2.5Z"/></svg>
-                            </button>
-                        </div>
+                    <div class="shape-detail-item">
+                        <label>الإطار:</label>
+                        <input type="color" id="outline-color" value="#00000000">
                     </div>
-                    <div style="display: flex; align-items: center; gap: 3px;">
-                        <label style="font-size: 10px;">السماكة:</label>
-                        <select id="outline-width" style="font-size: 10px;">
-                            <option value="0">بلا إطار</option>
-                            <option value="1">1 px</option>
-                            <option value="2">2 px</option>
-                            <option value="4">4 px</option>
-                            <option value="6">6 px</option>
-                            <option value="8">8 px</option>
-                        </select>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 3px;">
+                    <div class="shape-detail-item">
                         <input type="checkbox" id="apply-shadow">
-                        <label style="font-size: 10px;">ظل</label>
+                        <label>ظل</label>
                     </div>
                 </div>
             </div>
+
+            <!-- قسم سماكة الإطار -->
+            <div class="control-section" id="border-width-section" style="display: none;">
+                <div class="control-section-title">سماكة الإطار</div>
+                <div class="border-width-options">
+                    <button class="border-width-btn" onclick="setBorderWidth(0)">0</button>
+                    <button class="border-width-btn" onclick="setBorderWidth(1)">1</button>
+                    <button class="border-width-btn" onclick="setBorderWidth(2)">2</button>
+                    <button class="border-width-btn" onclick="setBorderWidth(4)">4</button>
+                    <button class="border-width-btn" onclick="setBorderWidth(6)">6</button>
+                    <button class="border-width-btn" onclick="setBorderWidth(8)">8</button>
+                    <button class="border-width-btn" onclick="setBorderWidth(10)">10</button>
+                </div>
+            </div>
         </div>
+
         <div class="tabs-container">
             <button class="tab-btn active" onclick="switchTab('logos')" id="tab-logos">الشعارات</button>
             <button class="tab-btn" onclick="switchTab('icons')" id="tab-icons">الأيقونات</button>
+            <button class="tab-btn" onclick="switchTab('flags')" id="tab-flags">الأعلام 🚩</button>
             <button class="tab-btn" onclick="switchTab('shapes')" id="tab-shapes">الأشكال</button>
         </div>
     </div>
+
     <div class="main-content">
         <div id="section-logos">
             <button class="btn-select" onclick="loadLogosFolder()">تحديد مجلد الشعارات</button>
@@ -131,15 +540,61 @@
             <button class="btn-select" onclick="loadIconsFolder()">تحديد مجلد الأيقونات</button>
             <div id="grid-icons-container"></div>
         </div>
+        <div id="section-flags" style="display: none;">
+            <input type="text" id="flag-search" class="search-box" placeholder="ابحث عن دولة...">
+            <div id="grid-flags" class="icon-grid"></div>
+        </div>
         <div id="section-shapes" style="display: none;">
             <button class="btn-select" onclick="loadShapesFolder()">تحديد مجلد الأشكال</button>
             <div id="grid-shapes" class="icon-grid"></div>
         </div>
     </div>
+
     <div id="notification"></div>
 
     <script>
         let currentTab = 'logos';
+        let countriesData = [];
+        let currentGradientType = 'none';
+        let currentBorderWidth = 0;
+        let loadedSvgs = {}; // Cache لـ SVG المحملة
+        
+        const professionalColors = [
+            '#4472C4', '#ED7D31', '#A5A5A5', '#FFC000', '#5B9BD5',
+            '#70AD47', '#264478', '#9E480E', '#636363', '#997300',
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+            '#DDA15E', '#BC6C25', '#8E7DBE', '#C1666B', '#48A9A6',
+            '#2E86AB', '#A23B72', '#F18F01', '#C73E1D', '#6A994E'
+        ];
+
+        function initProfessionalColors() {
+            const palette = document.getElementById('professional-colors');
+            palette.innerHTML = '';
+            professionalColors.forEach(color => {
+                const colorBox = document.createElement('div');
+                colorBox.className = 'palette-color';
+                colorBox.style.backgroundColor = color;
+                colorBox.onclick = () => {
+                    document.getElementById('icon-color').value = color;
+                    updateIconsPreview();
+                };
+                colorBox.title = color;
+                palette.appendChild(colorBox);
+            });
+        }
+
+        function setGradientType(type) {
+            currentGradientType = type;
+            document.querySelectorAll('.gradient-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateIconsPreview();
+        }
+
+        function setBorderWidth(width) {
+            currentBorderWidth = width;
+            document.querySelectorAll('.border-width-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
 
         function switchTab(tabName) {
             currentTab = tabName;
@@ -148,17 +603,27 @@
             
             document.getElementById('section-logos').style.display = 'none';
             document.getElementById('section-icons').style.display = 'none';
+            document.getElementById('section-flags').style.display = 'none';
             document.getElementById('section-shapes').style.display = 'none';
             document.getElementById('section-' + tabName).style.display = 'block';
             
             const globalControls = document.getElementById('global-controls');
-            if (tabName === 'shapes') {
+            const gradientSection = document.getElementById('gradient-section');
+            const borderWidthSection = document.getElementById('border-width-section');
+            
+            if (tabName === 'shapes' || tabName === 'logos') {
                 globalControls.style.display = 'none';
             } else {
                 globalControls.style.display = 'flex';
                 const isIcons = (tabName === 'icons');
-                document.getElementById('color-control-group').style.display = isIcons ? 'flex' : 'none';
                 document.getElementById('shape-selector-group').style.display = isIcons ? 'flex' : 'none';
+                document.querySelector('.shape-selector').style.display = isIcons ? 'block' : 'none';
+                gradientSection.style.display = isIcons ? 'block' : 'none';
+                borderWidthSection.style.display = isIcons ? 'block' : 'none';
+            }
+            
+            if (tabName === 'flags' && countriesData.length === 0) {
+                loadFlagsData();
             }
         }
 
@@ -170,13 +635,9 @@
 
         function showNotification(msg) {
             const n = document.getElementById('notification');
-            n.innerText = msg; n.style.display = 'block';
-            setTimeout(() => n.style.display = 'none', 3000);
-        }
-
-        // دوال الألوان الجديدة
-        function setQuickColor(inputId, color) {
-            document.getElementById(inputId).value = color;
+            n.innerText = msg;
+            n.style.display = 'block';
+            setTimeout(() => n.style.display = 'none', 2500);
         }
 
         async function pickColor(inputId) {
@@ -188,17 +649,17 @@
             try {
                 const result = await eyeDropper.open();
                 document.getElementById(inputId).value = result.sRGBHex;
-            } catch (e) {
-                // المستخدم ألغى العملية
-            }
+                updateIconsPreview();
+            } catch (e) {}
         }
 
         async function loadLogosFolder() {
             try {
                 const h = await window.showDirectoryPicker();
                 const g = document.getElementById('grid-logos');
-                g.innerHTML = ''; await extract(h, g);
-                showNotification('تم تحميل الشعارات');
+                g.innerHTML = '';
+                await extract(h, g, 'logos');
+                showNotification('✓ تم تحميل الشعارات');
             } catch(e) {}
         }
 
@@ -217,11 +678,11 @@
                         title.onclick = () => grid.style.display = grid.style.display === 'none' ? 'flex' : 'none';
                         c.appendChild(title);
                         const sub = await h.getDirectoryHandle(entry.name);
-                        await extract(sub, grid);
+                        await extract(sub, grid, 'icons');
                         c.appendChild(grid);
                     }
                 }
-                showNotification('تم تحميل مجلدات الأيقونات');
+                showNotification('✓ تم تحميل الأيقونات');
             } catch(e) {}
         }
 
@@ -229,24 +690,93 @@
             try {
                 const h = await window.showDirectoryPicker();
                 const g = document.getElementById('grid-shapes');
-                g.innerHTML = ''; await extract(h, g);
-                showNotification('تم تحميل الأشكال');
+                g.innerHTML = '';
+                await extract(h, g, 'shapes');
+                showNotification('✓ تم تحميل الأشكال');
             } catch(e) {}
         }
 
-        async function extract(h, g) {
+        async function extract(h, g, type) {
             for await (const e of h.values()) {
                 if (e.kind === 'file' && e.name.toLowerCase().endsWith('.svg')) {
                     const f = await e.getFile();
                     const t = await f.text();
                     const box = document.createElement('div');
                     box.className = 'icon-box';
-                    const img = document.createElement('img');
-                    img.src = URL.createObjectURL(f);
-                    box.appendChild(img);
-                    box.onclick = () => insert(t);
+                    
+                    if (type === 'logos' || type === 'shapes') {
+                        const img = document.createElement('img');
+                        img.src = URL.createObjectURL(f);
+                        box.appendChild(img);
+                        box.onclick = () => insert(t, type);
+                    } else if (type === 'icons') {
+                        const img = document.createElement('img');
+                        img.src = URL.createObjectURL(f);
+                        box.appendChild(img);
+                        box.onclick = () => insert(t, type);
+                    }
                     g.appendChild(box);
                 }
+            }
+        }
+
+        async function loadFlagsData() {
+            try {
+                const response = await fetch('country.json');
+                countriesData = await response.json();
+                displayFlags(countriesData);
+                showNotification('✓ تم تحميل الأعلام');
+            } catch(e) {
+                showNotification('✗ خطأ في تحميل الأعلام');
+            }
+        }
+
+        function displayFlags(countries) {
+            const grid = document.getElementById('grid-flags');
+            grid.innerHTML = '';
+            
+            countries.forEach(country => {
+                const box = document.createElement('div');
+                box.className = 'icon-box';
+                box.title = country.name;
+                
+                const flagUrl = `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.5.0/${country.flag_4x3}`;
+                const img = document.createElement('img');
+                img.src = flagUrl;
+                img.onerror = () => {
+                    img.src = `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.5.0/${country.flag_1x1}`;
+                };
+                
+                box.appendChild(img);
+                box.onclick = () => insertFlag(flagUrl, country.name);
+                grid.appendChild(box);
+            });
+        }
+
+        function filterFlags() {
+            const searchTerm = document.getElementById('flag-search').value.toLowerCase();
+            const filtered = countriesData.filter(country => 
+                country.name.toLowerCase().includes(searchTerm) ||
+                country.code.toLowerCase().includes(searchTerm)
+            );
+            displayFlags(filtered);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchBox = document.getElementById('flag-search');
+            if (searchBox) {
+                searchBox.addEventListener('input', filterFlags);
+            }
+            document.getElementById('icon-color').addEventListener('change', updateIconsPreview);
+            document.getElementById('gradient-color').addEventListener('change', updateIconsPreview);
+            document.getElementById('bg-color').addEventListener('change', updateIconsPreview);
+        });
+
+        function updateIconsPreview() {
+            // تحديث معاينة الأيقونات فقط (وليس الأعلام والشعارات)
+            if (currentTab === 'icons') {
+                const boxes = document.querySelectorAll('#grid-icons-container .icon-box img');
+                // يمكن إضافة منطق معاينة هنا إذا لزم الأمر
             }
         }
 
@@ -256,26 +786,22 @@
             return hex.toUpperCase();
         }
 
-        // محرك تلوين SVG دقيق يضمن استبدال كافة الألوان السوداء بلون الثيم أو اللون المختار
         function deepColorSVG(svgString, fillColor) {
             const parser = new DOMParser();
             const doc = parser.parseFromString(svgString, "image/svg+xml");
             const elements = doc.querySelectorAll('*');
             
             elements.forEach(el => {
-                // استبدال fill إذا كان أسود أو غير موجود
                 const fill = el.getAttribute('fill');
                 if (fill && (fill === '#000' || fill === '#000000' || fill === 'black' || fill.toLowerCase() === '#2c3030')) {
                     el.setAttribute('fill', fillColor);
                 }
                 
-                // استبدال stroke فقط إذا كان موجوداً وأسود، لتجنب إضافة حدود غير ضرورية
                 const stroke = el.getAttribute('stroke');
                 if (stroke && (stroke === '#000' || stroke === '#000000' || stroke === 'black' || stroke.toLowerCase() === '#2c3030')) {
                     el.setAttribute('stroke', fillColor);
                 }
                 
-                // استبدال الستايل المضمن
                 const style = el.getAttribute('style');
                 if (style) {
                     let newStyle = style;
@@ -288,10 +814,8 @@
                     el.setAttribute('style', newStyle);
                 }
 
-                // التعامل مع وسم <style> داخل SVG
                 if (el.tagName.toLowerCase() === 'style') {
                     let cssText = el.textContent;
-                    // استبدال الألوان السوداء أو الداكنة في CSS الداخلي
                     cssText = cssText.replace(/fill\s*:\s*(#000|#000000|black|#2c3030)/gi, `fill:${fillColor}`);
                     cssText = cssText.replace(/stroke\s*:\s*(#000|#000000|black|#2c3030)/gi, `stroke:${fillColor}`);
                     el.textContent = cssText;
@@ -315,24 +839,58 @@
             } else if (width && height) {
                 return `0 0 ${width} ${height}`;
             } else {
-                return '0 0 100 100'; // قيمة افتراضية
+                return '0 0 100 100';
             }
         }
 
-        function insert(svg) {
-            if (currentTab === 'shapes') {
+        function createGradientDef(gradientType, color1, color2) {
+            if (gradientType === 'none') return '';
+            
+            const gradId = 'grad-' + Math.random().toString(36).substr(2, 9);
+            
+            if (gradientType === 'linear') {
+                return `<defs><linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:${color1};stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:${color2};stop-opacity:1" />
+                </linearGradient></defs>`;
+            } else if (gradientType === 'radial') {
+                return `<defs><radialGradient id="${gradId}" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:${color1};stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:${color2};stop-opacity:1" />
+                </radialGradient></defs>`;
+            } else if (gradientType === 'diagonal') {
+                return `<defs><linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:${color1};stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:${color2};stop-opacity:1" />
+                </linearGradient></defs>`;
+            }
+            
+            return '';
+        }
+
+        function insert(svg, type) {
+            if (type === 'shapes') {
                 Office.context.document.setSelectedDataAsync(svg, { coercionType: Office.CoercionType.XmlSvg });
+                showNotification('✓ تم إدراج الشكل');
                 return;
             }
 
+            if (type === 'logos') {
+                Office.context.document.setSelectedDataAsync(svg, { coercionType: Office.CoercionType.XmlSvg });
+                showNotification('✓ تم إدراج الشعار');
+                return;
+            }
+
+            // معالجة الأيقونات فقط
             const w = parseInt(document.getElementById('icon-width').value) || 50;
             const applyColor = document.getElementById('apply-color').checked;
             const iconColor = '#' + hexToRgb(document.getElementById('icon-color').value);
             const shape = document.querySelector('input[name="bg-shape"]:checked').value;
             const bgColor = '#' + hexToRgb(document.getElementById('bg-color').value);
             const outlineColor = '#' + hexToRgb(document.getElementById('outline-color').value);
-            const outlineWidth = parseInt(document.getElementById('outline-width').value);
+            const outlineWidth = currentBorderWidth;
             const applyShadow = document.getElementById('apply-shadow').checked;
+            const gradientColor = '#' + hexToRgb(document.getElementById('gradient-color').value);
 
             try {
                 let processedSvg = svg;
@@ -348,39 +906,44 @@
                     let shapeHtml = '';
                     const strokeAttr = outlineWidth > 0 ? `stroke="${outlineColor}" stroke-width="${outlineWidth}"` : '';
                     
-                    // إضافة تأثير الظل إذا تم اختياره
                     let filterDef = '';
                     let filterAttr = '';
                     if (applyShadow) {
-                        filterDef = `
-                        <defs>
-                            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                                <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
-                                <feOffset dx="2" dy="2" result="offsetblur" />
-                                <feComponentTransfer>
-                                    <feFuncA type="linear" slope="0.3" />
-                                </feComponentTransfer>
-                                <feMerge>
-                                    <feMergeNode />
-                                    <feMergeNode in="SourceGraphic" />
-                                </feMerge>
-                            </filter>
-                        </defs>`;
+                        filterDef = `<defs><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+                            <feOffset dx="2" dy="2" result="offsetblur" />
+                            <feComponentTransfer>
+                                <feFuncA type="linear" slope="0.3" />
+                            </feComponentTransfer>
+                            <feMerge>
+                                <feMergeNode />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter></defs>`;
                         filterAttr = 'filter="url(#shadow)"';
                     }
 
-                    if (shape === 'circle') shapeHtml = `<circle cx="${c}" cy="${c}" r="${containerSize/2 - 5}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
-                    else if (shape === 'square') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
-                    else if (shape === 'rounded') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.1}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
+                    const gradientDef = createGradientDef(currentGradientType, bgColor, gradientColor);
+                    const fillColor = currentGradientType !== 'none' ? `url(#${gradientDef.match(/id="([^"]+)"/)?.[1] || 'grad'})` : bgColor;
+
+                    if (shape === 'circle') {
+                        shapeHtml = `<circle cx="${c}" cy="${c}" r="${containerSize/2 - 5}" fill="${fillColor}" ${strokeAttr} ${filterAttr} />`;
+                    } else if (shape === 'square') {
+                        shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" fill="${fillColor}" ${strokeAttr} ${filterAttr} />`;
+                    } else if (shape === 'rounded') {
+                        shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.1}" fill="${fillColor}" ${strokeAttr} ${filterAttr} />`;
+                    } else if (shape === 'super-rounded') {
+                        shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.25}" fill="${fillColor}" ${strokeAttr} ${filterAttr} />`;
+                    }
 
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(processedSvg, "image/svg+xml");
                     const svgInner = new XMLSerializer().serializeToString(doc.documentElement).replace(/<\/?svg[^>]*>/g, '');
                     
-                    // استخراج viewBox الأصلي من الأيقونة
                     const originalViewBox = extractSVGViewBox(processedSvg);
 
                     finalContent = `<svg width="${containerSize}" height="${containerSize}" viewBox="0 0 ${containerSize} ${containerSize}" xmlns="http://www.w3.org/2000/svg">
+                        ${gradientDef}
                         ${filterDef}
                         ${shapeHtml}
                         <g transform="translate(${padding},${padding})">
@@ -391,14 +954,88 @@
 
                 Office.context.document.setSelectedDataAsync(finalContent, { coercionType: Office.CoercionType.XmlSvg }, (result) => {
                     if (result.status === Office.AsyncResultStatus.Succeeded) {
-                        showNotification('تم الإدراج بنجاح ✨');
+                        showNotification('✓ تم إدراج الأيقونة');
                     } else {
-                        showNotification('حدث خطأ في الإدراج');
+                        showNotification('✗ خطأ في الإدراج');
                     }
                 });
             } catch(err) { 
                 console.error(err);
-                showNotification('حدث خطأ: ' + err.message);
+                showNotification('✗ خطأ: ' + err.message);
+            }
+        }
+
+        function insertFlag(flagUrl, countryName) {
+            const w = parseInt(document.getElementById('icon-width').value) || 50;
+            const shape = document.querySelector('input[name="bg-shape"]:checked').value;
+            const bgColor = '#' + hexToRgb(document.getElementById('bg-color').value);
+            const outlineColor = '#' + hexToRgb(document.getElementById('outline-color').value);
+            const outlineWidth = currentBorderWidth;
+            const applyShadow = document.getElementById('apply-shadow').checked;
+            const gradientColor = '#' + hexToRgb(document.getElementById('gradient-color').value);
+
+            try {
+                let finalContent = `<svg width="${w}" height="${w}" viewBox="0 0 ${w} ${w}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <image x="0" y="0" width="${w}" height="${w}" xlink:href="${flagUrl}" />
+                </svg>`;
+
+                if (shape !== 'none') {
+                    const padding = w * 0.40;
+                    const containerSize = w + (padding * 2);
+                    const c = containerSize / 2;
+                    let shapeHtml = '';
+                    const strokeAttr = outlineWidth > 0 ? `stroke="${outlineColor}" stroke-width="${outlineWidth}"` : '';
+                    
+                    let filterDef = '';
+                    let filterAttr = '';
+                    if (applyShadow) {
+                        filterDef = `<defs><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+                            <feOffset dx="2" dy="2" result="offsetblur" />
+                            <feComponentTransfer>
+                                <feFuncA type="linear" slope="0.3" />
+                            </feComponentTransfer>
+                            <feMerge>
+                                <feMergeNode />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter></defs>`;
+                        filterAttr = 'filter="url(#shadow)"';
+                    }
+
+                    const gradientDef = createGradientDef(currentGradientType, bgColor, gradientColor);
+                    const fillColor = currentGradientType !== 'none' ? `url(#${gradientDef.match(/id="([^"]+)"/)?.[1] || 'grad'})` : bgColor;
+
+                    if (shape === 'circle') {
+                        shapeHtml = `<circle cx="${c}" cy="${c}" r="${containerSize/2 - 5}" fill="${fillColor}" ${strokeAttr} ${filterAttr} />`;
+                    } else if (shape === 'square') {
+                        shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" fill="${fillColor}" ${strokeAttr} ${filterAttr} />`;
+                    } else if (shape === 'rounded') {
+                        shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.1}" fill="${fillColor}" ${strokeAttr} ${filterAttr} />`;
+                    } else if (shape === 'super-rounded') {
+                        shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.25}" fill="${fillColor}" ${strokeAttr} ${filterAttr} />`;
+                    }
+
+                    finalContent = `<svg width="${containerSize}" height="${containerSize}" viewBox="0 0 ${containerSize} ${containerSize}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        ${gradientDef}
+                        ${filterDef}
+                        ${shapeHtml}
+                        <g transform="translate(${padding},${padding})">
+                            <image x="0" y="0" width="${w}" height="${w}" xlink:href="${flagUrl}" />
+                        </g>
+                    </svg>`;
+                }
+
+                Office.context.document.setSelectedDataAsync(finalContent, { coercionType: Office.CoercionType.XmlSvg }, (result) => {
+                    if (result.status === Office.AsyncResultStatus.Succeeded) {
+                        showNotification(`✓ علم ${countryName}`);
+                    } else {
+                        showNotification('✗ خطأ في الإدراج');
+                    }
+                });
+            } catch(err) { 
+                console.error(err);
+                showNotification('✗ خطأ: ' + err.message);
             }
         }
 
@@ -416,6 +1053,7 @@
                 updateThemeColor();
                 Office.context.document.addHandlerAsync(Office.EventType.OfficeThemeChanged, updateThemeColor);
             }
+            initProfessionalColors();
             switchTab('logos');
         });
     </script>
