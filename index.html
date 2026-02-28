@@ -24,9 +24,13 @@
             display: flex; 
             flex-direction: column; 
             height: 100vh; 
-            font-family: 'Calibri', 'Segoe UI', Tahoma, sans-serif; 
+            font-family: 'Calibri', 'Segoe UI', Tahoma, sans-serif;
             background-color: #f3f2f1; 
             overflow: hidden; 
+        }
+
+        body * {
+            font-family: 'Calibri', 'Segoe UI Arabic', 'Tahoma', sans-serif;
         }
 
         .top-bar { 
@@ -37,7 +41,7 @@
             display: flex; 
             flex-direction: column; 
             gap: 8px; 
-            max-height: 48vh; 
+            max-height: 50vh; 
             overflow-y: auto;
         }
 
@@ -56,7 +60,6 @@
             padding-bottom: 4px; 
         }
 
-        /* تحسين تخطيط التحكم */
         .control-section {
             background-color: var(--bg-light);
             padding: 6px 8px;
@@ -131,36 +134,75 @@
             transform: scale(1.1);
         }
 
-        /* لوحة الألوان الاحترافية */
-        .color-palette {
-            display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
-        }
-
-        .palette-color { 
-            width: 16px; 
-            height: 16px; 
+        /* أداة القطارة */
+        .eyedropper-btn { 
+            background: none; 
             border: 1px solid var(--border-color); 
-            border-radius: 3px; 
             cursor: pointer; 
+            padding: 2px 4px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 3px; 
             transition: all var(--transition-speed);
+            width: 24px;
+            height: 24px;
             flex-shrink: 0;
         }
 
-        .palette-color:hover { 
-            transform: scale(1.2);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        .eyedropper-btn:hover { 
+            background-color: #e1dfdd;
+            border-color: var(--primary-color);
         }
 
-        /* أزرار التدرج */
-        .gradient-options {
+        .eyedropper-btn svg { 
+            width: 12px; 
+            height: 12px; 
+            fill: var(--text-secondary); 
+        }
+
+        /* قسم الألوان */
+        .color-section {
+            background-color: var(--bg-light);
+            padding: 6px 8px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+        }
+
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        .color-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .color-item label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            min-width: 50px;
+        }
+
+        /* شريط التدرج */
+        .gradient-section {
+            background-color: var(--bg-light);
+            padding: 6px 8px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 0;
+        }
+
+        .gradient-type-selector {
             display: flex;
             gap: 4px;
-            flex-wrap: wrap;
+            margin-bottom: 5px;
         }
 
-        .gradient-btn {
+        .gradient-type-btn {
             padding: 3px 6px;
             font-size: 9px;
             border: 1px solid var(--border-color);
@@ -169,47 +211,61 @@
             cursor: pointer;
             transition: all var(--transition-speed);
             white-space: nowrap;
+            flex: 1;
         }
 
-        .gradient-btn:hover {
+        .gradient-type-btn:hover {
             background-color: #e1dfdd;
             border-color: var(--primary-color);
         }
 
-        .gradient-btn.active {
+        .gradient-type-btn.active {
             background-color: var(--primary-color);
             color: white;
             border-color: var(--primary-color);
         }
 
-        /* أزرار سماكة الإطار */
-        .border-width-options {
+        .gradient-slider-container {
             display: flex;
+            align-items: center;
             gap: 4px;
-            flex-wrap: wrap;
+            margin-bottom: 4px;
         }
 
-        .border-width-btn {
-            padding: 3px 6px;
+        .gradient-slider-container label {
             font-size: 9px;
-            border: 1px solid var(--border-color);
-            border-radius: 3px;
-            background-color: #ffffff;
+            color: var(--text-secondary);
+            min-width: 45px;
+        }
+
+        .gradient-slider-container input[type="range"] {
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            background: linear-gradient(to right, #000, #fff);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .gradient-slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary-color);
             cursor: pointer;
-            transition: all var(--transition-speed);
-            min-width: 28px;
-            text-align: center;
+            border: 1px solid var(--border-color);
         }
 
-        .border-width-btn:hover {
-            background-color: #e1dfdd;
-            border-color: var(--primary-color);
-        }
-
-        .border-width-btn.active {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+        .gradient-slider-container input[type="range"]::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: 1px solid var(--border-color);
         }
 
         /* أشكال الحاوية */
@@ -243,16 +299,45 @@
 
         .shape-details {
             display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            align-items: center;
+            flex-direction: column;
+            gap: 4px;
         }
 
-        .shape-detail-item {
+        /* قسم سماكة الإطار */
+        .border-width-section {
+            background-color: var(--bg-light);
+            padding: 6px 8px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+        }
+
+        .border-width-options {
             display: flex;
-            align-items: center;
             gap: 3px;
-            font-size: 10px;
+            flex-wrap: wrap;
+        }
+
+        .border-width-btn {
+            padding: 3px 6px;
+            font-size: 9px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            min-width: 26px;
+            text-align: center;
+        }
+
+        .border-width-btn:hover {
+            background-color: #e1dfdd;
+            border-color: var(--primary-color);
+        }
+
+        .border-width-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
         }
 
         /* التبويبات */
@@ -384,6 +469,7 @@
             font-size: 11px; 
             margin-bottom: 8px;
             transition: all var(--transition-speed);
+            font-family: 'Calibri', 'Segoe UI Arabic', 'Tahoma', sans-serif;
         }
 
         .search-box:focus {
@@ -419,7 +505,6 @@
             }
         }
 
-        /* شريط التمرير المخصص */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -436,11 +521,24 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #a19f9d;
         }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
     </style>
 </head>
 <body>
     <div class="top-bar">
-        <h3>✨ Shaza pptx library</h3>
+        <h3>Shaza pptx library</h3>
         <div id="global-controls" class="controls-panel">
             <!-- قسم الحجم -->
             <div class="control-section">
@@ -453,32 +551,41 @@
             </div>
 
             <!-- قسم الألوان -->
-            <div class="control-section">
+            <div class="color-section">
                 <div class="control-section-title">الألوان</div>
-                <div class="control-row">
-                    <div class="control-box">
+                
+                <div class="color-item">
+                    <label>لون الأيقونة:</label>
+                    <input type="color" id="icon-color" value="#000000">
+                    <button class="eyedropper-btn" onclick="pickColor('icon-color')" title="اختيار لون">
+                        <svg viewBox="0 0 24 24"><path d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8.5L11,12L2,21L3,22L12,13L15.5,9.5L14.5,8.5M19.35,2.5C19.1,2.5 18.85,2.6 18.65,2.8L17.56,3.89L20.11,6.44L21.2,5.35C21.6,4.95 21.6,4.3 21.2,3.9L20.1,2.8C19.9,2.6 19.65,2.5 19.35,2.5Z"/></svg>
+                    </button>
+                    <div class="control-box" style="flex: 0; min-width: auto;">
                         <input type="checkbox" id="apply-color" checked>
-                        <label>تلوين:</label>
-                        <input type="color" id="icon-color" value="#4472C4">
+                        <label style="min-width: auto;">تفعيل</label>
                     </div>
                 </div>
-                <div class="color-palette" id="professional-colors"></div>
             </div>
 
-            <!-- قسم التدرجات -->
-            <div class="control-section" id="gradient-section" style="display: none;">
+            <!-- قسم التدرج -->
+            <div class="gradient-section" id="gradient-section" style="display: none;">
                 <div class="control-section-title">التدرج اللوني</div>
-                <div class="gradient-options">
-                    <button class="gradient-btn" onclick="setGradientType('none')">بدون</button>
-                    <button class="gradient-btn" onclick="setGradientType('linear')">خطي →</button>
-                    <button class="gradient-btn" onclick="setGradientType('radial')">دائري ◯</button>
-                    <button class="gradient-btn" onclick="setGradientType('diagonal')">مائل ↗</button>
+                <div class="gradient-type-selector">
+                    <button class="gradient-type-btn" onclick="setGradientType('none')">بدون</button>
+                    <button class="gradient-type-btn" onclick="setGradientType('linear')">خطي</button>
+                    <button class="gradient-type-btn" onclick="setGradientType('radial')">دائري</button>
+                    <button class="gradient-type-btn" onclick="setGradientType('diagonal')">مائل</button>
                 </div>
-                <div class="control-row" style="margin-top: 4px;">
-                    <div class="control-box">
-                        <label>اللون الثاني:</label>
-                        <input type="color" id="gradient-color" value="#FF6B6B">
-                    </div>
+                <div class="gradient-slider-container">
+                    <label>الموضع:</label>
+                    <input type="range" id="gradient-position" min="0" max="100" value="50" oninput="updateGradientPreview()">
+                </div>
+                <div class="color-item">
+                    <label>اللون الثاني:</label>
+                    <input type="color" id="gradient-color" value="#FFFFFF">
+                    <button class="eyedropper-btn" onclick="pickColor('gradient-color')" title="اختيار لون">
+                        <svg viewBox="0 0 24 24"><path d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8.5L11,12L2,21L3,22L12,13L15.5,9.5L14.5,8.5M19.35,2.5C19.1,2.5 18.85,2.6 18.65,2.8L17.56,3.89L20.11,6.44L21.2,5.35C21.6,4.95 21.6,4.3 21.2,3.9L20.1,2.8C19.9,2.6 19.65,2.5 19.35,2.5Z"/></svg>
+                    </button>
                 </div>
             </div>
 
@@ -486,31 +593,37 @@
             <div class="shape-selector">
                 <div class="control-section-title">الشكل الحاوي</div>
                 <div class="shape-options">
-                    <label class="shape-option"><input type="radio" name="bg-shape" value="none" checked> لا شيء</label>
+                    <label class="shape-option"><input type="radio" name="bg-shape" value="none" checked> بدون</label>
                     <label class="shape-option"><input type="radio" name="bg-shape" value="circle"> دائرة</label>
                     <label class="shape-option"><input type="radio" name="bg-shape" value="square"> مربع</label>
                     <label class="shape-option"><input type="radio" name="bg-shape" value="rounded"> ناعم</label>
                     <label class="shape-option"><input type="radio" name="bg-shape" value="super-rounded"> ناعم جداً</label>
                 </div>
                 <div id="bg-details" class="shape-details" style="display: none;">
-                    <div class="shape-detail-item">
-                        <label>الخلفية:</label>
-                        <input type="color" id="bg-color" value="#ffffff">
+                    <div class="color-item">
+                        <label>خلفية:</label>
+                        <input type="color" id="bg-color" value="#FFFFFF">
+                        <button class="eyedropper-btn" onclick="pickColor('bg-color')" title="اختيار لون">
+                            <svg viewBox="0 0 24 24"><path d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8.5L11,12L2,21L3,22L12,13L15.5,9.5L14.5,8.5M19.35,2.5C19.1,2.5 18.85,2.6 18.65,2.8L17.56,3.89L20.11,6.44L21.2,5.35C21.6,4.95 21.6,4.3 21.2,3.9L20.1,2.8C19.9,2.6 19.65,2.5 19.35,2.5Z"/></svg>
+                        </button>
                     </div>
-                    <div class="shape-detail-item">
-                        <label>الإطار:</label>
-                        <input type="color" id="outline-color" value="#00000000">
+                    <div class="color-item">
+                        <label>إطار:</label>
+                        <input type="color" id="outline-color" value="#000000">
+                        <button class="eyedropper-btn" onclick="pickColor('outline-color')" title="اختيار لون">
+                            <svg viewBox="0 0 24 24"><path d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8.5L11,12L2,21L3,22L12,13L15.5,9.5L14.5,8.5M19.35,2.5C19.1,2.5 18.85,2.6 18.65,2.8L17.56,3.89L20.11,6.44L21.2,5.35C21.6,4.95 21.6,4.3 21.2,3.9L20.1,2.8C19.9,2.6 19.65,2.5 19.35,2.5Z"/></svg>
+                        </button>
                     </div>
-                    <div class="shape-detail-item">
+                    <label class="checkbox-label">
                         <input type="checkbox" id="apply-shadow">
-                        <label>ظل</label>
-                    </div>
+                        <span>ظل</span>
+                    </label>
                 </div>
             </div>
 
             <!-- قسم سماكة الإطار -->
-            <div class="control-section" id="border-width-section" style="display: none;">
-                <div class="control-section-title">سماكة الإطار</div>
+            <div class="border-width-section" id="border-width-section" style="display: none;">
+                <div class="control-section-title">سماكة الإطار (بكسل)</div>
                 <div class="border-width-options">
                     <button class="border-width-btn" onclick="setBorderWidth(0)">0</button>
                     <button class="border-width-btn" onclick="setBorderWidth(1)">1</button>
@@ -526,7 +639,7 @@
         <div class="tabs-container">
             <button class="tab-btn active" onclick="switchTab('logos')" id="tab-logos">الشعارات</button>
             <button class="tab-btn" onclick="switchTab('icons')" id="tab-icons">الأيقونات</button>
-            <button class="tab-btn" onclick="switchTab('flags')" id="tab-flags">الأعلام 🚩</button>
+            <button class="tab-btn" onclick="switchTab('flags')" id="tab-flags">الأعلام</button>
             <button class="tab-btn" onclick="switchTab('shapes')" id="tab-shapes">الأشكال</button>
         </div>
     </div>
@@ -557,43 +670,21 @@
         let countriesData = [];
         let currentGradientType = 'none';
         let currentBorderWidth = 0;
-        let loadedSvgs = {}; // Cache لـ SVG المحملة
         
-        const professionalColors = [
-            '#4472C4', '#ED7D31', '#A5A5A5', '#FFC000', '#5B9BD5',
-            '#70AD47', '#264478', '#9E480E', '#636363', '#997300',
-            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-            '#DDA15E', '#BC6C25', '#8E7DBE', '#C1666B', '#48A9A6',
-            '#2E86AB', '#A23B72', '#F18F01', '#C73E1D', '#6A994E'
-        ];
-
-        function initProfessionalColors() {
-            const palette = document.getElementById('professional-colors');
-            palette.innerHTML = '';
-            professionalColors.forEach(color => {
-                const colorBox = document.createElement('div');
-                colorBox.className = 'palette-color';
-                colorBox.style.backgroundColor = color;
-                colorBox.onclick = () => {
-                    document.getElementById('icon-color').value = color;
-                    updateIconsPreview();
-                };
-                colorBox.title = color;
-                palette.appendChild(colorBox);
-            });
-        }
-
         function setGradientType(type) {
             currentGradientType = type;
-            document.querySelectorAll('.gradient-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.gradient-type-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            updateIconsPreview();
         }
 
         function setBorderWidth(width) {
             currentBorderWidth = width;
             document.querySelectorAll('.border-width-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
+        }
+
+        function updateGradientPreview() {
+            // تحديث معاينة التدرج
         }
 
         function switchTab(tabName) {
@@ -616,7 +707,6 @@
             } else {
                 globalControls.style.display = 'flex';
                 const isIcons = (tabName === 'icons');
-                document.getElementById('shape-selector-group').style.display = isIcons ? 'flex' : 'none';
                 document.querySelector('.shape-selector').style.display = isIcons ? 'block' : 'none';
                 gradientSection.style.display = isIcons ? 'block' : 'none';
                 borderWidthSection.style.display = isIcons ? 'block' : 'none';
@@ -649,7 +739,6 @@
             try {
                 const result = await eyeDropper.open();
                 document.getElementById(inputId).value = result.sRGBHex;
-                updateIconsPreview();
             } catch (e) {}
         }
 
@@ -659,7 +748,7 @@
                 const g = document.getElementById('grid-logos');
                 g.innerHTML = '';
                 await extract(h, g, 'logos');
-                showNotification('✓ تم تحميل الشعارات');
+                showNotification('تم تحميل الشعارات');
             } catch(e) {}
         }
 
@@ -682,7 +771,7 @@
                         c.appendChild(grid);
                     }
                 }
-                showNotification('✓ تم تحميل الأيقونات');
+                showNotification('تم تحميل الأيقونات');
             } catch(e) {}
         }
 
@@ -692,7 +781,7 @@
                 const g = document.getElementById('grid-shapes');
                 g.innerHTML = '';
                 await extract(h, g, 'shapes');
-                showNotification('✓ تم تحميل الأشكال');
+                showNotification('تم تحميل الأشكال');
             } catch(e) {}
         }
 
@@ -704,17 +793,10 @@
                     const box = document.createElement('div');
                     box.className = 'icon-box';
                     
-                    if (type === 'logos' || type === 'shapes') {
-                        const img = document.createElement('img');
-                        img.src = URL.createObjectURL(f);
-                        box.appendChild(img);
-                        box.onclick = () => insert(t, type);
-                    } else if (type === 'icons') {
-                        const img = document.createElement('img');
-                        img.src = URL.createObjectURL(f);
-                        box.appendChild(img);
-                        box.onclick = () => insert(t, type);
-                    }
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(f);
+                    box.appendChild(img);
+                    box.onclick = () => insert(t, type);
                     g.appendChild(box);
                 }
             }
@@ -725,9 +807,9 @@
                 const response = await fetch('country.json');
                 countriesData = await response.json();
                 displayFlags(countriesData);
-                showNotification('✓ تم تحميل الأعلام');
+                showNotification('تم تحميل الأعلام');
             } catch(e) {
-                showNotification('✗ خطأ في تحميل الأعلام');
+                showNotification('خطأ في تحميل الأعلام');
             }
         }
 
@@ -767,18 +849,7 @@
             if (searchBox) {
                 searchBox.addEventListener('input', filterFlags);
             }
-            document.getElementById('icon-color').addEventListener('change', updateIconsPreview);
-            document.getElementById('gradient-color').addEventListener('change', updateIconsPreview);
-            document.getElementById('bg-color').addEventListener('change', updateIconsPreview);
         });
-
-        function updateIconsPreview() {
-            // تحديث معاينة الأيقونات فقط (وليس الأعلام والشعارات)
-            if (currentTab === 'icons') {
-                const boxes = document.querySelectorAll('#grid-icons-container .icon-box img');
-                // يمكن إضافة منطق معاينة هنا إذا لزم الأمر
-            }
-        }
 
         function hexToRgb(hex) {
             hex = hex.replace('#', '');
@@ -843,25 +914,26 @@
             }
         }
 
-        function createGradientDef(gradientType, color1, color2) {
+        function createGradientDef(gradientType, color1, color2, position) {
             if (gradientType === 'none') return '';
             
             const gradId = 'grad-' + Math.random().toString(36).substr(2, 9);
+            const pos = position || 50;
             
             if (gradientType === 'linear') {
                 return `<defs><linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" style="stop-color:${color1};stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:${color2};stop-opacity:1" />
+                    <stop offset="${pos}%" style="stop-color:${color2};stop-opacity:1" />
                 </linearGradient></defs>`;
             } else if (gradientType === 'radial') {
                 return `<defs><radialGradient id="${gradId}" cx="50%" cy="50%" r="50%">
                     <stop offset="0%" style="stop-color:${color1};stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:${color2};stop-opacity:1" />
+                    <stop offset="${pos}%" style="stop-color:${color2};stop-opacity:1" />
                 </radialGradient></defs>`;
             } else if (gradientType === 'diagonal') {
                 return `<defs><linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" style="stop-color:${color1};stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:${color2};stop-opacity:1" />
+                    <stop offset="${pos}%" style="stop-color:${color2};stop-opacity:1" />
                 </linearGradient></defs>`;
             }
             
@@ -869,19 +941,12 @@
         }
 
         function insert(svg, type) {
-            if (type === 'shapes') {
+            if (type === 'shapes' || type === 'logos') {
                 Office.context.document.setSelectedDataAsync(svg, { coercionType: Office.CoercionType.XmlSvg });
-                showNotification('✓ تم إدراج الشكل');
+                showNotification('تم الإدراج بنجاح');
                 return;
             }
 
-            if (type === 'logos') {
-                Office.context.document.setSelectedDataAsync(svg, { coercionType: Office.CoercionType.XmlSvg });
-                showNotification('✓ تم إدراج الشعار');
-                return;
-            }
-
-            // معالجة الأيقونات فقط
             const w = parseInt(document.getElementById('icon-width').value) || 50;
             const applyColor = document.getElementById('apply-color').checked;
             const iconColor = '#' + hexToRgb(document.getElementById('icon-color').value);
@@ -891,6 +956,7 @@
             const outlineWidth = currentBorderWidth;
             const applyShadow = document.getElementById('apply-shadow').checked;
             const gradientColor = '#' + hexToRgb(document.getElementById('gradient-color').value);
+            const gradientPosition = document.getElementById('gradient-position').value;
 
             try {
                 let processedSvg = svg;
@@ -923,7 +989,7 @@
                         filterAttr = 'filter="url(#shadow)"';
                     }
 
-                    const gradientDef = createGradientDef(currentGradientType, bgColor, gradientColor);
+                    const gradientDef = createGradientDef(currentGradientType, bgColor, gradientColor, gradientPosition);
                     const fillColor = currentGradientType !== 'none' ? `url(#${gradientDef.match(/id="([^"]+)"/)?.[1] || 'grad'})` : bgColor;
 
                     if (shape === 'circle') {
@@ -954,14 +1020,14 @@
 
                 Office.context.document.setSelectedDataAsync(finalContent, { coercionType: Office.CoercionType.XmlSvg }, (result) => {
                     if (result.status === Office.AsyncResultStatus.Succeeded) {
-                        showNotification('✓ تم إدراج الأيقونة');
+                        showNotification('تم الإدراج بنجاح');
                     } else {
-                        showNotification('✗ خطأ في الإدراج');
+                        showNotification('خطأ في الإدراج');
                     }
                 });
             } catch(err) { 
                 console.error(err);
-                showNotification('✗ خطأ: ' + err.message);
+                showNotification('خطأ: ' + err.message);
             }
         }
 
@@ -973,6 +1039,7 @@
             const outlineWidth = currentBorderWidth;
             const applyShadow = document.getElementById('apply-shadow').checked;
             const gradientColor = '#' + hexToRgb(document.getElementById('gradient-color').value);
+            const gradientPosition = document.getElementById('gradient-position').value;
 
             try {
                 let finalContent = `<svg width="${w}" height="${w}" viewBox="0 0 ${w} ${w}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -1003,7 +1070,7 @@
                         filterAttr = 'filter="url(#shadow)"';
                     }
 
-                    const gradientDef = createGradientDef(currentGradientType, bgColor, gradientColor);
+                    const gradientDef = createGradientDef(currentGradientType, bgColor, gradientColor, gradientPosition);
                     const fillColor = currentGradientType !== 'none' ? `url(#${gradientDef.match(/id="([^"]+)"/)?.[1] || 'grad'})` : bgColor;
 
                     if (shape === 'circle') {
@@ -1028,14 +1095,14 @@
 
                 Office.context.document.setSelectedDataAsync(finalContent, { coercionType: Office.CoercionType.XmlSvg }, (result) => {
                     if (result.status === Office.AsyncResultStatus.Succeeded) {
-                        showNotification(`✓ علم ${countryName}`);
+                        showNotification('تم إدراج العلم بنجاح');
                     } else {
-                        showNotification('✗ خطأ في الإدراج');
+                        showNotification('خطأ في الإدراج');
                     }
                 });
             } catch(err) { 
                 console.error(err);
-                showNotification('✗ خطأ: ' + err.message);
+                showNotification('خطأ: ' + err.message);
             }
         }
 
@@ -1053,7 +1120,6 @@
                 updateThemeColor();
                 Office.context.document.addHandlerAsync(Office.EventType.OfficeThemeChanged, updateThemeColor);
             }
-            initProfessionalColors();
             switchTab('logos');
         });
     </script>
