@@ -48,7 +48,7 @@
                     <input type="number" id="icon-width" value="50">
                 </div>
                 <div class="control-box" id="color-control-group">
-                    <input type="checkbox" id="apply-color">
+                    <input type="checkbox" id="apply-color" checked>
                     <label>تلوين</label>
                     <input type="color" id="icon-color" value="#4472C4">
                 </div>
@@ -76,11 +76,14 @@
                             <option value="0">بلا إطار</option>
                             <option value="1">1 px</option>
                             <option value="2">2 px</option>
+                            <option value="3">3 px</option>
                             <option value="4">4 px</option>
-                            <option value="6">6 px</option>
-                            <option value="8">8 px</option>
-                            <option value="10">10 px</option>
+                            <option value="5">5 px</option>
                         </select>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 3px;">
+                        <input type="checkbox" id="apply-shadow">
+                        <label style="font-size: 10px;">ظل</label>
                     </div>
                 </div>
             </div>
@@ -251,6 +254,24 @@
             return new XMLSerializer().serializeToString(doc);
         }
 
+        function extractSVGViewBox(svgString) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(svgString, "image/svg+xml");
+            const svgElement = doc.documentElement;
+            
+            const viewBox = svgElement.getAttribute('viewBox');
+            const width = svgElement.getAttribute('width');
+            const height = svgElement.getAttribute('height');
+            
+            if (viewBox) {
+                return viewBox;
+            } else if (width && height) {
+                return `0 0 ${width} ${height}`;
+            } else {
+                return '0 0 100 100'; // قيمة افتراضية
+            }
+        }
+
         function insert(svg) {
             if (currentTab === 'shapes') {
                 Office.context.document.setSelectedDataAsync(svg, { coercionType: Office.CoercionType.XmlSvg });
@@ -264,6 +285,7 @@
             const bgColor = '#' + hexToRgb(document.getElementById('bg-color').value);
             const outlineColor = '#' + hexToRgb(document.getElementById('outline-color').value);
             const outlineWidth = parseInt(document.getElementById('outline-width').value);
+            const applyShadow = document.getElementById('apply-shadow').checked;
 
             try {
                 let processedSvg = svg;
@@ -278,19 +300,44 @@
                     const c = containerSize / 2;
                     let shapeHtml = '';
                     const strokeAttr = outlineWidth > 0 ? `stroke="${outlineColor}" stroke-width="${outlineWidth}"` : '';
+                    
+                    // إضافة تأثير الظل إذا تم اختياره
+                    let filterDef = '';
+                    let filterAttr = '';
+                    if (applyShadow) {
+                        filterDef = `
+                        <defs>
+                            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+                                <feOffset dx="2" dy="2" result="offsetblur" />
+                                <feComponentTransfer>
+                                    <feFuncA type="linear" slope="0.3" />
+                                </feComponentTransfer>
+                                <feMerge>
+                                    <feMergeNode />
+                                    <feMergeNode in="SourceGraphic" />
+                                </feMerge>
+                            </filter>
+                        </defs>`;
+                        filterAttr = 'filter="url(#shadow)"';
+                    }
 
-                    if (shape === 'circle') shapeHtml = `<circle cx="${c}" cy="${c}" r="${containerSize/2 - 5}" fill="${bgColor}" ${strokeAttr} />`;
-                    else if (shape === 'square') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" fill="${bgColor}" ${strokeAttr} />`;
-                    else if (shape === 'rounded') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.1}" fill="${bgColor}" ${strokeAttr} />`;
+                    if (shape === 'circle') shapeHtml = `<circle cx="${c}" cy="${c}" r="${containerSize/2 - 5}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
+                    else if (shape === 'square') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
+                    else if (shape === 'rounded') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.1}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
 
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(processedSvg, "image/svg+xml");
                     const svgInner = new XMLSerializer().serializeToString(doc.documentElement).replace(/<\/?svg[^>]*>/g, '');
+                    
+                    // استخراج viewBox الأصلي من الأيقونة
+                    const originalViewBox = extractSVGViewBox(processedSvg);
 
                     finalContent = `<svg width="${containerSize}" height="${containerSize}" viewBox="0 0 ${containerSize} ${containerSize}" xmlns="http://www.w3.org/2000/svg">
+                        ${filterDef}
                         ${shapeHtml}
                         <g transform="translate(${padding},${padding})">
-                            <svg width="${w}" height="${w}" viewBox="0 0 ${w} ${w}">${svgInner}</svg>
+                            <svg width="${w}" height="${w}" viewBox="${originalViewBox}" preserveAspectRatio="xMidYMid meet">${svgInner}</svg>
                         </g>
                     </svg>`;
                 }
