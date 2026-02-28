@@ -372,7 +372,7 @@
 
                     if (shape === 'circle') shapeHtml = `<circle cx="${c}" cy="${c}" r="${containerSize/2 - 5}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
                     else if (shape === 'square') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
-                    else if (shape === 'rounded') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.5}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
+                    else if (shape === 'rounded') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.2}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
 
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(processedSvg, "image/svg+xml");
