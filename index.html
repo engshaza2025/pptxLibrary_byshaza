@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Shaza pptx library - محسّن v2</title>
+    <title>Shaza pptx library - محسّن</title>
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
     <style>
         body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f3f2f1; overflow: hidden; }
-        .top-bar { background-color: #ffffff; padding: 10px 15px 0 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10; display: flex; flex-direction: column; gap: 8px; max-height: 50%; overflow-y: auto; }
+        .top-bar { background-color: #ffffff; padding: 10px 15px 0 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10; display: flex; flex-direction: column; gap: 8px; }
         .top-bar h3 { color: #0078d4; margin: 0; font-size: 16px; text-align: center; }
         
         .controls-panel { display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
@@ -18,6 +18,7 @@
         .control-box input[type="number"] { width: 35px; }
         .control-box input[type="color"] { width: 20px; height: 20px; padding: 0; border: none; cursor: pointer; background: none; }
         
+        /* تحسينات أداة القطارة ومربعات الألوان */
         .color-tools { display: flex; align-items: center; gap: 4px; }
         .quick-color { width: 14px; height: 14px; border: 1px solid #c8c6c4; border-radius: 2px; cursor: pointer; }
         .color-black { background-color: #000000; }
@@ -27,7 +28,7 @@
         .eyedropper-btn svg { width: 14px; height: 14px; fill: #605e5c; }
 
         .shape-selector { background-color: #f8f8f8; padding: 8px; border-radius: 6px; border: 1px solid #edebe9; margin-bottom: 5px; display: flex; flex-direction: column; gap: 8px; }
-        .shape-options { display: flex; gap: 10px; justify-content: center; border-bottom: 1px solid #e1dfdd; padding-bottom: 5px; flex-wrap: wrap; }
+        .shape-options { display: flex; gap: 10px; justify-content: center; border-bottom: 1px solid #e1dfdd; padding-bottom: 5px; }
         .shape-option { display: flex; align-items: center; gap: 3px; font-size: 10px; cursor: pointer; }
         .shape-details { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
         
@@ -42,23 +43,17 @@
         .icon-box:hover { transform: scale(1.05); border-color: #0078d4; }
         .icon-box img { max-width: 100%; max-height: 100%; pointer-events: none; }
         
-        .group-title { color: #323130; font-size: 12px; border-bottom: 2px solid #e1dfdd; padding: 6px 5px; margin-top: 5px; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
-        .group-title:hover { background-color: #f0f0f0; }
-        .group-title .arrow { display: inline-block; transition: transform 0.2s; }
-        .group-title.collapsed .arrow { transform: rotate(-90deg); }
-        
-        .nested-group { margin-right: 20px; }
-        .nested-group .group-title { font-size: 11px; color: #666; }
-        
+        .group-title { color: #323130; font-size: 12px; border-bottom: 2px solid #e1dfdd; padding: 6px 5px; margin-top: 5px; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         #notification { position: fixed; bottom: 15px; left: 15px; right: 15px; padding: 8px; background: #323130; color: white; border-radius: 4px; font-size: 11px; text-align: center; display: none; z-index: 100; }
         
+        /* نمط جديد للخيارات المنفصلة */
         .stroke-control-group { display: none; background-color: #f0f0f0; padding: 6px; border-radius: 4px; border-right: 3px solid #0078d4; }
         .stroke-control-group.visible { display: flex; align-items: center; gap: 8px; }
     </style>
 </head>
 <body>
     <div class="top-bar">
-        <h3>Shaza pptx library - محسّن v2</h3>
+        <h3>Shaza pptx library - محسّن</h3>
         <div id="global-controls" class="controls-panel">
             <div class="controls-row">
                 <div class="control-box">
@@ -79,6 +74,7 @@
                 </div>
             </div>
             
+            <!-- خيار الستروك المنفصل -->
             <div class="stroke-control-group" id="stroke-control-group">
                 <input type="checkbox" id="apply-stroke">
                 <label style="font-size: 11px; color: #605e5c; font-weight: bold; margin: 0;">تلوين الإطار (Stroke)</label>
@@ -97,7 +93,6 @@
                     <label class="shape-option"><input type="radio" name="bg-shape" value="circle"> دائرة</label>
                     <label class="shape-option"><input type="radio" name="bg-shape" value="square"> مربع</label>
                     <label class="shape-option"><input type="radio" name="bg-shape" value="rounded"> مربع ناعم</label>
-                    <label class="shape-option"><input type="radio" name="bg-shape" value="circle-white-border"> دائرة + إطار أبيض</label>
                 </div>
                 <div id="bg-details" class="shape-details" style="display: none;">
                     <div style="display: flex; align-items: center; gap: 3px;">
@@ -138,46 +133,6 @@
                     </div>
                 </div>
             </div>
-            
-            <div id="shapes-controls" style="display: none; background-color: #f8f8f8; padding: 8px; border-radius: 6px; border: 1px solid #edebe9;">
-                <div style="font-size: 10px; font-weight: bold; color: #0078d4; margin-bottom: 8px;">خيارات الأشكال:</div>
-                <div class="controls-row">
-                    <div class="control-box">
-                        <label>الحجم:</label>
-                        <input type="number" id="shape-width" value="100">
-                    </div>
-                </div>
-                <div style="margin-top: 8px;">
-                    <div style="font-size: 10px; font-weight: bold; color: #0078d4; margin-bottom: 5px;">الشكل الحاوي:</div>
-                    <div class="shape-options">
-                        <label class="shape-option"><input type="radio" name="shape-bg-shape" value="none" checked> لا شيء</label>
-                        <label class="shape-option"><input type="radio" name="shape-bg-shape" value="circle"> دائرة</label>
-                        <label class="shape-option"><input type="radio" name="shape-bg-shape" value="square"> مربع</label>
-                        <label class="shape-option"><input type="radio" name="shape-bg-shape" value="rounded"> مربع ناعم</label>
-                        <label class="shape-option"><input type="radio" name="shape-bg-shape" value="circle-white-border"> دائرة + إطار أبيض</label>
-                    </div>
-                </div>
-                <div id="shape-bg-details" style="display: none; margin-top: 8px;">
-                    <div style="display: flex; align-items: center; gap: 3px;">
-                        <label style="font-size: 10px;">الخلفية:</label>
-                        <input type="color" id="shape-bg-color" value="#ffffff">
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 3px; margin-top: 5px;">
-                        <label style="font-size: 10px;">الإطار:</label>
-                        <input type="color" id="shape-outline-color" value="#00000000">
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 3px; margin-top: 5px;">
-                        <label style="font-size: 10px;">السماكة:</label>
-                        <select id="shape-outline-width" style="font-size: 10px;">
-                            <option value="0">بلا إطار</option>
-                            <option value="1">1 px</option>
-                            <option value="2">2 px</option>
-                            <option value="4">4 px</option>
-                            <option value="6">6 px</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
         </div>
         <div class="tabs-container">
             <button class="tab-btn active" onclick="switchTab('logos')" id="tab-logos">الشعارات</button>
@@ -203,6 +158,7 @@
 
     <script>
         let currentTab = 'logos';
+        let currentSvgContent = ''; // لتخزين محتوى SVG الحالي للفحص
 
         function switchTab(tabName) {
             currentTab = tabName;
@@ -215,14 +171,10 @@
             document.getElementById('section-' + tabName).style.display = 'block';
             
             const globalControls = document.getElementById('global-controls');
-            const shapesControls = document.getElementById('shapes-controls');
-            
             if (tabName === 'shapes') {
                 globalControls.style.display = 'none';
-                shapesControls.style.display = 'block';
             } else {
                 globalControls.style.display = 'flex';
-                shapesControls.style.display = 'none';
                 const isIcons = tabName === 'icons';
                 document.getElementById('shape-selector-group').style.display = isIcons ? 'flex' : 'none';
             }
@@ -234,18 +186,13 @@
             };
         });
 
-        document.querySelectorAll('input[name="shape-bg-shape"]').forEach(r => {
-            r.onchange = (e) => {
-                document.getElementById('shape-bg-details').style.display = e.target.value === 'none' ? 'none' : 'flex';
-            };
-        });
-
         function showNotification(msg) {
             const n = document.getElementById('notification');
             n.innerText = msg; n.style.display = 'block';
             setTimeout(() => n.style.display = 'none', 3000);
         }
 
+        // دوال الألوان الجديدة
         function setQuickColor(inputId, color) {
             document.getElementById(inputId).value = color;
         }
@@ -259,15 +206,16 @@
             try {
                 const result = await eyeDropper.open();
                 document.getElementById(inputId).value = result.sRGBHex;
-            } catch (e) {}
+            } catch (e) {
+                // المستخدم ألغى العملية
+            }
         }
 
         async function loadLogosFolder() {
             try {
                 const h = await window.showDirectoryPicker();
                 const g = document.getElementById('grid-logos');
-                g.innerHTML = ''; 
-                await extractWithFolders(h, g, false);
+                g.innerHTML = ''; await extract(h, g);
                 showNotification('تم تحميل الشعارات');
             } catch(e) {}
         }
@@ -277,7 +225,20 @@
                 const h = await window.showDirectoryPicker();
                 const c = document.getElementById('grid-icons-container');
                 c.innerHTML = '';
-                await extractWithFolders(h, c, false);
+                for await (const entry of h.values()) {
+                    if (entry.kind === 'directory') {
+                        const title = document.createElement('div');
+                        title.className = 'group-title';
+                        title.innerHTML = `<span>${entry.name}</span> <span>▼</span>`;
+                        const grid = document.createElement('div');
+                        grid.className = 'icon-grid';
+                        title.onclick = () => grid.style.display = grid.style.display === 'none' ? 'flex' : 'none';
+                        c.appendChild(title);
+                        const sub = await h.getDirectoryHandle(entry.name);
+                        await extract(sub, grid);
+                        c.appendChild(grid);
+                    }
+                }
                 showNotification('تم تحميل مجلدات الأيقونات');
             } catch(e) {}
         }
@@ -286,16 +247,15 @@
             try {
                 const h = await window.showDirectoryPicker();
                 const g = document.getElementById('grid-shapes');
-                g.innerHTML = ''; 
-                await extractWithFolders(h, g, false);
+                g.innerHTML = ''; await extract(h, g);
                 showNotification('تم تحميل الأشكال');
             } catch(e) {}
         }
 
-        async function extractWithFolders(h, container, isNested = false) {
-            for await (const entry of h.values()) {
-                if (entry.kind === 'file' && entry.name.toLowerCase().endsWith('.svg')) {
-                    const f = await entry.getFile();
+        async function extract(h, g) {
+            for await (const e of h.values()) {
+                if (e.kind === 'file' && e.name.toLowerCase().endsWith('.svg')) {
+                    const f = await e.getFile();
                     const t = await f.text();
                     const box = document.createElement('div');
                     box.className = 'icon-box';
@@ -303,33 +263,7 @@
                     img.src = URL.createObjectURL(f);
                     box.appendChild(img);
                     box.onclick = () => insert(t);
-                    container.appendChild(box);
-                } else if (entry.kind === 'directory') {
-                    const title = document.createElement('div');
-                    title.className = 'group-title' + (isNested ? ' nested-group' : '');
-                    const arrow = document.createElement('span');
-                    arrow.className = 'arrow';
-                    arrow.textContent = '▼';
-                    const titleText = document.createElement('span');
-                    titleText.textContent = entry.name;
-                    title.appendChild(titleText);
-                    title.appendChild(arrow);
-                    
-                    const grid = document.createElement('div');
-                    grid.className = 'icon-grid';
-                    grid.style.display = 'none';
-                    
-                    title.onclick = (e) => {
-                        e.stopPropagation();
-                        grid.style.display = grid.style.display === 'none' ? 'flex' : 'none';
-                        title.classList.toggle('collapsed');
-                    };
-                    
-                    container.appendChild(title);
-                    container.appendChild(grid);
-                    
-                    const sub = await h.getDirectoryHandle(entry.name);
-                    await extractWithFolders(sub, grid, true);
+                    g.appendChild(box);
                 }
             }
         }
@@ -340,6 +274,7 @@
             return hex.toUpperCase();
         }
 
+        // ✅ دالة تلوين SVG محسّنة - تعمل مع جميع أنواع الأيقونات
         function deepColorSVG(svgString, fillColor, strokeColor = null, applyStroke = false) {
             const parser = new DOMParser();
             const doc = parser.parseFromString(svgString, "image/svg+xml");
@@ -348,22 +283,28 @@
             elements.forEach(el => {
                 const tagName = el.tagName.toLowerCase();
                 
+                // تخطي وسوم معينة
                 if (tagName === 'style' || tagName === 'defs' || tagName === 'metadata') {
                     return;
                 }
 
+                // ✅ معالجة Fill - الأساسي
                 const fill = el.getAttribute('fill');
                 const style = el.getAttribute('style');
                 
+                // إذا كان هناك fill صريح أو في style
                 if (fill && (fill === '#000' || fill === '#000000' || fill === 'black' || fill.toLowerCase() === '#2c3030' || fill === 'none')) {
                     el.setAttribute('fill', fillColor);
                 } else if (!fill && !style) {
+                    // ✅ إذا لم يكن هناك fill على الإطلاق - أضف واحد جديد
                     el.setAttribute('fill', fillColor);
                 } else if (style && style.includes('fill')) {
+                    // استبدال في style
                     let newStyle = style.replace(/fill\s*:\s*(#[0-9a-fA-F]{3,8}|black|none|[a-z]+)/gi, `fill:${fillColor}`);
                     el.setAttribute('style', newStyle);
                 }
 
+                // ✅ معالجة Stroke - اختياري
                 if (applyStroke && strokeColor) {
                     const stroke = el.getAttribute('stroke');
                     if (stroke && (stroke === '#000' || stroke === '#000000' || stroke === 'black' || stroke.toLowerCase() === '#2c3030')) {
@@ -376,10 +317,13 @@
                 }
             });
 
+            // معالجة CSS داخل وسم <style>
             const styleElements = doc.querySelectorAll('style');
             styleElements.forEach(styleEl => {
                 let cssText = styleEl.textContent;
+                // استبدال fill
                 cssText = cssText.replace(/fill\s*:\s*(#[0-9a-fA-F]{3,8}|black|#2c3030|none)/gi, `fill:${fillColor}`);
+                // استبدال stroke إذا كان مطلوباً
                 if (applyStroke && strokeColor) {
                     cssText = cssText.replace(/stroke\s*:\s*(#[0-9a-fA-F]{3,8}|black)/gi, `stroke:${strokeColor}`);
                 }
@@ -407,9 +351,17 @@
             }
         }
 
+        // ✅ دالة للفحص إذا كانت الأيقونة تحتوي على stroke
+        function hasSvgStroke(svgString) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(svgString, "image/svg+xml");
+            const elements = doc.querySelectorAll('[stroke]');
+            return elements.length > 0;
+        }
+
         function insert(svg) {
             if (currentTab === 'shapes') {
-                insertShape(svg);
+                Office.context.document.setSelectedDataAsync(svg, { coercionType: Office.CoercionType.XmlSvg });
                 return;
             }
 
@@ -432,7 +384,49 @@
 
                 let finalContent = processedSvg;
                 if (shape !== 'none') {
-                    finalContent = wrapWithShape(processedSvg, shape, w, bgColor, outlineColor, outlineWidth, applyShadow);
+                    const padding = w * 0.40;
+                    const containerSize = w + (padding * 2);
+                    const c = containerSize / 2;
+                    let shapeHtml = '';
+                    const strokeAttr = outlineWidth > 0 ? `stroke="${outlineColor}" stroke-width="${outlineWidth}"` : '';
+                    
+                    let filterDef = '';
+                    let filterAttr = '';
+                    if (applyShadow) {
+                        filterDef = `
+                        <defs>
+                            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+                                <feOffset dx="2" dy="2" result="offsetblur" />
+                                <feComponentTransfer>
+                                    <feFuncA type="linear" slope="0.3" />
+                                </feComponentTransfer>
+                                <feMerge>
+                                    <feMergeNode />
+                                    <feMergeNode in="SourceGraphic" />
+                                </feMerge>
+                            </filter>
+                        </defs>`;
+                        filterAttr = 'filter="url(#shadow)"';
+                    }
+
+                    if (shape === 'circle') shapeHtml = `<circle cx="${c}" cy="${c}" r="${containerSize/2 - 5}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
+                    else if (shape === 'square') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
+                    else if (shape === 'rounded') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.2}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
+
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(processedSvg, "image/svg+xml");
+                    const svgInner = new XMLSerializer().serializeToString(doc.documentElement).replace(/<\/?svg[^>]*>/g, '');
+                    
+                    const originalViewBox = extractSVGViewBox(processedSvg);
+
+                    finalContent = `<svg width="${containerSize}" height="${containerSize}" viewBox="0 0 ${containerSize} ${containerSize}" xmlns="http://www.w3.org/2000/svg">
+                        ${filterDef}
+                        ${shapeHtml}
+                        <g transform="translate(${padding},${padding})">
+                            <svg width="${w}" height="${w}" viewBox="${originalViewBox}" preserveAspectRatio="xMidYMid meet">${svgInner}</svg>
+                        </g>
+                    </svg>`;
                 }
 
                 Office.context.document.setSelectedDataAsync(finalContent, { coercionType: Office.CoercionType.XmlSvg }, (result) => {
@@ -446,87 +440,6 @@
                 console.error(err);
                 showNotification('حدث خطأ: ' + err.message);
             }
-        }
-
-        function insertShape(svg) {
-            const w = parseInt(document.getElementById('shape-width').value) || 100;
-            const shape = document.querySelector('input[name="shape-bg-shape"]:checked').value;
-            const bgColor = '#' + hexToRgb(document.getElementById('shape-bg-color').value);
-            const outlineColor = '#' + hexToRgb(document.getElementById('shape-outline-color').value);
-            const outlineWidth = parseInt(document.getElementById('shape-outline-width').value);
-
-            try {
-                let finalContent = svg;
-                if (shape !== 'none') {
-                    finalContent = wrapWithShape(svg, shape, w, bgColor, outlineColor, outlineWidth, false);
-                }
-
-                Office.context.document.setSelectedDataAsync(finalContent, { coercionType: Office.CoercionType.XmlSvg }, (result) => {
-                    if (result.status === Office.AsyncResultStatus.Succeeded) {
-                        showNotification('تم الإدراج بنجاح ✨');
-                    } else {
-                        showNotification('حدث خطأ في الإدراج');
-                    }
-                });
-            } catch(err) { 
-                console.error(err);
-                showNotification('حدث خطأ: ' + err.message);
-            }
-        }
-
-        function wrapWithShape(svgString, shape, size, bgColor, outlineColor, outlineWidth, applyShadow) {
-            const padding = size * 0.40;
-            const containerSize = size + (padding * 2);
-            const c = containerSize / 2;
-            let shapeHtml = '';
-            const strokeAttr = outlineWidth > 0 ? `stroke="${outlineColor}" stroke-width="${outlineWidth}"` : '';
-            
-            let filterDef = '';
-            let filterAttr = '';
-            if (applyShadow) {
-                filterDef = `
-                <defs>
-                    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
-                        <feOffset dx="2" dy="2" result="offsetblur" />
-                        <feComponentTransfer>
-                            <feFuncA type="linear" slope="0.3" />
-                        </feComponentTransfer>
-                        <feMerge>
-                            <feMergeNode />
-                            <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
-                </defs>`;
-                filterAttr = 'filter="url(#shadow)"';
-            }
-
-            if (shape === 'circle') {
-                shapeHtml = `<circle cx="${c}" cy="${c}" r="${containerSize/2 - 5}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
-            } else if (shape === 'square') {
-                shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
-            } else if (shape === 'rounded') {
-                shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.2}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
-            } else if (shape === 'circle-white-border') {
-                shapeHtml = `
-                    <circle cx="${c}" cy="${c}" r="${containerSize/2 - 5}" fill="${bgColor}" ${filterAttr} />
-                    <circle cx="${c}" cy="${c}" r="${containerSize/2 - 5}" fill="none" stroke="white" stroke-width="3" />
-                `;
-            }
-
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(svgString, "image/svg+xml");
-            const svgInner = new XMLSerializer().serializeToString(doc.documentElement).replace(/<\/?svg[^>]*>/g, '');
-            
-            const originalViewBox = extractSVGViewBox(svgString);
-
-            return `<svg width="${containerSize}" height="${containerSize}" viewBox="0 0 ${containerSize} ${containerSize}" xmlns="http://www.w3.org/2000/svg">
-                ${filterDef}
-                ${shapeHtml}
-                <g transform="translate(${padding},${padding})">
-                    <svg width="${size}" height="${size}" viewBox="${originalViewBox}" preserveAspectRatio="xMidYMid meet">${svgInner}</svg>
-                </g>
-            </svg>`;
         }
 
         function updateThemeColor() {
