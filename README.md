@@ -1,2 +1,56 @@
-# pptxLibrary_byshaza
-A professional PowerPoint Add-in that allows users to insert local SVG files directly, featuring smart width control and advanced icon coloring to match presentation themes. 🎨✨
+# Shaza PPTX Library - محسّن 🎨
+
+نسخة محسّنة من إضافة البوربوينت لإدراج وتلوين الأيقونات SVG
+
+## ✨ التحسينات الجديدة
+
+### 1. تلوين محسّن لجميع أنواع الأيقونات
+- ✅ تلوين الأيقونات التي لا تحتوي على معلومات لون صريحة
+- ✅ دعم CSS classes في وسم `<style>`
+- ✅ دعم inline styles
+- ✅ معالجة Group elements (`<g>` tags)
+
+### 2. خيار الستروك المنفصل
+- خيار منفصل للتحكم في لون الإطار (Stroke)
+- يظهر فقط عند الحاجة
+- الستروك شفاف بشكل افتراضي
+
+### 3. دعم أنواع أيقونات جديدة
+تم إصلاح مشاكل التلوين مع:
+- الأيقونات بدون fill محدد
+- الأيقونات مع CSS classes
+- الأيقونات مع inline styles
+- الأيقونات المعقدة مع groups
+
+## 🚀 كيفية الاستخدام
+
+1. استخدم الملف `index.html` كملف الواجهة الرئيسي
+2. احتفظ بملف `manifest.xml` كما هو
+3. ضع مجلد `assets` في نفس المستوى
+
+## 📝 الملفات
+
+- `index.html` - الملف الرئيسي المحسّن
+- `manifest.xml` - ملف الإضافة
+- `assets/` - الصور والأيقونات
+- `IMPROVEMENTS.md` - تفاصيل التحسينات التقنية
+
+## 🔧 التغييرات التقنية
+
+تم تعديل دالة `deepColorSVG` لـ:
+1. إضافة fill جديد للعناصر بدون لون
+2. معالجة CSS classes بشكل صحيح
+3. دعم stroke منفصل واختياري
+
+## ✅ اختبار
+
+تم اختبار الأداة على:
+- ✅ أيقونات مع CSS classes
+- ✅ أيقونات بدون معلومات لون
+- ✅ أيقونات معقدة مع groups
+
+جميع الاختبارات نجحت! ✨
+
+## 📧 للمزيد من المعلومات
+
+راجع ملف `IMPROVEMENTS.md` للتفاصيل التقنية الكاملة.

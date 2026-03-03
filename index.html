@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Shaza pptx library</title>
+    <title>Shaza pptx library - محسّن</title>
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
     <style>
         body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f3f2f1; overflow: hidden; }
@@ -45,11 +45,15 @@
         
         .group-title { color: #323130; font-size: 12px; border-bottom: 2px solid #e1dfdd; padding: 6px 5px; margin-top: 5px; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         #notification { position: fixed; bottom: 15px; left: 15px; right: 15px; padding: 8px; background: #323130; color: white; border-radius: 4px; font-size: 11px; text-align: center; display: none; z-index: 100; }
+        
+        /* نمط جديد للخيارات المنفصلة */
+        .stroke-control-group { display: none; background-color: #f0f0f0; padding: 6px; border-radius: 4px; border-right: 3px solid #0078d4; }
+        .stroke-control-group.visible { display: flex; align-items: center; gap: 8px; }
     </style>
 </head>
 <body>
     <div class="top-bar">
-        <h3>Shaza pptx library</h3>
+        <h3>Shaza pptx library - محسّن</h3>
         <div id="global-controls" class="controls-panel">
             <div class="controls-row">
                 <div class="control-box">
@@ -58,7 +62,7 @@
                 </div>
                 <div class="control-box" id="color-control-group">
                     <input type="checkbox" id="apply-color" checked>
-                    <label>تلوين</label>
+                    <label>تلوين (Fill)</label>
                     <div class="color-tools">
                         <input type="color" id="icon-color" value="#4472C4">
                         <button class="eyedropper-btn" onclick="pickColor('icon-color')" title="قطارة اللون">
@@ -69,6 +73,19 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- خيار الستروك المنفصل -->
+            <div class="stroke-control-group" id="stroke-control-group">
+                <input type="checkbox" id="apply-stroke">
+                <label style="font-size: 11px; color: #605e5c; font-weight: bold; margin: 0;">تلوين الإطار (Stroke)</label>
+                <div class="color-tools">
+                    <input type="color" id="stroke-color" value="#000000">
+                    <button class="eyedropper-btn" onclick="pickColor('stroke-color')" title="قطارة اللون">
+                        <svg viewBox="0 0 24 24"><path d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8.5L11,12L2,21L3,22L12,13L15.5,9.5L14.5,8.5M19.35,2.5C19.1,2.5 18.85,2.6 18.65,2.8L17.56,3.89L20.11,6.44L21.2,5.35C21.6,4.95 21.6,4.3 21.2,3.9L20.1,2.8C19.9,2.6 19.65,2.5 19.35,2.5Z"/></svg>
+                    </button>
+                </div>
+            </div>
+            
             <div id="shape-selector-group" class="shape-selector">
                 <div class="shape-options">
                     <span style="font-size: 10px; font-weight: bold; color: #0078d4;">الشكل الحاوي:</span>
@@ -141,6 +158,7 @@
 
     <script>
         let currentTab = 'logos';
+        let currentSvgContent = ''; // لتخزين محتوى SVG الحالي للفحص
 
         function switchTab(tabName) {
             currentTab = tabName;
@@ -157,8 +175,7 @@
                 globalControls.style.display = 'none';
             } else {
                 globalControls.style.display = 'flex';
-                const isIcons = (tabName === 'icons');
-                document.getElementById('color-control-group').style.display = isIcons ? 'flex' : 'none';
+                const isIcons = tabName === 'icons';
                 document.getElementById('shape-selector-group').style.display = isIcons ? 'flex' : 'none';
             }
         }
@@ -257,46 +274,60 @@
             return hex.toUpperCase();
         }
 
-        // محرك تلوين SVG دقيق يضمن استبدال كافة الألوان السوداء بلون الثيم أو اللون المختار
-        function deepColorSVG(svgString, fillColor) {
+        // ✅ دالة تلوين SVG محسّنة - تعمل مع جميع أنواع الأيقونات
+        function deepColorSVG(svgString, fillColor, strokeColor = null, applyStroke = false) {
             const parser = new DOMParser();
             const doc = parser.parseFromString(svgString, "image/svg+xml");
             const elements = doc.querySelectorAll('*');
             
             elements.forEach(el => {
-                // استبدال fill إذا كان أسود أو غير موجود
+                const tagName = el.tagName.toLowerCase();
+                
+                // تخطي وسوم معينة
+                if (tagName === 'style' || tagName === 'defs' || tagName === 'metadata') {
+                    return;
+                }
+
+                // ✅ معالجة Fill - الأساسي
                 const fill = el.getAttribute('fill');
-                if (fill && (fill === '#000' || fill === '#000000' || fill === 'black' || fill.toLowerCase() === '#2c3030')) {
-                    el.setAttribute('fill', fillColor);
-                }
-                
-                // استبدال stroke فقط إذا كان موجوداً وأسود، لتجنب إضافة حدود غير ضرورية
-                const stroke = el.getAttribute('stroke');
-                if (stroke && (stroke === '#000' || stroke === '#000000' || stroke === 'black' || stroke.toLowerCase() === '#2c3030')) {
-                    el.setAttribute('stroke', fillColor);
-                }
-                
-                // استبدال الستايل المضمن
                 const style = el.getAttribute('style');
-                if (style) {
-                    let newStyle = style;
-                    if (style.includes('fill')) {
-                        newStyle = newStyle.replace(/fill\s*:\s*(#000|#000000|black|#2c3030)/gi, `fill:${fillColor}`);
-                    }
-                    if (style.includes('stroke')) {
-                        newStyle = newStyle.replace(/stroke\s*:\s*(#000|#000000|black|#2c3030)/gi, `stroke:${fillColor}`);
-                    }
+                
+                // إذا كان هناك fill صريح أو في style
+                if (fill && (fill === '#000' || fill === '#000000' || fill === 'black' || fill.toLowerCase() === '#2c3030' || fill === 'none')) {
+                    el.setAttribute('fill', fillColor);
+                } else if (!fill && !style) {
+                    // ✅ إذا لم يكن هناك fill على الإطلاق - أضف واحد جديد
+                    el.setAttribute('fill', fillColor);
+                } else if (style && style.includes('fill')) {
+                    // استبدال في style
+                    let newStyle = style.replace(/fill\s*:\s*(#[0-9a-fA-F]{3,8}|black|none|[a-z]+)/gi, `fill:${fillColor}`);
                     el.setAttribute('style', newStyle);
                 }
 
-                // التعامل مع وسم <style> داخل SVG
-                if (el.tagName.toLowerCase() === 'style') {
-                    let cssText = el.textContent;
-                    // استبدال الألوان السوداء أو الداكنة في CSS الداخلي
-                    cssText = cssText.replace(/fill\s*:\s*(#000|#000000|black|#2c3030)/gi, `fill:${fillColor}`);
-                    cssText = cssText.replace(/stroke\s*:\s*(#000|#000000|black|#2c3030)/gi, `stroke:${fillColor}`);
-                    el.textContent = cssText;
+                // ✅ معالجة Stroke - اختياري
+                if (applyStroke && strokeColor) {
+                    const stroke = el.getAttribute('stroke');
+                    if (stroke && (stroke === '#000' || stroke === '#000000' || stroke === 'black' || stroke.toLowerCase() === '#2c3030')) {
+                        el.setAttribute('stroke', strokeColor);
+                    } else if (style && style.includes('stroke')) {
+                        let newStyle = el.getAttribute('style');
+                        newStyle = newStyle.replace(/stroke\s*:\s*(#[0-9a-fA-F]{3,8}|black|[a-z]+)/gi, `stroke:${strokeColor}`);
+                        el.setAttribute('style', newStyle);
+                    }
                 }
+            });
+
+            // معالجة CSS داخل وسم <style>
+            const styleElements = doc.querySelectorAll('style');
+            styleElements.forEach(styleEl => {
+                let cssText = styleEl.textContent;
+                // استبدال fill
+                cssText = cssText.replace(/fill\s*:\s*(#[0-9a-fA-F]{3,8}|black|#2c3030|none)/gi, `fill:${fillColor}`);
+                // استبدال stroke إذا كان مطلوباً
+                if (applyStroke && strokeColor) {
+                    cssText = cssText.replace(/stroke\s*:\s*(#[0-9a-fA-F]{3,8}|black)/gi, `stroke:${strokeColor}`);
+                }
+                styleEl.textContent = cssText;
             });
             
             return new XMLSerializer().serializeToString(doc);
@@ -316,8 +347,16 @@
             } else if (width && height) {
                 return `0 0 ${width} ${height}`;
             } else {
-                return '0 0 100 100'; // قيمة افتراضية
+                return '0 0 100 100';
             }
+        }
+
+        // ✅ دالة للفحص إذا كانت الأيقونة تحتوي على stroke
+        function hasSvgStroke(svgString) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(svgString, "image/svg+xml");
+            const elements = doc.querySelectorAll('[stroke]');
+            return elements.length > 0;
         }
 
         function insert(svg) {
@@ -329,6 +368,8 @@
             const w = parseInt(document.getElementById('icon-width').value) || 50;
             const applyColor = document.getElementById('apply-color').checked;
             const iconColor = '#' + hexToRgb(document.getElementById('icon-color').value);
+            const applyStroke = document.getElementById('apply-stroke').checked;
+            const strokeColor = '#' + hexToRgb(document.getElementById('stroke-color').value);
             const shape = document.querySelector('input[name="bg-shape"]:checked').value;
             const bgColor = '#' + hexToRgb(document.getElementById('bg-color').value);
             const outlineColor = '#' + hexToRgb(document.getElementById('outline-color').value);
@@ -338,7 +379,7 @@
             try {
                 let processedSvg = svg;
                 if (applyColor) {
-                    processedSvg = deepColorSVG(svg, iconColor);
+                    processedSvg = deepColorSVG(svg, iconColor, strokeColor, applyStroke);
                 }
 
                 let finalContent = processedSvg;
@@ -349,7 +390,6 @@
                     let shapeHtml = '';
                     const strokeAttr = outlineWidth > 0 ? `stroke="${outlineColor}" stroke-width="${outlineWidth}"` : '';
                     
-                    // إضافة تأثير الظل إذا تم اختياره
                     let filterDef = '';
                     let filterAttr = '';
                     if (applyShadow) {
@@ -378,7 +418,6 @@
                     const doc = parser.parseFromString(processedSvg, "image/svg+xml");
                     const svgInner = new XMLSerializer().serializeToString(doc.documentElement).replace(/<\/?svg[^>]*>/g, '');
                     
-                    // استخراج viewBox الأصلي من الأيقونة
                     const originalViewBox = extractSVGViewBox(processedSvg);
 
                     finalContent = `<svg width="${containerSize}" height="${containerSize}" viewBox="0 0 ${containerSize} ${containerSize}" xmlns="http://www.w3.org/2000/svg">

@@ -1,0 +1,18 @@
+{
+  "name": "pptx-icon-styler",
+  "version": "2.0.0",
+  "description": "PowerPoint Add-in for inserting and coloring SVG icons with enhanced support for all icon types",
+  "main": "index.html",
+  "scripts": {
+    "dev": "http-server -p 3000 -c-1"
+  },
+  "keywords": [
+    "powerpoint",
+    "add-in",
+    "svg",
+    "icons",
+    "coloring"
+  ],
+  "author": "Shaza",
+  "license": "MIT"
+}
