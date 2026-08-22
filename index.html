@@ -1,91 +1,99 @@
 <!DOCTYPE html>
-<html dir="rtl">
+<html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Shaza pptx library - محسّن</title>
+    <title>Shaza pptx library</title>
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
     <style>
         body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f3f2f1; overflow: hidden; }
         .top-bar { background-color: #ffffff; padding: 10px 15px 0 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10; display: flex; flex-direction: column; gap: 8px; }
         .top-bar h3 { color: #0078d4; margin: 0; font-size: 16px; text-align: center; }
-        
+
         .controls-panel { display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
         .controls-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
         .control-box { display: flex; align-items: center; gap: 5px; background-color: #f8f8f8; padding: 4px 8px; border-radius: 6px; border: 1px solid #edebe9; flex: 1; min-width: 80px; justify-content: center; }
         .control-box label { font-size: 11px; color: #605e5c; font-weight: bold; margin: 0; }
         .control-box input[type="number"], .control-box select { padding: 2px; font-size: 11px; border: 1px solid #c8c6c4; border-radius: 4px; text-align: center; }
-        .control-box input[type="number"] { width: 35px; }
+        .control-box input[type="number"] { width: 45px; }
         .control-box input[type="color"] { width: 20px; height: 20px; padding: 0; border: none; cursor: pointer; background: none; }
-        
-        /* تحسينات أداة القطارة ومربعات الألوان */
-        .color-tools { display: flex; align-items: center; gap: 4px; }
-        .quick-color { width: 14px; height: 14px; border: 1px solid #c8c6c4; border-radius: 2px; cursor: pointer; }
-        .color-black { background-color: #000000; }
-        .color-white { background-color: #ffffff; }
-        .eyedropper-btn { background: none; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: background 0.2s; }
-        .eyedropper-btn:hover { background-color: #edebe9; }
-        .eyedropper-btn svg { width: 14px; height: 14px; fill: #605e5c; }
 
         .shape-selector { background-color: #f8f8f8; padding: 8px; border-radius: 6px; border: 1px solid #edebe9; margin-bottom: 5px; display: flex; flex-direction: column; gap: 8px; }
-        .shape-options { display: flex; gap: 10px; justify-content: center; border-bottom: 1px solid #e1dfdd; padding-bottom: 5px; }
+        .shape-options { display: flex; gap: 10px; justify-content: center; border-bottom: 1px solid #e1dfdd; padding-bottom: 5px; flex-wrap: wrap; }
         .shape-option { display: flex; align-items: center; gap: 3px; font-size: 10px; cursor: pointer; }
         .shape-details { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
-        
+
+        .theme-panel { background-color: #f8f8f8; padding: 6px 8px; border-radius: 6px; border: 1px solid #edebe9; display: flex; flex-direction: column; gap: 6px; }
+        .theme-head { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: space-between; }
+        .theme-label { font-size: 10px; font-weight: bold; color: #0078d4; }
+        .target-chips { display: flex; gap: 4px; }
+        .chip { font-size: 10px; padding: 2px 6px; border-radius: 10px; border: 1px solid #c8c6c4; background: #fff; color: #605e5c; cursor: pointer; }
+        .chip.active { background: #0078d4; border-color: #0078d4; color: #fff; font-weight: bold; }
+        .mini-btn { font-size: 12px; line-height: 1; padding: 2px 6px; border: 1px solid #c8c6c4; background: #fff; border-radius: 4px; cursor: pointer; color: #0078d4; }
+        .mini-btn:hover { background: #eff6fc; }
+        .mini-btn:disabled { opacity: 0.5; cursor: default; }
+        .swatches { display: flex; flex-wrap: wrap; gap: 4px; direction: ltr; }
+        .swatch { width: 22px; height: 22px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.25); cursor: pointer; position: relative; }
+        .swatch:hover { outline: 2px solid #0078d4; outline-offset: 1px; }
+        .swatch span { position: absolute; bottom: -1px; right: 1px; font-size: 7px; color: rgba(0,0,0,0.55); font-weight: bold; }
+        .theme-status { font-size: 9px; color: #605e5c; line-height: 1.5; }
         .tabs-container { display: flex; gap: 5px; border-bottom: 1px solid #edebe9; margin-top: 2px; }
         .tab-btn { flex: 1; background: none; border: none; padding: 8px 5px; cursor: pointer; font-size: 12px; color: #323130; border-bottom: 3px solid transparent; }
         .tab-btn.active { font-weight: bold; color: #0078d4; border-bottom: 3px solid #0078d4; }
-        
+
         .main-content { flex-grow: 1; padding: 12px; overflow-y: auto; background-color: #f3f2f1; }
-        .btn-select { background-color: #0078d4; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 12px; margin-bottom: 12px; font-weight: bold;}
+        .btn-select { background-color: #0078d4; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 12px; margin-bottom: 8px; font-weight: bold;}
+        .btn-select:hover { background-color: #106ebe; }
+        .search-box { width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 12px; border: 1px solid #c8c6c4; border-radius: 4px; margin-bottom: 10px; font-family: inherit; }
         .icon-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
         .icon-box { width: 55px; height: 55px; background-color: white; border: 1px solid #c8c6c4; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; transition: transform 0.1s; }
         .icon-box:hover { transform: scale(1.05); border-color: #0078d4; }
+        .icon-box.selected { border: 2px solid #0078d4; background: #eff6fc; box-shadow: 0 0 0 2px rgba(0,120,212,0.25); }
+        .icon-box.selected::after { content: '✓'; position: absolute; top: -6px; left: -6px; background: #0078d4; color: #fff; font-size: 9px; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .icon-box { position: relative; }
+        .batch-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; background: #fff; border: 1px solid #edebe9; border-radius: 6px; padding: 5px 7px; margin-bottom: 10px; }
+        .batch-bar.on { border-color: #0078d4; background: #f3f9fd; }
+        .batch-bar label { font-size: 10px; color: #605e5c; display: flex; align-items: center; gap: 3px; }
+        .batch-bar input[type="number"] { width: 34px; font-size: 11px; padding: 2px; border: 1px solid #c8c6c4; border-radius: 4px; text-align: center; }
+        .batch-count { font-size: 10px; font-weight: bold; color: #0078d4; }
+        .mini-btn.primary { background: #0078d4; color: #fff; border-color: #0078d4; font-weight: bold; }
+        .mini-btn.primary:disabled { background: #c8c6c4; border-color: #c8c6c4; color: #fff; }
         .icon-box img { max-width: 100%; max-height: 100%; pointer-events: none; }
-        
+
         .group-title { color: #323130; font-size: 12px; border-bottom: 2px solid #e1dfdd; padding: 6px 5px; margin-top: 5px; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .empty-hint { font-size: 11px; color: #605e5c; text-align: center; padding: 20px 10px; line-height: 1.7; }
         #notification { position: fixed; bottom: 15px; left: 15px; right: 15px; padding: 8px; background: #323130; color: white; border-radius: 4px; font-size: 11px; text-align: center; display: none; z-index: 100; }
-        
-        /* نمط جديد للخيارات المنفصلة */
-        .stroke-control-group { display: none; background-color: #f0f0f0; padding: 6px; border-radius: 4px; border-right: 3px solid #0078d4; }
-        .stroke-control-group.visible { display: flex; align-items: center; gap: 8px; }
     </style>
 </head>
 <body>
     <div class="top-bar">
-        <h3>Shaza pptx library - محسّن</h3>
+        <h3>Shaza pptx library</h3>
         <div id="global-controls" class="controls-panel">
             <div class="controls-row">
-                <div class="control-box">
+                <div class="control-box" id="size-control-group">
                     <label>الحجم:</label>
-                    <input type="number" id="icon-width" value="50">
+                    <input type="number" id="icon-width" value="50" min="10" max="200" step="1" title="إدخال يدوي من 10 إلى 200">
+                    <select id="size-preset" title="اختيار سريع للحجم"></select>
                 </div>
                 <div class="control-box" id="color-control-group">
                     <input type="checkbox" id="apply-color" checked>
-                    <label>تلوين (Fill)</label>
-                    <div class="color-tools">
-                        <input type="color" id="icon-color" value="#4472C4">
-                        <button class="eyedropper-btn" onclick="pickColor('icon-color')" title="قطارة اللون">
-                            <svg viewBox="0 0 24 24"><path d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8.5L11,12L2,21L3,22L12,13L15.5,9.5L14.5,8.5M19.35,2.5C19.1,2.5 18.85,2.6 18.65,2.8L17.56,3.89L20.11,6.44L21.2,5.35C21.6,4.95 21.6,4.3 21.2,3.9L20.1,2.8C19.9,2.6 19.65,2.5 19.35,2.5Z"/></svg>
-                        </button>
-                        <div class="quick-color color-black" onclick="setQuickColor('icon-color', '#000000')" title="أسود"></div>
-                        <div class="quick-color color-white" onclick="setQuickColor('icon-color', '#ffffff')" title="أبيض"></div>
+                    <label>تلوين</label>
+                    <input type="color" id="icon-color" value="#4472C4">
+                </div>
+            </div>
+            <div id="theme-group" class="theme-panel">
+                <div class="theme-head">
+                    <span class="theme-label">ألوان ثيم العرض</span>
+                    <div class="target-chips" id="theme-target">
+                        <span class="chip active" data-target="icon-color">الأيقونة</span>
+                        <span class="chip" data-target="bg-color">الخلفية</span>
+                        <span class="chip" data-target="outline-color">الإطار</span>
                     </div>
+                    <button type="button" class="mini-btn" id="theme-load" onclick="loadThemeColors(true)" title="قراءة ألوان الثيم من العرض الحالي">⟳</button>
                 </div>
+                <div id="theme-swatches" class="swatches"></div>
+                <div id="theme-status" class="theme-status">اضغطي ⟳ لقراءة ألوان الثيم من العرض المفتوح.</div>
             </div>
-            
-            <!-- خيار الستروك المنفصل -->
-            <div class="stroke-control-group" id="stroke-control-group">
-                <input type="checkbox" id="apply-stroke">
-                <label style="font-size: 11px; color: #605e5c; font-weight: bold; margin: 0;">تلوين الإطار (Stroke)</label>
-                <div class="color-tools">
-                    <input type="color" id="stroke-color" value="#000000">
-                    <button class="eyedropper-btn" onclick="pickColor('stroke-color')" title="قطارة اللون">
-                        <svg viewBox="0 0 24 24"><path d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8.5L11,12L2,21L3,22L12,13L15.5,9.5L14.5,8.5M19.35,2.5C19.1,2.5 18.85,2.6 18.65,2.8L17.56,3.89L20.11,6.44L21.2,5.35C21.6,4.95 21.6,4.3 21.2,3.9L20.1,2.8C19.9,2.6 19.65,2.5 19.35,2.5Z"/></svg>
-                    </button>
-                </div>
-            </div>
-            
             <div id="shape-selector-group" class="shape-selector">
                 <div class="shape-options">
                     <span style="font-size: 10px; font-weight: bold; color: #0078d4;">الشكل الحاوي:</span>
@@ -93,39 +101,32 @@
                     <label class="shape-option"><input type="radio" name="bg-shape" value="circle"> دائرة</label>
                     <label class="shape-option"><input type="radio" name="bg-shape" value="square"> مربع</label>
                     <label class="shape-option"><input type="radio" name="bg-shape" value="rounded"> مربع ناعم</label>
+                    <label class="shape-option"><input type="radio" name="bg-shape" value="diamond"> معيّن</label>
                 </div>
-                <div id="bg-details" class="shape-details" style="display: none;">
-                    <div style="display: flex; align-items: center; gap: 3px;">
-                        <label style="font-size: 10px;">الخلفية:</label>
-                        <div class="color-tools">
+                <div class="shape-details">
+                    <div id="bg-details" class="shape-details" style="display: none;">
+                        <div style="display: flex; align-items: center; gap: 3px;">
+                            <label style="font-size: 10px;">الخلفية:</label>
                             <input type="color" id="bg-color" value="#ffffff">
-                            <button class="eyedropper-btn" onclick="pickColor('bg-color')" title="قطارة اللون">
-                                <svg viewBox="0 0 24 24"><path d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8.5L11,12L2,21L3,22L12,13L15.5,9.5L14.5,8.5M19.35,2.5C19.1,2.5 18.85,2.6 18.65,2.8L17.56,3.89L20.11,6.44L21.2,5.35C21.6,4.95 21.6,4.3 21.2,3.9L20.1,2.8C19.9,2.6 19.65,2.5 19.35,2.5Z"/></svg>
-                            </button>
-                            <div class="quick-color color-black" onclick="setQuickColor('bg-color', '#000000')" title="أسود"></div>
-                            <div class="quick-color color-white" onclick="setQuickColor('bg-color', '#ffffff')" title="أبيض"></div>
                         </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 3px;">
-                        <label style="font-size: 10px;">الإطار:</label>
-                        <div class="color-tools">
-                            <input type="color" id="outline-color" value="#00000000">
-                            <button class="eyedropper-btn" onclick="pickColor('outline-color')" title="قطارة اللون">
-                                <svg viewBox="0 0 24 24"><path d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8.5L11,12L2,21L3,22L12,13L15.5,9.5L14.5,8.5M19.35,2.5C19.1,2.5 18.85,2.6 18.65,2.8L17.56,3.89L20.11,6.44L21.2,5.35C21.6,4.95 21.6,4.3 21.2,3.9L20.1,2.8C19.9,2.6 19.65,2.5 19.35,2.5Z"/></svg>
-                            </button>
+                        <div style="display: flex; align-items: center; gap: 3px;">
+                            <label style="font-size: 10px;">الإطار:</label>
+                            <input type="color" id="outline-color" value="#000000">
                         </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 3px;">
-                        <label style="font-size: 10px;">السماكة:</label>
-                        <select id="outline-width" style="font-size: 10px;">
-                            <option value="0">بلا إطار</option>
-                            <option value="1">1 px</option>
-                            <option value="2">2 px</option>
-                            <option value="4">4 px</option>
-                            <option value="6">6 px</option>
-                            <option value="8">8 px</option>
-                             <option value="10">10 px</option>
-                        </select>
+                        <div style="display: flex; align-items: center; gap: 3px;">
+                            <label style="font-size: 10px;">السماكة:</label>
+                            <select id="outline-width" style="font-size: 10px;">
+                                <option value="0">بلا إطار</option>
+                                <option value="1">1 px</option>
+                                <option value="2">2 px</option>
+                                <option value="3">3 px</option>
+                                <option value="4">4 px</option>
+                                <option value="5">5 px</option>
+                                <option value="6">6 px</option>
+                                <option value="8">8 px</option>
+                                <option value="10">10 px</option>
+                            </select>
+                        </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 3px;">
                         <input type="checkbox" id="apply-shadow">
@@ -142,41 +143,126 @@
     </div>
     <div class="main-content">
         <div id="section-logos">
-            <button class="btn-select" onclick="loadLogosFolder()">تحديد مجلد الشعارات</button>
+            <button class="btn-select" onclick="loadFlat('logos')">تحديد مجلد الشعارات</button>
+            <input type="search" class="search-box" id="search-logos" placeholder="بحث بالاسم…" oninput="filterGrid('logos')">
             <div id="grid-logos" class="icon-grid"></div>
+            <div class="empty-hint" id="hint-logos">اضغطي الزر بالأعلى واختاري مجلد الشعارات (ملفات SVG).</div>
         </div>
         <div id="section-icons" style="display: none;">
-            <button class="btn-select" onclick="loadIconsFolder()">تحديد مجلد الأيقونات</button>
+            <button class="btn-select" onclick="loadGrouped()">تحديد مجلد الأيقونات</button>
+            <input type="search" class="search-box" id="search-icons" placeholder="بحث بالاسم…" oninput="filterGrid('icons')">
             <div id="grid-icons-container"></div>
+            <div class="empty-hint" id="hint-icons">اختاري المجلد الرئيسي للأيقونات — سيتم عرض كل مجلد فرعي كمجموعة مستقلة.</div>
         </div>
         <div id="section-shapes" style="display: none;">
-            <button class="btn-select" onclick="loadShapesFolder()">تحديد مجلد الأشكال</button>
+            <button class="btn-select" onclick="loadFlat('shapes')">تحديد مجلد الأشكال</button>
+            <input type="search" class="search-box" id="search-shapes" placeholder="بحث بالاسم…" oninput="filterGrid('shapes')">
             <div id="grid-shapes" class="icon-grid"></div>
+            <div class="empty-hint" id="hint-shapes">الأشكال تُدرج كما هي بدون تلوين أو تحجيم.</div>
         </div>
     </div>
     <div id="notification"></div>
 
     <script>
         let currentTab = 'logos';
-        let currentSvgContent = ''; // لتخزين محتوى SVG الحالي للفحص
+        let filterSeq = 0;
+        const objectUrls = [];
+        const TABS = ['logos', 'icons', 'shapes'];
+
+        /* -------- إعدادات مستقلة لكل تبويب -------- */
+
+        const CONTROL_IDS = ['icon-width', 'apply-color', 'icon-color', 'bg-color', 'outline-color', 'outline-width', 'apply-shadow'];
+        const tabSettings = {};
+
+        function snapshotSettings() {
+            const s = {};
+            CONTROL_IDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                s[id] = (el.type === 'checkbox') ? el.checked : el.value;
+            });
+            const r = document.querySelector('input[name="bg-shape"]:checked');
+            s.shape = r ? r.value : 'none';
+            return s;
+        }
+
+        function restoreSettings(s) {
+            if (!s) return;
+            CONTROL_IDS.forEach(id => {
+                if (!(id in s)) return;
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (el.type === 'checkbox') el.checked = s[id];
+                else el.value = s[id];
+            });
+            const r = document.querySelector('input[name="bg-shape"][value="' + (s.shape || 'none') + '"]');
+            if (r) r.checked = true;
+            document.getElementById('bg-details').style.display = (s.shape && s.shape !== 'none') ? 'flex' : 'none';
+            syncSizeUI();
+        }
+
+        /* -------- الحجم: إدخال يدوي أو اختيار جاهز -------- */
+
+        const SIZE_MIN = 10, SIZE_MAX = 200;
+
+        function buildSizePresets() {
+            const sel = document.getElementById('size-preset');
+            sel.innerHTML = '';
+            const manual = document.createElement('option');
+            manual.value = ''; manual.textContent = 'يدوي';
+            sel.appendChild(manual);
+            for (let v = SIZE_MIN; v <= SIZE_MAX; v += 10) {
+                const o = document.createElement('option');
+                o.value = String(v); o.textContent = v + ' px';
+                sel.appendChild(o);
+            }
+            sel.onchange = () => {
+                if (!sel.value) { document.getElementById('icon-width').focus(); return; }
+                document.getElementById('icon-width').value = sel.value;
+            };
+            const num = document.getElementById('icon-width');
+            num.oninput = () => syncSizeUI();
+            num.onchange = () => { num.value = String(clampSize(num.value)); syncSizeUI(); };
+        }
+
+        function clampSize(v) {
+            let n = parseInt(v, 10);
+            if (!isFinite(n)) n = 50;
+            return Math.max(SIZE_MIN, Math.min(SIZE_MAX, n));
+        }
+
+        function syncSizeUI() {
+            const num = document.getElementById('icon-width');
+            const sel = document.getElementById('size-preset');
+            if (!num || !sel) return;
+            const v = parseInt(num.value, 10);
+            const match = Array.from(sel.options).filter(o => o.value && parseInt(o.value, 10) === v)[0];
+            sel.value = match ? match.value : '';
+        }
+
+        /* ---------------- واجهة ---------------- */
 
         function switchTab(tabName) {
+            if (tabSettings[currentTab] !== undefined || currentTab) tabSettings[currentTab] = snapshotSettings();
             currentTab = tabName;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
-            
-            document.getElementById('section-logos').style.display = 'none';
-            document.getElementById('section-icons').style.display = 'none';
-            document.getElementById('section-shapes').style.display = 'none';
-            document.getElementById('section-' + tabName).style.display = 'block';
-            
+
+            TABS.forEach(n => {
+                document.getElementById('section-' + n).style.display = (n === tabName) ? 'block' : 'none';
+            });
+
+            restoreSettings(tabSettings[tabName]);
+
             const globalControls = document.getElementById('global-controls');
             if (tabName === 'shapes') {
                 globalControls.style.display = 'none';
             } else {
                 globalControls.style.display = 'flex';
-                const isIcons = tabName === 'icons';
+                const isIcons = (tabName === 'icons');
+                document.getElementById('color-control-group').style.display = isIcons ? 'flex' : 'none';
                 document.getElementById('shape-selector-group').style.display = isIcons ? 'flex' : 'none';
+                document.getElementById('theme-group').style.display = isIcons ? 'flex' : 'none';
             }
         }
 
@@ -188,275 +274,832 @@
 
         function showNotification(msg) {
             const n = document.getElementById('notification');
-            n.innerText = msg; n.style.display = 'block';
-            setTimeout(() => n.style.display = 'none', 3000);
+            n.innerText = msg;
+            n.style.display = 'block';
+            const mySeq = ++filterSeq;
+            setTimeout(() => { if (mySeq === filterSeq) n.style.display = 'none'; }, 3500);
         }
 
-        // دوال الألوان الجديدة
-        function setQuickColor(inputId, color) {
-            document.getElementById(inputId).value = color;
-        }
-
-        async function pickColor(inputId) {
-            if (!window.EyeDropper) {
-                showNotification('متصفحك لا يدعم أداة القطارة');
-                return;
-            }
-            const eyeDropper = new EyeDropper();
-            try {
-                const result = await eyeDropper.open();
-                document.getElementById(inputId).value = result.sRGBHex;
-            } catch (e) {
-                // المستخدم ألغى العملية
-            }
-        }
-
-        async function loadLogosFolder() {
-            try {
-                const h = await window.showDirectoryPicker();
-                const g = document.getElementById('grid-logos');
-                g.innerHTML = ''; await extract(h, g);
-                showNotification('تم تحميل الشعارات');
-            } catch(e) {}
-        }
-
-        async function loadIconsFolder() {
-            try {
-                const h = await window.showDirectoryPicker();
-                const c = document.getElementById('grid-icons-container');
-                c.innerHTML = '';
-                for await (const entry of h.values()) {
-                    if (entry.kind === 'directory') {
-                        const title = document.createElement('div');
-                        title.className = 'group-title';
-                        title.innerHTML = `<span>${entry.name}</span> <span>▼</span>`;
-                        const grid = document.createElement('div');
-                        grid.className = 'icon-grid';
-                        title.onclick = () => grid.style.display = grid.style.display === 'none' ? 'flex' : 'none';
-                        c.appendChild(title);
-                        const sub = await h.getDirectoryHandle(entry.name);
-                        await extract(sub, grid);
-                        c.appendChild(grid);
-                    }
-                }
-                showNotification('تم تحميل مجلدات الأيقونات');
-            } catch(e) {}
-        }
-
-        async function loadShapesFolder() {
-            try {
-                const h = await window.showDirectoryPicker();
-                const g = document.getElementById('grid-shapes');
-                g.innerHTML = ''; await extract(h, g);
-                showNotification('تم تحميل الأشكال');
-            } catch(e) {}
-        }
-
-        async function extract(h, g) {
-            for await (const e of h.values()) {
-                if (e.kind === 'file' && e.name.toLowerCase().endsWith('.svg')) {
-                    const f = await e.getFile();
-                    const t = await f.text();
-                    const box = document.createElement('div');
-                    box.className = 'icon-box';
-                    const img = document.createElement('img');
-                    img.src = URL.createObjectURL(f);
-                    box.appendChild(img);
-                    box.onclick = () => insert(t);
-                    g.appendChild(box);
-                }
-            }
-        }
-
-        function hexToRgb(hex) {
-            hex = hex.replace('#', '');
-            if (hex.length === 8) hex = hex.substring(0, 6);
-            return hex.toUpperCase();
-        }
-
-        // ✅ دالة تلوين SVG محسّنة - تعمل مع جميع أنواع الأيقونات
-        function deepColorSVG(svgString, fillColor, strokeColor = null, applyStroke = false) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(svgString, "image/svg+xml");
-            const elements = doc.querySelectorAll('*');
-            
-            elements.forEach(el => {
-                const tagName = el.tagName.toLowerCase();
-                
-                // تخطي وسوم معينة
-                if (tagName === 'style' || tagName === 'defs' || tagName === 'metadata') {
-                    return;
-                }
-
-                // ✅ معالجة Fill - الأساسي
-                const fill = el.getAttribute('fill');
-                const style = el.getAttribute('style');
-                
-                // إذا كان هناك fill صريح أو في style
-                if (fill && (fill === '#000' || fill === '#000000' || fill === 'black' || fill.toLowerCase() === '#2c3030' || fill === 'none')) {
-                    el.setAttribute('fill', fillColor);
-                } else if (!fill && !style) {
-                    // ✅ إذا لم يكن هناك fill على الإطلاق - أضف واحد جديد
-                    el.setAttribute('fill', fillColor);
-                } else if (style && style.includes('fill')) {
-                    // استبدال في style
-                    let newStyle = style.replace(/fill\s*:\s*(#[0-9a-fA-F]{3,8}|black|none|[a-z]+)/gi, `fill:${fillColor}`);
-                    el.setAttribute('style', newStyle);
-                }
-
-                // ✅ معالجة Stroke - اختياري
-                if (applyStroke && strokeColor) {
-                    const stroke = el.getAttribute('stroke');
-                    if (stroke && (stroke === '#000' || stroke === '#000000' || stroke === 'black' || stroke.toLowerCase() === '#2c3030')) {
-                        el.setAttribute('stroke', strokeColor);
-                    } else if (style && style.includes('stroke')) {
-                        let newStyle = el.getAttribute('style');
-                        newStyle = newStyle.replace(/stroke\s*:\s*(#[0-9a-fA-F]{3,8}|black|[a-z]+)/gi, `stroke:${strokeColor}`);
-                        el.setAttribute('style', newStyle);
-                    }
+        function filterGrid(tab) {
+            const q = (document.getElementById('search-' + tab).value || '').trim().toLowerCase();
+            const root = document.getElementById('section-' + tab);
+            root.querySelectorAll('.icon-box').forEach(box => {
+                const name = (box.dataset.name || '').toLowerCase();
+                box.style.display = (!q || name.indexOf(q) !== -1) ? 'flex' : 'none';
+            });
+            root.querySelectorAll('.icon-grid').forEach(grid => {
+                const anyVisible = Array.from(grid.querySelectorAll('.icon-box')).some(b => b.style.display !== 'none');
+                const title = grid.previousElementSibling;
+                if (title && title.classList.contains('group-title')) {
+                    title.style.display = anyVisible ? 'flex' : 'none';
                 }
             });
+        }
 
-            // معالجة CSS داخل وسم <style>
-            const styleElements = doc.querySelectorAll('style');
-            styleElements.forEach(styleEl => {
-                let cssText = styleEl.textContent;
-                // استبدال fill
-                cssText = cssText.replace(/fill\s*:\s*(#[0-9a-fA-F]{3,8}|black|#2c3030|none)/gi, `fill:${fillColor}`);
-                // استبدال stroke إذا كان مطلوباً
-                if (applyStroke && strokeColor) {
-                    cssText = cssText.replace(/stroke\s*:\s*(#[0-9a-fA-F]{3,8}|black)/gi, `stroke:${strokeColor}`);
+        /* ------------- اختيار الملفات (مع بديل احتياطي) ------------- */
+
+        async function collectFromDirHandle(handle, prefix) {
+            let out = [];
+            for await (const entry of handle.values()) {
+                if (entry.kind === 'file') {
+                    if (entry.name.toLowerCase().endsWith('.svg')) {
+                        out.push({ dir: prefix, name: entry.name, file: await entry.getFile() });
+                    }
+                } else if (entry.kind === 'directory') {
+                    const sub = await handle.getDirectoryHandle(entry.name);
+                    out = out.concat(await collectFromDirHandle(sub, prefix ? prefix + '/' + entry.name : entry.name));
                 }
-                styleEl.textContent = cssText;
+            }
+            return out;
+        }
+
+        // بديل يعمل داخل بوربوينت سطح المكتب حيث يُمنع showDirectoryPicker أحياناً
+        function pickViaInput() {
+            return new Promise((resolve) => {
+                const inp = document.createElement('input');
+                inp.type = 'file';
+                inp.multiple = true;
+                inp.accept = '.svg,image/svg+xml';
+                inp.setAttribute('webkitdirectory', '');
+                inp.setAttribute('directory', '');
+                inp.style.display = 'none';
+                document.body.appendChild(inp);
+                inp.addEventListener('change', () => {
+                    const files = Array.from(inp.files || []).filter(f => f.name.toLowerCase().endsWith('.svg'));
+                    const out = files.map(f => {
+                        const rel = f.webkitRelativePath || f.name;
+                        const parts = rel.split('/');
+                        parts.pop();
+                        if (parts.length) parts.shift();
+                        return { dir: parts.join('/'), name: f.name, file: f };
+                    });
+                    inp.remove();
+                    resolve(out);
+                });
+                inp.click();
             });
-            
+        }
+
+        async function pickSvgs() {
+            if (typeof window.showDirectoryPicker === 'function') {
+                try {
+                    const handle = await window.showDirectoryPicker();
+                    return await collectFromDirHandle(handle, '');
+                } catch (e) {
+                    if (e && (e.name === 'AbortError' || e.name === 'NotAllowedError' && e.message && e.message.indexOf('user') !== -1)) {
+                        return null; // ألغت المستخدمة الاختيار
+                    }
+                    // أي منع آخر: ننتقل للطريقة الاحتياطية
+                }
+            }
+            return await pickViaInput();
+        }
+
+        /* ---------------- التحديد المتعدد ---------------- */
+
+        const multiMode = { logos: false, icons: false, shapes: false };
+        const selected = { logos: [], icons: [], shapes: [] };
+        const MAX_BATCH = 60;
+
+        function buildBatchBars() {
+            TABS.forEach(tab => {
+                const bar = document.createElement('div');
+                bar.className = 'batch-bar';
+                bar.id = 'batch-' + tab;
+                bar.innerHTML =
+                    '<button type="button" class="mini-btn" id="multi-btn-' + tab + '">☑ تحديد متعدد</button>'
+                    + '<span class="batch-count" id="batch-count-' + tab + '">لا يوجد تحديد</span>'
+                    + '<label title="0 = ترتيب تلقائي">أعمدة: <input type="number" id="batch-cols-' + tab + '" value="0" min="0" max="12"></label>'
+                    + '<button type="button" class="mini-btn primary" id="batch-insert-' + tab + '" disabled>إدراج المحدد</button>'
+                    + '<button type="button" class="mini-btn" id="batch-clear-' + tab + '">مسح</button>';
+                const search = document.getElementById('search-' + tab);
+                search.parentNode.insertBefore(bar, search.nextSibling);
+                document.getElementById('multi-btn-' + tab).onclick = () => toggleMulti(tab);
+                document.getElementById('batch-insert-' + tab).onclick = () => insertSelected(tab);
+                document.getElementById('batch-clear-' + tab).onclick = () => clearSelection(tab);
+            });
+        }
+
+        function toggleMulti(tab) {
+            multiMode[tab] = !multiMode[tab];
+            document.getElementById('batch-' + tab).classList.toggle('on', multiMode[tab]);
+            document.getElementById('multi-btn-' + tab).textContent = multiMode[tab] ? '✕ إنهاء التحديد' : '☑ تحديد متعدد';
+            if (!multiMode[tab]) clearSelection(tab);
+            else showNotification('وضع التحديد المتعدد: اضغطي الأيقونات ثم "إدراج المحدد"');
+            updateBatchUI(tab);
+        }
+
+        function clearSelection(tab) {
+            selected[tab] = [];
+            document.querySelectorAll('#section-' + tab + ' .icon-box.selected').forEach(b => b.classList.remove('selected'));
+            updateBatchUI(tab);
+        }
+
+        function updateBatchUI(tab) {
+            const n = selected[tab].length;
+            document.getElementById('batch-count-' + tab).textContent = n ? ('المحدد: ' + n) : 'لا يوجد تحديد';
+            document.getElementById('batch-insert-' + tab).disabled = (n === 0);
+        }
+
+        function toggleSelect(tab, item, box) {
+            const i = selected[tab].indexOf(item);
+            if (i === -1) {
+                if (selected[tab].length >= MAX_BATCH) { showNotification('الحد الأقصى ' + MAX_BATCH + ' أيقونة في الدفعة'); return; }
+                selected[tab].push(item);
+                box.classList.add('selected');
+            } else {
+                selected[tab].splice(i, 1);
+                box.classList.remove('selected');
+            }
+            updateBatchUI(tab);
+        }
+
+        function makeBox(item, tab) {
+            const box = document.createElement('div');
+            box.className = 'icon-box';
+            box.dataset.name = item.name.replace(/\.svg$/i, '');
+            box.title = item.dir ? item.dir + '/' + item.name : item.name;
+            const img = document.createElement('img');
+            const url = URL.createObjectURL(item.file);
+            objectUrls.push(url);
+            img.src = url;
+            img.alt = item.name;
+            box.appendChild(img);
+            box.onclick = async () => {
+                if (multiMode[tab]) { toggleSelect(tab, item, box); return; }
+                try {
+                    const text = await item.file.text();
+                    insert(text);
+                } catch (err) {
+                    showNotification('تعذّرت قراءة الملف: ' + item.name);
+                }
+            };
+            return box;
+        }
+
+        // عزل معرّفات وأصناف كل أيقونة حتى لا تتصادم عند دمج عدة أيقونات في رسم واحد
+        function isolateUnit(svgString, idx) {
+            const doc = parseSvg(svgString);
+            if (!doc) return svgString;
+            const pre = 'u' + idx + '_';
+
+            const ids = [];
+            doc.querySelectorAll('[id]').forEach(el => { ids.push(el.getAttribute('id')); });
+            if (ids.length) {
+                doc.querySelectorAll('*').forEach(el => {
+                    for (let i = 0; i < el.attributes.length; i++) {
+                        const at = el.attributes[i];
+                        let v = at.value;
+                        if (v.indexOf('#') === -1) continue;
+                        ids.forEach(id => {
+                            v = v.split('url(#' + id + ')').join('url(#' + pre + id + ')');
+                            if (v === '#' + id) v = '#' + pre + id;
+                        });
+                        if (v !== at.value) el.setAttribute(at.name, v);
+                    }
+                });
+                doc.querySelectorAll('[id]').forEach(el => el.setAttribute('id', pre + el.getAttribute('id')));
+            }
+
+            doc.querySelectorAll('[class]').forEach(el => {
+                const cls = (el.getAttribute('class') || '').trim().split(/\s+/).filter(Boolean).map(c => pre + c).join(' ');
+                el.setAttribute('class', cls);
+            });
+            doc.querySelectorAll('style').forEach(el => {
+                el.textContent = (el.textContent || '').replace(/\.([A-Za-z_][\w-]*)/g, '.' + pre + '$1');
+            });
+
             return new XMLSerializer().serializeToString(doc);
         }
 
-        function extractSVGViewBox(svgString) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(svgString, "image/svg+xml");
-            const svgElement = doc.documentElement;
-            
-            const viewBox = svgElement.getAttribute('viewBox');
-            const width = svgElement.getAttribute('width');
-            const height = svgElement.getAttribute('height');
-            
-            if (viewBox) {
-                return viewBox;
-            } else if (width && height) {
-                return `0 0 ${width} ${height}`;
-            } else {
-                return '0 0 100 100';
+        function unitSize(svgString) {
+            const doc = parseSvg(svgString);
+            if (!doc) return null;
+            const el = doc.documentElement;
+            let w = parseFloat(el.getAttribute('width'));
+            let h = parseFloat(el.getAttribute('height'));
+            const vb = getViewBox(doc);
+            if (!(w > 0) || !(h > 0)) {
+                const n = vb.split(/[\s,]+/).map(Number);
+                w = n[2] > 0 ? n[2] : 100;
+                h = n[3] > 0 ? n[3] : 100;
+            }
+            return { w: w, h: h, viewBox: vb, doc: doc };
+        }
+
+        // يرصّ الأيقونات المحددة في شبكة داخل رسم SVG واحد
+        function composeGrid(units, cols) {
+            const parsed = units.map((u, i) => unitSize(isolateUnit(u, i))).filter(Boolean);
+            if (!parsed.length) return null;
+            if (parsed.length === 1) return new XMLSerializer().serializeToString(parsed[0].doc);
+
+            const cellW = Math.max.apply(null, parsed.map(p => p.w));
+            const cellH = Math.max.apply(null, parsed.map(p => p.h));
+            const n = parsed.length;
+            const c = (cols > 0) ? Math.min(cols, n) : Math.ceil(Math.sqrt(n));
+            const rows = Math.ceil(n / c);
+            const gap = Math.max(4, Math.round(Math.max(cellW, cellH) * 0.15));
+            const totalW = c * cellW + (c - 1) * gap;
+            const totalH = rows * cellH + (rows - 1) * gap;
+
+            let body = '';
+            parsed.forEach((p, i) => {
+                const col = i % c, row = Math.floor(i / c);
+                const x = Math.round((col * (cellW + gap) + (cellW - p.w) / 2) * 100) / 100;
+                const y = Math.round((row * (cellH + gap) + (cellH - p.h) / 2) * 100) / 100;
+                const el = p.doc.documentElement;
+                el.setAttribute('width', String(p.w));
+                el.setAttribute('height', String(p.h));
+                el.setAttribute('viewBox', p.viewBox);
+                el.removeAttribute('x'); el.removeAttribute('y');
+                body += '<g transform="translate(' + x + ',' + y + ')">' + new XMLSerializer().serializeToString(el) + '</g>';
+            });
+
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="' + totalW + '" height="' + totalH
+                + '" viewBox="0 0 ' + totalW + ' ' + totalH + '">' + body + '</svg>';
+        }
+
+        async function insertSelected(tab) {
+            const items = selected[tab].slice();
+            if (!items.length) { showNotification('لم تحدّدي أي أيقونة'); return; }
+            const btn = document.getElementById('batch-insert-' + tab);
+            btn.disabled = true;
+            try {
+                const units = [];
+                for (let i = 0; i < items.length; i++) {
+                    const text = await items[i].file.text();
+                    units.push(buildContent(text));
+                }
+                const cols = parseInt(document.getElementById('batch-cols-' + tab).value, 10) || 0;
+                const svg = composeGrid(units, cols);
+                if (!svg) throw new Error('تعذّر تجهيز الأيقونات');
+                sendToSlide(svg);
+                showNotification('جارٍ إدراج ' + items.length + ' أيقونة كرسم واحد');
+            } catch (err) {
+                showNotification('تعذّر الإدراج: ' + err.message);
+            } finally {
+                btn.disabled = (selected[tab].length === 0);
             }
         }
 
-        // ✅ دالة للفحص إذا كانت الأيقونة تحتوي على stroke
-        function hasSvgStroke(svgString) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(svgString, "image/svg+xml");
-            const elements = doc.querySelectorAll('[stroke]');
-            return elements.length > 0;
+        function clearUrls() {
+            while (objectUrls.length) { try { URL.revokeObjectURL(objectUrls.pop()); } catch (e) {} }
+        }
+
+        async function loadFlat(tab) {
+            const items = await pickSvgs();
+            if (items === null) return;
+            const g = document.getElementById('grid-' + tab);
+            clearSelection(tab);
+            clearUrls();
+            g.innerHTML = '';
+            const hint = document.getElementById('hint-' + tab);
+            if (!items.length) {
+                hint.style.display = 'block';
+                showNotification('لم يتم العثور على ملفات SVG داخل المجلد المختار');
+                return;
+            }
+            hint.style.display = 'none';
+            items.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+            items.forEach(it => g.appendChild(makeBox(it, tab)));
+            filterGrid(tab);
+            showNotification('تم تحميل ' + items.length + ' ملف');
+        }
+
+        async function loadGrouped() {
+            const items = await pickSvgs();
+            if (items === null) return;
+            const c = document.getElementById('grid-icons-container');
+            const hint = document.getElementById('hint-icons');
+            clearSelection('icons');
+            clearUrls();
+            c.innerHTML = '';
+            if (!items.length) {
+                hint.style.display = 'block';
+                showNotification('لم يتم العثور على ملفات SVG داخل المجلد المختار');
+                return;
+            }
+            hint.style.display = 'none';
+
+            const groups = new Map();
+            items.forEach(it => {
+                const key = it.dir ? it.dir.split('/')[0] : 'بدون مجلد';
+                if (!groups.has(key)) groups.set(key, []);
+                groups.get(key).push(it);
+            });
+
+            Array.from(groups.keys()).sort((a, b) => a.localeCompare(b, 'ar')).forEach(key => {
+                const list = groups.get(key).sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+                const title = document.createElement('div');
+                title.className = 'group-title';
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = key + ' (' + list.length + ')';
+                const arrow = document.createElement('span');
+                arrow.textContent = '▼';
+                title.appendChild(nameSpan);
+                title.appendChild(arrow);
+
+                const grid = document.createElement('div');
+                grid.className = 'icon-grid';
+                title.onclick = () => {
+                    const hidden = grid.style.display === 'none';
+                    grid.style.display = hidden ? 'flex' : 'none';
+                    arrow.textContent = hidden ? '▼' : '◀';
+                };
+                list.forEach(it => grid.appendChild(makeBox(it, 'icons')));
+                c.appendChild(title);
+                c.appendChild(grid);
+            });
+
+            filterGrid('icons');
+            showNotification('تم تحميل ' + items.length + ' أيقونة في ' + groups.size + ' مجموعة');
+        }
+
+        /* ---------------- معالجة SVG ---------------- */
+
+        const DARK_RE = /^(#000|#000000|black|#2c3030|#1a1a1a|#111|#111111|currentcolor)$/i;
+        const DARK_CSS_RE = /(#000000|#000|black|#2c3030|#1a1a1a|#111111|#111|currentColor)/gi;
+        const SHAPE_TAGS = ['path', 'circle', 'rect', 'polygon', 'polyline', 'ellipse', 'line'];
+
+        function parseSvg(svgString) {
+            const doc = new DOMParser().parseFromString(svgString, 'image/svg+xml');
+            if (doc.getElementsByTagName('parsererror').length) return null;
+            return doc;
+        }
+
+        // محرك تلوين SVG: يستبدل الأسود/الداكن/currentColor باللون المختار
+        function deepColorSVG(svgString, fillColor) {
+            const doc = parseSvg(svgString);
+            if (!doc) return svgString;
+
+            doc.querySelectorAll('*').forEach(el => {
+                const tag = el.tagName.toLowerCase();
+
+                const fill = el.getAttribute('fill');
+                if (fill && DARK_RE.test(fill.trim())) el.setAttribute('fill', fillColor);
+
+                const stroke = el.getAttribute('stroke');
+                if (stroke && DARK_RE.test(stroke.trim())) el.setAttribute('stroke', fillColor);
+
+                const style = el.getAttribute('style');
+                if (style) {
+                    let s = style;
+                    s = s.replace(/fill\s*:\s*([^;]+)/gi, (m, v) => DARK_RE.test(v.trim()) ? 'fill:' + fillColor : m);
+                    s = s.replace(/stroke\s*:\s*([^;]+)/gi, (m, v) => DARK_RE.test(v.trim()) ? 'stroke:' + fillColor : m);
+                    el.setAttribute('style', s);
+                }
+
+                if (tag === 'style') {
+                    let css = el.textContent || '';
+                    css = css.replace(/fill\s*:\s*([^;}]+)/gi, (m, v) => DARK_RE.test(v.trim()) ? 'fill:' + fillColor : m);
+                    css = css.replace(/stroke\s*:\s*([^;}]+)/gi, (m, v) => DARK_RE.test(v.trim()) ? 'stroke:' + fillColor : m);
+                    el.textContent = css;
+                }
+
+                // أيقونات تعتمد اللون الأسود الافتراضي (بلا fill ولا class ولا style)
+                if (SHAPE_TAGS.indexOf(tag) !== -1 && !el.getAttribute('fill') && !el.getAttribute('class')
+                    && !(el.getAttribute('style') || '').match(/fill\s*:/i)) {
+                    const st = el.getAttribute('stroke');
+                    if (!st || st === 'none') el.setAttribute('fill', fillColor);
+                }
+            });
+
+            return new XMLSerializer().serializeToString(doc);
+        }
+
+        function getViewBox(doc) {
+            const el = doc.documentElement;
+            const vb = el.getAttribute('viewBox');
+            if (vb && vb.trim()) return vb.trim();
+            const w = parseFloat(el.getAttribute('width'));
+            const h = parseFloat(el.getAttribute('height'));
+            if (w > 0 && h > 0) return '0 0 ' + w + ' ' + h;
+            return '0 0 100 100';
+        }
+
+        // ضبط مقاس الأيقونة مع الحفاظ على النسبة — يجعل خانة "الحجم" فعّالة دائماً
+        function resizeSvg(svgString, w) {
+            const doc = parseSvg(svgString);
+            if (!doc) return svgString;
+            const el = doc.documentElement;
+            const vb = getViewBox(doc).split(/[\s,]+/).map(Number);
+            const ratio = (vb[2] > 0 && vb[3] > 0) ? (vb[3] / vb[2]) : 1;
+            el.setAttribute('viewBox', getViewBox(doc));
+            el.setAttribute('width', String(w));
+            el.setAttribute('height', String(Math.round(w * ratio)));
+            if (!el.getAttribute('xmlns')) el.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            return new XMLSerializer().serializeToString(doc);
+        }
+
+        function innerOf(svgString) {
+            const doc = parseSvg(svgString);
+            if (!doc) return { inner: '', viewBox: '0 0 100 100' };
+            const el = doc.documentElement;
+            let inner = '';
+            for (let i = 0; i < el.childNodes.length; i++) {
+                inner += new XMLSerializer().serializeToString(el.childNodes[i]);
+            }
+            return { inner: inner, viewBox: getViewBox(doc) };
+        }
+
+        let shadowSeq = 0;
+        function shadowFilter(id) {
+            return '<defs><filter id="' + id + '" x="-25%" y="-25%" width="150%" height="150%">'
+                + '<feGaussianBlur in="SourceAlpha" stdDeviation="2.5" />'
+                + '<feOffset dx="2" dy="2" result="offsetblur" />'
+                + '<feComponentTransfer><feFuncA type="linear" slope="0.35" /></feComponentTransfer>'
+                + '<feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>'
+                + '</filter></defs>';
+        }
+
+        /* ---------- ألوان ثيم العرض (قراءة theme1.xml من داخل الـ pptx) ---------- */
+
+        const THEME_SLOTS = [
+            { key: 'accent1', label: 'A1' }, { key: 'accent2', label: 'A2' }, { key: 'accent3', label: 'A3' },
+            { key: 'accent4', label: 'A4' }, { key: 'accent5', label: 'A5' }, { key: 'accent6', label: 'A6' },
+            { key: 'dk1', label: 'D1' }, { key: 'dk2', label: 'D2' },
+            { key: 'lt1', label: 'L1' }, { key: 'lt2', label: 'L2' },
+            { key: 'hlink', label: 'H' }
+        ];
+        const SLOT_NAMES = {
+            accent1: 'Accent 1', accent2: 'Accent 2', accent3: 'Accent 3', accent4: 'Accent 4',
+            accent5: 'Accent 5', accent6: 'Accent 6', dk1: 'Text / Dark 1', dk2: 'Text / Dark 2',
+            lt1: 'Background / Light 1', lt2: 'Background / Light 2', hlink: 'Hyperlink'
+        };
+
+        let themeColors = null;
+        let themeTarget = 'icon-color';
+        let themeLoading = false;
+
+        document.querySelectorAll('#theme-target .chip').forEach(ch => {
+            ch.onclick = () => {
+                document.querySelectorAll('#theme-target .chip').forEach(c => c.classList.remove('active'));
+                ch.classList.add('active');
+                themeTarget = ch.dataset.target;
+            };
+        });
+
+        /* --- قارئ ZIP مصغّر: لا يحتاج أي مكتبة خارجية --- */
+        function zipIndex(bytes) {
+            const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+            let eocd = -1;
+            const floor = Math.max(0, bytes.length - 66000);
+            for (let i = bytes.length - 22; i >= floor; i--) {
+                if (bytes[i] === 0x50 && bytes[i + 1] === 0x4b && bytes[i + 2] === 0x05 && bytes[i + 3] === 0x06) { eocd = i; break; }
+            }
+            if (eocd < 0) throw new Error('الملف ليس أرشيف ZIP صالحاً');
+            const count = dv.getUint16(eocd + 10, true);
+            let p = dv.getUint32(eocd + 16, true);
+            const map = {};
+            const dec = new TextDecoder('utf-8');
+            for (let i = 0; i < count && p + 46 <= bytes.length; i++) {
+                if (dv.getUint32(p, true) !== 0x02014b50) break;
+                const nameLen = dv.getUint16(p + 28, true);
+                const extraLen = dv.getUint16(p + 30, true);
+                const cmtLen = dv.getUint16(p + 32, true);
+                map[dec.decode(bytes.subarray(p + 46, p + 46 + nameLen))] = {
+                    method: dv.getUint16(p + 10, true),
+                    compSize: dv.getUint32(p + 20, true),
+                    lho: dv.getUint32(p + 42, true)
+                };
+                p += 46 + nameLen + extraLen + cmtLen;
+            }
+            return map;
+        }
+
+        async function zipText(bytes, entry) {
+            if (!entry) return null;
+            const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+            const nameLen = dv.getUint16(entry.lho + 26, true);
+            const extraLen = dv.getUint16(entry.lho + 28, true);
+            const start = entry.lho + 30 + nameLen + extraLen;
+            const data = bytes.subarray(start, start + entry.compSize);
+            if (entry.method === 0) return new TextDecoder('utf-8').decode(data);
+            if (typeof DecompressionStream === 'undefined') throw new Error('المتصفح لا يدعم فك الضغط');
+            const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+            return new TextDecoder('utf-8').decode(await new Response(stream).arrayBuffer());
+        }
+
+        function getPresentationBytes() {
+            return new Promise((resolve, reject) => {
+                Office.context.document.getFileAsync(Office.FileType.Compressed, { sliceSize: 3 * 1024 * 1024 }, (res) => {
+                    if (res.status !== Office.AsyncResultStatus.Succeeded) {
+                        return reject(new Error((res.error && res.error.message) || 'تعذّرت قراءة العرض'));
+                    }
+                    const file = res.value;
+                    const parts = [];
+                    let total = 0;
+                    const step = (i) => {
+                        if (i >= file.sliceCount) {
+                            file.closeAsync();
+                            const out = new Uint8Array(total);
+                            let off = 0;
+                            parts.forEach(u => { out.set(u, off); off += u.length; });
+                            return resolve(out);
+                        }
+                        file.getSliceAsync(i, (r) => {
+                            if (r.status !== Office.AsyncResultStatus.Succeeded) {
+                                file.closeAsync();
+                                return reject(new Error((r.error && r.error.message) || 'تعذّرت قراءة العرض'));
+                            }
+                            const u = (r.value.data instanceof Uint8Array) ? r.value.data : new Uint8Array(r.value.data);
+                            parts.push(u); total += u.length;
+                            step(i + 1);
+                        });
+                    };
+                    step(0);
+                });
+            });
+        }
+
+        function getActiveSlideIndex() {
+            return new Promise((resolve) => {
+                try {
+                    Office.context.document.getSelectedDataAsync(Office.CoercionType.SlideRange, (r) => {
+                        try {
+                            if (r.status === Office.AsyncResultStatus.Succeeded && r.value && r.value.slides && r.value.slides.length) {
+                                resolve(r.value.slides[0].index || null);
+                            } else resolve(null);
+                        } catch (e) { resolve(null); }
+                    });
+                } catch (e) { resolve(null); }
+            });
+        }
+
+        function relsPathFor(part) {
+            const i = part.lastIndexOf('/');
+            return part.slice(0, i + 1) + '_rels/' + part.slice(i + 1) + '.rels';
+        }
+
+        function resolvePath(basePart, target) {
+            if (target.charAt(0) === '/') return target.slice(1);
+            const stack = basePart.split('/').slice(0, -1);
+            target.split('/').forEach(seg => {
+                if (seg === '.' || seg === '') return;
+                if (seg === '..') stack.pop();
+                else stack.push(seg);
+            });
+            return stack.join('/');
+        }
+
+        function parseRels(xml, basePart) {
+            const out = [];
+            const re = /<Relationship\b[^>]*>/g;
+            let m;
+            while ((m = re.exec(xml))) {
+                const tag = m[0];
+                const id = (tag.match(/Id="([^"]+)"/) || [])[1];
+                const type = (tag.match(/Type="([^"]+)"/) || [])[1] || '';
+                const target = (tag.match(/Target="([^"]+)"/) || [])[1];
+                const mode = (tag.match(/TargetMode="([^"]+)"/) || [])[1];
+                if (!target || mode === 'External') continue;
+                out.push({ id: id, type: type, part: resolvePath(basePart, target) });
+            }
+            return out;
+        }
+
+        async function followTo(bytes, idx, part, typeSuffix) {
+            const rels = await zipText(bytes, idx[relsPathFor(part)]);
+            if (!rels) return null;
+            const hit = parseRels(rels, part).filter(r => r.type.indexOf(typeSuffix) !== -1)[0];
+            return hit ? hit.part : null;
+        }
+
+        // يحدّد ملف الثيم الفعلي للشريحة النشطة: slide ← layout ← master ← theme
+        async function findThemePart(bytes, idx, slideIndex) {
+            try {
+                if (slideIndex) {
+                    const pres = await zipText(bytes, idx['ppt/presentation.xml']);
+                    const rels = await zipText(bytes, idx['ppt/_rels/presentation.xml.rels']);
+                    if (pres && rels) {
+                        const relList = parseRels(rels, 'ppt/presentation.xml');
+                        const ids = [];
+                        const re = /<p:sldId\b[^>]*r:id="([^"]+)"/g;
+                        let m;
+                        while ((m = re.exec(pres))) ids.push(m[1]);
+                        const rid = ids[slideIndex - 1];
+                        const slide = rid && (relList.filter(r => r.id === rid)[0] || {}).part;
+                        if (slide) {
+                            const layout = await followTo(bytes, idx, slide, 'slideLayout');
+                            if (layout) {
+                                const master = await followTo(bytes, idx, layout, 'slideMaster');
+                                if (master) {
+                                    const theme = await followTo(bytes, idx, master, 'theme');
+                                    if (theme && idx[theme]) return { part: theme, exact: true };
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e) { /* نكمل للاحتياطي */ }
+
+            if (idx['ppt/theme/theme1.xml']) return { part: 'ppt/theme/theme1.xml', exact: false };
+            const any = Object.keys(idx).filter(n => /^ppt\/theme\/theme\d+\.xml$/.test(n)).sort()[0];
+            return any ? { part: any, exact: false } : null;
+        }
+
+        function parseThemeColors(xml) {
+            const block = xml.match(/<a:clrScheme[\s\S]*?<\/a:clrScheme>/);
+            const scope = block ? block[0] : xml;
+            const out = {};
+            THEME_SLOTS.forEach(s => {
+                const re = new RegExp('<a:' + s.key + '\\b[^>]*>([\\s\\S]*?)</a:' + s.key + '>');
+                const m = scope.match(re);
+                if (!m) return;
+                let hex = (m[1].match(/<a:srgbClr\s+val="([0-9A-Fa-f]{6})"/) || [])[1];
+                if (!hex) hex = (m[1].match(/<a:sysClr\b[^>]*lastClr="([0-9A-Fa-f]{6})"/) || [])[1];
+                if (hex) out[s.key] = '#' + hex.toUpperCase();
+            });
+            return out;
+        }
+
+        function renderSwatches() {
+            const wrap = document.getElementById('theme-swatches');
+            wrap.innerHTML = '';
+            if (!themeColors) return;
+            THEME_SLOTS.forEach(s => {
+                const hex = themeColors[s.key];
+                if (!hex) return;
+                const d = document.createElement('div');
+                d.className = 'swatch';
+                d.style.backgroundColor = hex;
+                d.title = SLOT_NAMES[s.key] + ' — ' + hex;
+                const tag = document.createElement('span');
+                tag.textContent = s.label;
+                d.appendChild(tag);
+                d.onclick = () => {
+                    const input = document.getElementById(themeTarget);
+                    if (!input) return;
+                    input.value = hex.toLowerCase();
+                    if (themeTarget === 'icon-color') document.getElementById('apply-color').checked = true;
+                    if (themeTarget === 'outline-color' && document.getElementById('outline-width').value === '0') {
+                        document.getElementById('outline-width').value = '2';
+                    }
+                    showNotification(SLOT_NAMES[s.key] + ' → ' + hex);
+                };
+                wrap.appendChild(d);
+            });
+        }
+
+        async function loadThemeColors(userTriggered) {
+            if (themeLoading) return;
+            const status = document.getElementById('theme-status');
+            const btn = document.getElementById('theme-load');
+            themeLoading = true;
+            btn.disabled = true;
+            status.textContent = 'جارٍ قراءة ألوان الثيم…';
+            try {
+                if (!window.Office || !Office.context || !Office.context.document || !Office.context.document.getFileAsync) {
+                    throw new Error('غير متاح خارج بوربوينت');
+                }
+                const slideIndex = await getActiveSlideIndex();
+                const bytes = await getPresentationBytes();
+                const idx = zipIndex(bytes);
+                const found = await findThemePart(bytes, idx, slideIndex);
+                if (!found) throw new Error('لم يُعثر على ملف الثيم داخل العرض');
+                const xml = await zipText(bytes, idx[found.part]);
+                const colors = parseThemeColors(xml || '');
+                if (!colors.accent1) throw new Error('تعذّر قراءة مجموعة الألوان');
+                themeColors = colors;
+                renderSwatches();
+                if (userTriggered) {
+                    document.getElementById('icon-color').value = colors.accent1.toLowerCase();
+                    document.getElementById('apply-color').checked = true;
+                }
+                status.textContent = 'تم — ' + (found.exact ? 'ثيم الشريحة النشطة' : 'الثيم الرئيسي للعرض')
+                    + '. اختاري الهدف ثم اضغطي أي لون.';
+            } catch (err) {
+                status.textContent = 'تعذّرت القراءة: ' + err.message + ' — يمكنك اختيار اللون يدوياً.';
+                if (userTriggered) showNotification('تعذّرت قراءة ألوان الثيم: ' + err.message);
+            } finally {
+                themeLoading = false;
+                btn.disabled = false;
+            }
+        }
+
+        /* ---------------- الإدراج ---------------- */
+
+        function sendToSlide(content) {
+            Office.context.document.setSelectedDataAsync(content, { coercionType: Office.CoercionType.XmlSvg }, (result) => {
+                if (result.status === Office.AsyncResultStatus.Succeeded) {
+                    showNotification('تم الإدراج بنجاح ✨');
+                } else {
+                    showNotification('تعذّر الإدراج: ' + ((result.error && result.error.message) || 'تأكدي من وجود شريحة مفتوحة'));
+                }
+            });
+        }
+
+        function buildContent(svg) {
+            // تبويب الأشكال: إدراج كما هو
+            if (currentTab === 'shapes') return svg;
+
+            const styled = (currentTab === 'icons');
+            const w = clampSize(document.getElementById('icon-width').value);
+            const applyColor = styled && document.getElementById('apply-color').checked;
+            const iconColor = document.getElementById('icon-color').value || '#4472C4';
+            const shape = styled ? (document.querySelector('input[name="bg-shape"]:checked') || {}).value || 'none' : 'none';
+            const applyShadow = styled && document.getElementById('apply-shadow').checked;
+            const bgColor = document.getElementById('bg-color').value || '#ffffff';
+            const outlineColor = document.getElementById('outline-color').value || '#000000';
+            const outlineWidth = parseInt(document.getElementById('outline-width').value, 10) || 0;
+
+            let processed = applyColor ? deepColorSVG(svg, iconColor) : svg;
+
+            // لا شكل حاوٍ ولا ظل: نضبط المقاس فقط
+            if (shape === 'none' && !applyShadow) return resizeSvg(processed, w);
+
+            const parts = innerOf(processed);
+            const filterId = 'shz-shadow-' + (++shadowSeq);
+            const filterDef = applyShadow ? shadowFilter(filterId) : '';
+            const filterAttr = applyShadow ? ' filter="url(#' + filterId + ')"' : '';
+
+            // ظل بدون شكل حاوٍ: نغلّف الأيقونة بهامش يكفي للظل
+            if (shape === 'none') {
+                const pad = Math.max(4, Math.round(w * 0.12));
+                const total = w + pad * 2;
+                return '<svg xmlns="http://www.w3.org/2000/svg" width="' + total + '" height="' + total + '" viewBox="0 0 ' + total + ' ' + total + '">'
+                    + filterDef
+                    + '<g transform="translate(' + pad + ',' + pad + ')"' + filterAttr + '>'
+                    + '<svg width="' + w + '" height="' + w + '" viewBox="' + parts.viewBox + '" preserveAspectRatio="xMidYMid meet">' + parts.inner + '</svg>'
+                    + '</g></svg>';
+            }
+
+            const padding = Math.round(w * 0.40);
+            const containerSize = w + padding * 2;
+            const c = containerSize / 2;
+            const inset = Math.max(5, outlineWidth);
+            const strokeAttr = outlineWidth > 0 ? ' stroke="' + outlineColor + '" stroke-width="' + outlineWidth + '"' : '';
+            let shapeHtml = '';
+            if (shape === 'circle') {
+                shapeHtml = '<circle cx="' + c + '" cy="' + c + '" r="' + (containerSize / 2 - inset) + '" fill="' + bgColor + '"' + strokeAttr + filterAttr + ' />';
+            } else if (shape === 'square') {
+                shapeHtml = '<rect x="' + inset + '" y="' + inset + '" width="' + (containerSize - inset * 2) + '" height="' + (containerSize - inset * 2) + '" fill="' + bgColor + '"' + strokeAttr + filterAttr + ' />';
+            } else if (shape === 'diamond') {
+                const half = containerSize / 2 - inset;
+                const pts = [c + ',' + (c - half), (c + half) + ',' + c, c + ',' + (c + half), (c - half) + ',' + c].join(' ');
+                shapeHtml = '<polygon points="' + pts + '" fill="' + bgColor + '"' + strokeAttr + filterAttr + ' />';
+            } else if (shape === 'rounded') {
+                shapeHtml = '<rect x="' + inset + '" y="' + inset + '" width="' + (containerSize - inset * 2) + '" height="' + (containerSize - inset * 2) + '" rx="' + Math.round(containerSize * 0.15) + '" fill="' + bgColor + '"' + strokeAttr + filterAttr + ' />';
+            }
+
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="' + containerSize + '" height="' + containerSize + '" viewBox="0 0 ' + containerSize + ' ' + containerSize + '">'
+                + filterDef
+                + shapeHtml
+                + '<g transform="translate(' + padding + ',' + padding + ')">'
+                + '<svg width="' + w + '" height="' + w + '" viewBox="' + parts.viewBox + '" preserveAspectRatio="xMidYMid meet">' + parts.inner + '</svg>'
+                + '</g></svg>';
         }
 
         function insert(svg) {
-            if (currentTab === 'shapes') {
-                Office.context.document.setSelectedDataAsync(svg, { coercionType: Office.CoercionType.XmlSvg });
-                return;
-            }
-
-            const w = parseInt(document.getElementById('icon-width').value) || 50;
-            const applyColor = document.getElementById('apply-color').checked;
-            const iconColor = '#' + hexToRgb(document.getElementById('icon-color').value);
-            const applyStroke = document.getElementById('apply-stroke').checked;
-            const strokeColor = '#' + hexToRgb(document.getElementById('stroke-color').value);
-            const shape = document.querySelector('input[name="bg-shape"]:checked').value;
-            const bgColor = '#' + hexToRgb(document.getElementById('bg-color').value);
-            const outlineColor = '#' + hexToRgb(document.getElementById('outline-color').value);
-            const outlineWidth = parseInt(document.getElementById('outline-width').value);
-            const applyShadow = document.getElementById('apply-shadow').checked;
-
             try {
-                let processedSvg = svg;
-                if (applyColor) {
-                    processedSvg = deepColorSVG(svg, iconColor, strokeColor, applyStroke);
+                if (!window.Office || !Office.context || !Office.context.document) {
+                    showNotification('الإضافة غير متصلة ببوربوينت — أعيدي فتح اللوحة');
+                    return;
                 }
-
-                let finalContent = processedSvg;
-                if (shape !== 'none') {
-                    const padding = w * 0.40;
-                    const containerSize = w + (padding * 2);
-                    const c = containerSize / 2;
-                    let shapeHtml = '';
-                    const strokeAttr = outlineWidth > 0 ? `stroke="${outlineColor}" stroke-width="${outlineWidth}"` : '';
-                    
-                    let filterDef = '';
-                    let filterAttr = '';
-                    if (applyShadow) {
-                        filterDef = `
-                        <defs>
-                            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                                <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
-                                <feOffset dx="2" dy="2" result="offsetblur" />
-                                <feComponentTransfer>
-                                    <feFuncA type="linear" slope="0.3" />
-                                </feComponentTransfer>
-                                <feMerge>
-                                    <feMergeNode />
-                                    <feMergeNode in="SourceGraphic" />
-                                </feMerge>
-                            </filter>
-                        </defs>`;
-                        filterAttr = 'filter="url(#shadow)"';
-                    }
-
-                    if (shape === 'circle') shapeHtml = `<circle cx="${c}" cy="${c}" r="${containerSize/2 - 5}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
-                    else if (shape === 'square') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
-                    else if (shape === 'rounded') shapeHtml = `<rect x="5" y="5" width="${containerSize-10}" height="${containerSize-10}" rx="${containerSize*0.2}" fill="${bgColor}" ${strokeAttr} ${filterAttr} />`;
-
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(processedSvg, "image/svg+xml");
-                    const svgInner = new XMLSerializer().serializeToString(doc.documentElement).replace(/<\/?svg[^>]*>/g, '');
-                    
-                    const originalViewBox = extractSVGViewBox(processedSvg);
-
-                    finalContent = `<svg width="${containerSize}" height="${containerSize}" viewBox="0 0 ${containerSize} ${containerSize}" xmlns="http://www.w3.org/2000/svg">
-                        ${filterDef}
-                        ${shapeHtml}
-                        <g transform="translate(${padding},${padding})">
-                            <svg width="${w}" height="${w}" viewBox="${originalViewBox}" preserveAspectRatio="xMidYMid meet">${svgInner}</svg>
-                        </g>
-                    </svg>`;
-                }
-
-                Office.context.document.setSelectedDataAsync(finalContent, { coercionType: Office.CoercionType.XmlSvg }, (result) => {
-                    if (result.status === Office.AsyncResultStatus.Succeeded) {
-                        showNotification('تم الإدراج بنجاح ✨');
-                    } else {
-                        showNotification('حدث خطأ في الإدراج');
-                    }
-                });
-            } catch(err) { 
+                sendToSlide(buildContent(svg));
+            } catch (err) {
                 console.error(err);
                 showNotification('حدث خطأ: ' + err.message);
             }
         }
 
+        /* ---------------- ثيم الأوفيس ---------------- */
+
         function updateThemeColor() {
-            if (Office.context && Office.context.officeTheme) {
-                const accent1 = Office.context.officeTheme.accent1;
-                if (accent1) {
-                    document.getElementById('icon-color').value = accent1;
-                }
-            }
+            try {
+                if (!Office.context || !Office.context.officeTheme) return;
+                let a = Office.context.officeTheme.accent1;
+                if (!a) return;
+                a = String(a).trim();
+                if (/^[0-9a-f]{6}$/i.test(a)) a = '#' + a;
+                if (/^#[0-9a-f]{6}$/i.test(a)) document.getElementById('icon-color').value = a;
+            } catch (e) { /* الثيم غير متاح في هذه النسخة */ }
+        }
+
+        function initUI() {
+            buildSizePresets();
+            buildBatchBars();
+            syncSizeUI();
+            const base = snapshotSettings();
+            TABS.forEach(t => { if (!tabSettings[t]) tabSettings[t] = JSON.parse(JSON.stringify(base)); });
+            TABS.forEach(t => updateBatchUI(t));
         }
 
         Office.onReady((info) => {
-            if (info.host === Office.HostType.PowerPoint) {
-                updateThemeColor();
-                Office.context.document.addHandlerAsync(Office.EventType.OfficeThemeChanged, updateThemeColor);
-            }
+            try {
+                if (info && info.host === Office.HostType.PowerPoint) {
+                    updateThemeColor();
+                    if (Office.EventType && Office.EventType.OfficeThemeChanged) {
+                        try {
+                            Office.context.document.addHandlerAsync(Office.EventType.OfficeThemeChanged, updateThemeColor);
+                        } catch (e) { /* غير مدعوم في هذه النسخة */ }
+                    }
+                }
+            } catch (e) { console.error(e); }
+            initUI();
             switchTab('logos');
+            // محاولة صامتة لقراءة ألوان الثيم عند الفتح (لا تُغيّر اللون المختار)
+            setTimeout(() => { loadThemeColors(false); }, 600);
         });
     </script>
 </body>
