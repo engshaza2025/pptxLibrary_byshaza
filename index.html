@@ -18,8 +18,21 @@ body.dark{
   --inp:#1f1e1d; --inpLine:#4a4948; --onTxt:#10222e; --danger:#ff8f9e; --dangerBg:#5a2a2a;
 }
 *{box-sizing:border-box}
-body{margin:0;display:flex;flex-direction:column;height:100vh;overflow:hidden;
+body{margin:0;display:flex;flex-direction:row;height:100vh;overflow:hidden;
   font-family:'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--txt)}
+#scroller{flex:1;min-width:0;overflow-y:auto;display:flex;flex-direction:column}
+
+/* شريط تمرير واضح يُسحب بالماوس */
+#scroller{padding-left:15px;scrollbar-width:none}
+#scroller::-webkit-scrollbar{width:0;height:0}
+
+/* شريط تمرير ظاهر دائماً ويُسحب بالماوس */
+#sbar{position:fixed;left:3px;top:7px;bottom:7px;width:11px;border-radius:7px;
+  background:var(--line);z-index:30;display:none;cursor:pointer}
+#sthumb{position:absolute;left:1px;right:1px;top:0;height:40px;border-radius:6px;
+  background:var(--mut);cursor:grab}
+#sthumb:hover{background:var(--txt)}
+#sthumb.drag{background:var(--acc);cursor:grabbing}
 
 .bar{background:var(--surf);padding:8px 9px 9px;display:flex;flex-direction:column;gap:6px;
   box-shadow:0 2px 5px rgba(0,0,0,.05);z-index:5}
@@ -92,12 +105,12 @@ input[type=checkbox]{accent-color:var(--acc)}
 .chip.active{background:var(--acc);border-color:var(--acc);color:var(--onTxt);font-weight:700}
 .theme-status{font-size:9px;color:var(--mut);line-height:1.5}
 
-.tabs{display:flex;border-bottom:1px solid var(--line);background:var(--surf)}
+.tabs{display:flex;border-bottom:1px solid var(--line);background:var(--surf);position:sticky;top:0;z-index:6}
 .tab-btn{flex:1;background:none;border:none;padding:7px 4px;cursor:pointer;font-size:12px;
   color:var(--mut);border-bottom:3px solid transparent;font-family:inherit}
 .tab-btn.active{font-weight:700;color:var(--acc);border-bottom-color:var(--acc)}
 
-.main{flex-grow:1;padding:9px;overflow-y:auto;background:var(--bg)}
+.main{flex-grow:1;padding:9px;background:var(--bg)}
 .btn-select{background:var(--acc);color:var(--onTxt);border:none;padding:8px;border-radius:5px;
   cursor:pointer;width:100%;font-size:12px;font-weight:700;margin-bottom:7px;font-family:inherit}
 .search-box{width:100%;padding:5px 8px;font-size:11px;border:1px solid var(--inpLine);
@@ -126,11 +139,16 @@ input[type=checkbox]{accent-color:var(--acc)}
   color:var(--onTxt);font-size:9px;width:15px;height:15px;border-radius:50%;display:flex;
   align-items:center;justify-content:center}
 .empty-hint{font-size:11px;color:var(--mut);text-align:center;padding:14px 8px;line-height:1.7}
+body.dark .icon-box, body.dark .pv, body.dark .pchip{background:#f3f3f3;border-color:#55534f}
+body.dark .icon-box:hover{border-color:var(--acc)}
+body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
 #notification{position:fixed;bottom:12px;left:12px;right:12px;padding:8px;background:#323130;color:#fff;
   border-radius:5px;font-size:11px;text-align:center;display:none;z-index:100}
 </style>
 </head>
 <body>
+<div id="sbar"><div id="sthumb"></div></div>
+<div id="scroller">
 <div class="bar">
   <div class="head">
     <button class="mini" id="theme-toggle" title="تبديل الوضع الداكن">🌙</button>
@@ -197,35 +215,15 @@ input[type=checkbox]{accent-color:var(--acc)}
             <option value="3">3px</option><option value="4">4px</option><option value="5">5px</option>
             <option value="6">6px</option><option value="8">8px</option><option value="10">10px</option>
           </select></div>
+        <div class="r" style="gap:4px">
+          <span class="lbl"><input type="checkbox" id="apply-shadow"> ظل</span></div>
       </div>
     </div>
   </div>
 
-  <!-- كتلة الظل -->
-  <div class="blk" id="blk-shadow" data-key="shadow">
-    <div class="bh">🌑 الظل
-      <span class="sp"><span class="lbl"><input type="checkbox" id="apply-shadow"> مفعّل</span>
-      <span class="chev" data-toggle="shadow">▾</span></span></div>
-    <div class="bb" style="padding:6px">
-      <div class="r" style="gap:5px">
-        <span class="lbl">الانتشار</span>
-        <select id="shadow-blur">
-          <option value="1.2">ناعم</option><option value="2.5" selected>متوسط</option>
-          <option value="4">واسع</option><option value="6">واسع جداً</option></select>
-        <span class="lbl">الكثافة</span>
-        <select id="shadow-slope">
-          <option value="0.2">خفيف</option><option value="0.35" selected>متوسط</option>
-          <option value="0.5">قوي</option><option value="0.7">قوي جداً</option></select>
-        <span class="lbl">الإزاحة</span>
-        <select id="shadow-offset">
-          <option value="0">0</option><option value="1">1px</option><option value="2" selected>2px</option>
-          <option value="3">3px</option><option value="4">4px</option></select>
-      </div>
-    </div>
-  </div>
 </div>
 
-<div class="tabs">
+<div class="tabs" id="tabs">
   <button class="tab-btn active" onclick="switchTab('logos')" id="tab-logos">الشعارات</button>
   <button class="tab-btn" onclick="switchTab('icons')" id="tab-icons">الأيقونات</button>
   <button class="tab-btn" onclick="switchTab('shapes')" id="tab-shapes">الأشكال</button>
@@ -253,6 +251,7 @@ input[type=checkbox]{accent-color:var(--acc)}
       <button class="btn-select" onclick="pickFolder('shapes')">تحديد مجلد الأشكال</button>
       الأشكال تُدرج كما هي بدون تلوين أو تحجيم.</div>
   </div>
+</div>
 </div>
 <div id="notification"></div>
 
@@ -326,11 +325,12 @@ function toggleBlock(key){
   st[key] = !st[key];
   lsSet('shz_collapse', st);
   applyCollapse();
+  setTimeout(updateScrollbar, 30);
 }
 
 /* ==================== إعدادات مستقلة لكل تبويب ==================== */
-const CONTROL_IDS = ['icon-width','apply-color','icon-color','bg-color','outline-color','outline-width',
-  'apply-shadow','shadow-blur','shadow-slope','shadow-offset'];
+const CONTROL_IDS = ['icon-width','apply-color','icon-color','bg-color','outline-color','outline-width','apply-shadow'];
+const SHADOW_BLUR = 2.5, SHADOW_SLOPE = 0.35, SHADOW_OFFSET = 2;
 const tabSettings = {};
 
 function snapshotSettings(){
@@ -407,13 +407,13 @@ function switchTab(tabName){
   const isIcons = tabName === 'icons', isShapes = tabName === 'shapes';
   $('blk-presets').style.display = isIcons ? '' : 'none';
   $('blk-shape').style.display   = isIcons ? '' : 'none';
-  $('blk-shadow').style.display  = isIcons ? '' : 'none';
   $('blk-icon').style.display    = isShapes ? 'none' : '';
   document.querySelectorAll('#blk-icon .bb > .r, #blk-icon .theme-status').forEach((el, i) => {
     if (i > 0) el.style.display = isIcons ? '' : 'none';   // الشعارات: الحجم فقط
   });
   updateFolderBar();
   renderPreview();
+  setTimeout(updateScrollbar, 30);
 }
 
 /* ==================== البحث والتكبير ==================== */
@@ -448,6 +448,7 @@ function setZoom(px){
   px = Math.max(32, Math.min(72, parseInt(px,10) || 40));
   document.documentElement.style.setProperty('--box', px + 'px');
   lsSet('shz_zoom', px);
+  setTimeout(updateScrollbar, 30);
   TABS.forEach(t => {
     const r = $('zoom-' + t), v = $('zoomval-' + t);
     if (r) r.value = px;
@@ -650,6 +651,7 @@ async function renderItems(tab, items, folderName){
     showNotification('تم تحميل ' + items.length + ' ملف');
   }
   filterGrid(tab);
+  setTimeout(updateScrollbar, 30);
 }
 
 /* ==================== التحديد المتعدد ==================== */
@@ -1133,9 +1135,7 @@ function currentSettings(){
     outlineColor: $('outline-color').value || '#000000',
     outlineWidth: parseInt($('outline-width').value, 10) || 0,
     shadowOn: $('apply-shadow').checked,
-    blur: parseFloat($('shadow-blur').value) || 2.5,
-    slope: parseFloat($('shadow-slope').value) || .35,
-    off: parseFloat($('shadow-offset').value) || 0
+    blur: SHADOW_BLUR, slope: SHADOW_SLOPE, off: SHADOW_OFFSET
   };
 }
 function applySettings(st){
@@ -1148,9 +1148,6 @@ function applySettings(st){
   $('outline-color').value = st.outlineColor;
   $('outline-width').value = String(st.outlineWidth);
   $('apply-shadow').checked = !!st.shadowOn;
-  $('shadow-blur').value = String(st.blur);
-  $('shadow-slope').value = String(st.slope);
-  $('shadow-offset').value = String(st.off);
   syncShapeUI(); syncSizeUI(); renderPreview();
 }
 
@@ -1345,10 +1342,64 @@ async function insertSelected(tab){
   finally { btn.disabled = (selected[tab].length === 0); }
 }
 
+/* ==================== شريط التمرير ==================== */
+function updateScrollbar(){
+  const sc = $('scroller'), bar = $('sbar'), th = $('sthumb');
+  if (!sc || !bar) return;
+  const trackH = bar.clientHeight;
+  const ratio = sc.clientHeight / sc.scrollHeight;
+  if (ratio >= 0.999){ bar.style.display = 'none'; return; }
+  bar.style.display = 'block';
+  const h = Math.max(34, Math.round(trackH * ratio));
+  const max = sc.scrollHeight - sc.clientHeight;
+  const top = max > 0 ? Math.round((sc.scrollTop / max) * (trackH - h)) : 0;
+  th.style.height = h + 'px';
+  th.style.top = top + 'px';
+}
+function wireScrollbar(){
+  const sc = $('scroller'), bar = $('sbar'), th = $('sthumb');
+  let dragging = false, startY = 0, startTop = 0;
+
+  th.addEventListener('pointerdown', (e) => {
+    dragging = true; startY = e.clientY; startTop = th.offsetTop;
+    th.classList.add('drag');
+    th.setPointerCapture(e.pointerId);
+    e.preventDefault(); e.stopPropagation();
+  });
+  th.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const trackH = bar.clientHeight, h = th.offsetHeight;
+    const span = trackH - h;
+    if (span <= 0) return;
+    const top = Math.max(0, Math.min(span, startTop + (e.clientY - startY)));
+    sc.scrollTop = (top / span) * (sc.scrollHeight - sc.clientHeight);
+  });
+  const stop = (e) => { if (!dragging) return; dragging = false; th.classList.remove('drag');
+    try { th.releasePointerCapture(e.pointerId); } catch(err){} };
+  th.addEventListener('pointerup', stop);
+  th.addEventListener('pointercancel', stop);
+
+  bar.addEventListener('pointerdown', (e) => {
+    if (e.target === th) return;
+    const rect = bar.getBoundingClientRect();
+    const h = th.offsetHeight, span = bar.clientHeight - h;
+    const top = Math.max(0, Math.min(span, e.clientY - rect.top - h / 2));
+    sc.scrollTop = span > 0 ? (top / span) * (sc.scrollHeight - sc.clientHeight) : 0;
+  });
+
+  sc.addEventListener('scroll', updateScrollbar);
+  window.addEventListener('resize', updateScrollbar);
+  if (window.ResizeObserver){
+    const ro = new ResizeObserver(updateScrollbar);
+    ro.observe(sc);
+    Array.from(sc.children).forEach(c => ro.observe(c));
+  }
+  updateScrollbar();
+}
+
 /* ==================== التشغيل ==================== */
 function wireControls(){
-  ['icon-color','bg-color','outline-color','outline-width','apply-color','apply-shadow',
-   'shadow-blur','shadow-slope','shadow-offset'].forEach(id => {
+  ['icon-color','bg-color','outline-color','outline-width','apply-color','apply-shadow'].forEach(id => {
     const el = $(id); if (!el) return;
     el.addEventListener('input', renderPreview);
     el.addEventListener('change', renderPreview);
@@ -1374,6 +1425,7 @@ function initUI(){
   buildZoomBars();
   buildBatchBars();
   wireControls();
+  wireScrollbar();
   applyCollapse();
   if (!localStorage.getItem('shz_presets')) setPresets(defaultPresets()); else renderPresets();
   syncSizeUI(); syncShapeUI();
