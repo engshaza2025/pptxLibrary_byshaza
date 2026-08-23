@@ -142,6 +142,7 @@ input[type=checkbox]{accent-color:var(--acc)}
 body.dark .icon-box, body.dark .pv, body.dark .pchip{background:#f3f3f3;border-color:#55534f}
 body.dark .icon-box:hover{border-color:var(--acc)}
 body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
+.ver{font-size:9px;color:var(--mut);font-family:Consolas,monospace;min-width:32px;text-align:left;opacity:.75}
 #notification{position:fixed;bottom:12px;left:12px;right:12px;padding:8px;background:#323130;color:#fff;
   border-radius:5px;font-size:11px;text-align:center;display:none;z-index:100}
 </style>
@@ -153,7 +154,7 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
   <div class="head">
     <button class="mini" id="theme-toggle" title="تبديل الوضع الداكن">🌙</button>
     <h3>Shaza pptx library</h3>
-    <span style="width:26px"></span>
+    <span class="ver" id="app-version" title="رقم نسخة الصفحة المحمّلة">v2.0.2</span>
   </div>
 
   <div class="folder">📁 <b id="folder-name">لم يُحدَّد مجلد</b>
@@ -260,7 +261,8 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
 const TABS = ['logos','icons','shapes'];
 let currentTab = 'logos';
 let notifSeq = 0;
-const objectUrls = [];
+const objectUrls = { logos: [], icons: [], shapes: [] };
+const iconObservers = { logos: null, icons: null, shapes: null };
 const SIZE_MIN = 10, SIZE_MAX = 200;
 
 const SAMPLE_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
@@ -578,18 +580,53 @@ async function restoreLastFolder(tab){
 }
 
 /* ==================== عرض الشبكة ==================== */
-function clearUrls(){ while (objectUrls.length){ try { URL.revokeObjectURL(objectUrls.pop()); } catch(e){} } }
+/* تحرير معاينات تبويب واحد فقط — لا تُمسّ معاينات التبويبات الأخرى */
+function clearUrls(tab){
+  const list = objectUrls[tab] || [];
+  while (list.length){ try { URL.revokeObjectURL(list.pop()); } catch(e){} }
+  if (iconObservers[tab]){ try { iconObservers[tab].disconnect(); } catch(e){} iconObservers[tab] = null; }
+}
+
+/* تحميل كسول: لا تُبنى معاينة الأيقونة إلا حين تقترب من الشاشة */
+function observerFor(tab){
+  if (iconObservers[tab]) return iconObservers[tab];
+  if (!window.IntersectionObserver) return null;
+  const ob = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      ob.unobserve(e.target);
+      loadBoxImage(e.target, tab);
+    });
+  }, { root: $('scroller'), rootMargin: '250px 0px' });
+  iconObservers[tab] = ob;
+  return ob;
+}
+function loadBoxImage(box, tab){
+  if (box._loaded || !box._item) return;
+  box._loaded = true;
+  try {
+    const url = URL.createObjectURL(box._item.file);
+    objectUrls[tab].push(url);
+    const img = box.querySelector('img');
+    if (img) img.src = url;
+  } catch(e){}
+}
 
 function makeBox(item, tab){
   const box = document.createElement('div');
   box.className = 'icon-box';
   box.dataset.name = item.name.replace(/\.svg$/i,'');
   box.title = item.dir ? item.dir + '/' + item.name : item.name;
+  box._item = item;
+
   const img = document.createElement('img');
-  const url = URL.createObjectURL(item.file);
-  objectUrls.push(url);
-  img.src = url; img.alt = item.name;
+  img.alt = item.name;
+  img.decoding = 'async';
   box.appendChild(img);
+
+  const ob = observerFor(tab);
+  if (ob) ob.observe(box); else loadBoxImage(box, tab);
+
   box.onmouseenter = async () => {
     try {
       if (!item._text) item._text = await item.file.text();
@@ -607,7 +644,7 @@ function makeBox(item, tab){
 
 async function renderItems(tab, items, folderName){
   clearSelection(tab);
-  clearUrls();
+  clearUrls(tab);
   const hint = $('hint-' + tab);
   folderInfo[tab] = { name: folderName || 'مجلد', count: items.length };
   updateFolderBar();
@@ -704,16 +741,37 @@ function toggleSelect(tab, item, box){
 
 /* ==================== محرّك SVG (مُختبَر) ==================== */
         const DARK_RE = /^(#000|#000000|black|#2c3030|#1a1a1a|#111|#111111|currentcolor)$/i;
-        const DARK_CSS_RE = /(#000000|#000|black|#2c3030|#1a1a1a|#111111|#111|currentColor)/gi;
         const SHAPE_TAGS = ['path', 'circle', 'rect', 'polygon', 'polyline', 'ellipse', 'line'];
 
         function parseSvg(svgString) {
             const doc = new DOMParser().parseFromString(svgString, 'image/svg+xml');
             if (doc.getElementsByTagName('parsererror').length) return null;
+            if (!doc.documentElement || doc.documentElement.tagName.toLowerCase() !== 'svg') return null;
             return doc;
         }
 
-        // محرك تلوين SVG: يستبدل الأسود/الداكن/currentColor باللون المختار
+        /* القيمة المصرّح بها على العنصر نفسه (من style أوّلاً ثم من الخاصية) */
+        function ownPaint(el, prop) {
+            const style = el.getAttribute('style');
+            if (style) {
+                const m = style.match(new RegExp('(?:^|[;\\s])' + prop + '\\s*:\\s*([^;]+)', 'i'));
+                if (m) return m[1].trim();
+            }
+            const a = el.getAttribute(prop);
+            return a ? a.trim() : null;
+        }
+        /* أقرب قيمة معلَنة على العنصر أو أيٍّ من آبائه، بما فيهم عنصر svg الجذر */
+        function inheritedPaint(el, prop) {
+            let n = el;
+            while (n && n.nodeType === 1) {
+                const v = ownPaint(n, prop);
+                if (v) return v;
+                n = n.parentNode;
+            }
+            return null;
+        }
+
+        /* محرك تلوين SVG: يستبدل الأسود/الداكن/currentColor باللون المختار */
         function deepColorSVG(svgString, fillColor) {
             const doc = parseSvg(svgString);
             if (!doc) return svgString;
@@ -721,18 +779,18 @@ function toggleSelect(tab, item, box){
             doc.querySelectorAll('*').forEach(el => {
                 const tag = el.tagName.toLowerCase();
 
-                const fill = el.getAttribute('fill');
-                if (fill && DARK_RE.test(fill.trim())) el.setAttribute('fill', fillColor);
-
-                const stroke = el.getAttribute('stroke');
-                if (stroke && DARK_RE.test(stroke.trim())) el.setAttribute('stroke', fillColor);
+                /* 1) استبدال كل طلاء داكن مُصرَّح به صراحةً — خاصيةً كان أم style أم CSS */
+                ['fill', 'stroke'].forEach(prop => {
+                    const a = el.getAttribute(prop);
+                    if (a && DARK_RE.test(a.trim())) el.setAttribute(prop, fillColor);
+                });
 
                 const style = el.getAttribute('style');
                 if (style) {
                     let s = style;
-                    s = s.replace(/fill\s*:\s*([^;]+)/gi, (m, v) => DARK_RE.test(v.trim()) ? 'fill:' + fillColor : m);
-                    s = s.replace(/stroke\s*:\s*([^;]+)/gi, (m, v) => DARK_RE.test(v.trim()) ? 'stroke:' + fillColor : m);
-                    el.setAttribute('style', s);
+                    s = s.replace(/(^|[;\s])fill\s*:\s*([^;]+)/gi, (m, p, v) => DARK_RE.test(v.trim()) ? p + 'fill:' + fillColor : m);
+                    s = s.replace(/(^|[;\s])stroke\s*:\s*([^;]+)/gi, (m, p, v) => DARK_RE.test(v.trim()) ? p + 'stroke:' + fillColor : m);
+                    if (s !== style) el.setAttribute('style', s);
                 }
 
                 if (tag === 'style') {
@@ -742,50 +800,93 @@ function toggleSelect(tab, item, box){
                     el.textContent = css;
                 }
 
-                // أيقونات تعتمد اللون الأسود الافتراضي (بلا fill ولا class ولا style)
-                if (SHAPE_TAGS.indexOf(tag) !== -1 && !el.getAttribute('fill') && !el.getAttribute('class')
-                    && !(el.getAttribute('style') || '').match(/fill\s*:/i)) {
-                    const st = el.getAttribute('stroke');
-                    if (!st || st === 'none') el.setAttribute('fill', fillColor);
-                }
+                /* 2) قاعدة «الأسود الافتراضي» لأيقونات بلا أي طلاء مُصرَّح.
+                      تُطبَّق فقط إن لم يُصرَّح fill ولا stroke في أي مستوى أعلى —
+                      وهذا ما يحمي الأيقونات الخطّية التي تضع fill="none" على الجذر. */
+                if (SHAPE_TAGS.indexOf(tag) === -1) return;
+                if (el.getAttribute('class')) return;
+                if (ownPaint(el, 'fill')) return;
+                const os = ownPaint(el, 'stroke');
+                if (os && os !== 'none') return;
+                if (inheritedPaint(el, 'fill') !== null) return;
+                const is = inheritedPaint(el, 'stroke');
+                if (is && is !== 'none') return;
+                el.setAttribute('fill', fillColor);
             });
 
             return new XMLSerializer().serializeToString(doc);
         }
 
+        /* قراءة مقاس رقمي آمنة: ترفض النِّسب المئوية وتقبل الوحدات المطلقة */
+        function numAttr(el, name) {
+            const v = el.getAttribute(name);
+            if (!v) return NaN;
+            if (/%\s*$/.test(v)) return NaN;
+            const n = parseFloat(v);
+            return isFinite(n) ? n : NaN;
+        }
+
         function getViewBox(doc) {
             const el = doc.documentElement;
             const vb = el.getAttribute('viewBox');
-            if (vb && vb.trim()) return vb.trim();
-            const w = parseFloat(el.getAttribute('width'));
-            const h = parseFloat(el.getAttribute('height'));
+            if (vb && vb.trim()) {
+                const n = vb.trim().split(/[\s,]+/).map(Number);
+                if (n.length === 4 && n.every(isFinite) && n[2] > 0 && n[3] > 0) return vb.trim();
+            }
+            const w = numAttr(el, 'width'), h = numAttr(el, 'height');
             if (w > 0 && h > 0) return '0 0 ' + w + ' ' + h;
             return '0 0 100 100';
         }
 
-        // ضبط مقاس الأيقونة مع الحفاظ على النسبة — يجعل خانة "الحجم" فعّالة دائماً
+        /* تنظيف ما لا يُرسَم: تعليقات وبيانات وصفية — يقلّص حجم الحمولة المرسلة لبوربوينت */
+        function cleanSvg(doc) {
+            const drop = [];
+            const walk = (n) => {
+                for (let i = 0; i < n.childNodes.length; i++) {
+                    const c = n.childNodes[i];
+                    if (c.nodeType === 8) { drop.push(c); continue; }
+                    if (c.nodeType === 1) {
+                        const t = c.tagName.toLowerCase();
+                        if (t === 'metadata' || t === 'desc' || t === 'title') { drop.push(c); continue; }
+                        walk(c);
+                    }
+                }
+            };
+            walk(doc.documentElement);
+            drop.forEach(n => { try { n.parentNode.removeChild(n); } catch (e) {} });
+            return doc;
+        }
+
+        /* ضبط مقاس الأيقونة مع الحفاظ على النسبة — يجعل خانة "الحجم" فعّالة دائماً */
         function resizeSvg(svgString, w) {
             const doc = parseSvg(svgString);
             if (!doc) return svgString;
+            cleanSvg(doc);
             const el = doc.documentElement;
-            const vb = getViewBox(doc).split(/[\s,]+/).map(Number);
-            const ratio = (vb[2] > 0 && vb[3] > 0) ? (vb[3] / vb[2]) : 1;
-            el.setAttribute('viewBox', getViewBox(doc));
+            const vb = getViewBox(doc);
+            const n = vb.split(/[\s,]+/).map(Number);
+            const ratio = (n[2] > 0 && n[3] > 0) ? (n[3] / n[2]) : 1;
+            el.setAttribute('viewBox', vb);
             el.setAttribute('width', String(w));
             el.setAttribute('height', String(Math.round(w * ratio)));
             if (!el.getAttribute('xmlns')) el.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
             return new XMLSerializer().serializeToString(doc);
         }
 
-        function innerOf(svgString) {
+        /* يُدرِج الأيقونة داخل شكل حاوٍ مع الاحتفاظ بعنصر svg الأصلي كاملاً —
+           وبذلك تبقى خصائص الجذر (fill و stroke-width و stroke-linecap ومساحات الأسماء) سليمة */
+        function embedSvg(svgString, w) {
             const doc = parseSvg(svgString);
-            if (!doc) return { inner: '', viewBox: '0 0 100 100' };
+            if (!doc) return '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + w + '"></svg>';
+            cleanSvg(doc);
             const el = doc.documentElement;
-            let inner = '';
-            for (let i = 0; i < el.childNodes.length; i++) {
-                inner += new XMLSerializer().serializeToString(el.childNodes[i]);
-            }
-            return { inner: inner, viewBox: getViewBox(doc) };
+            el.setAttribute('viewBox', getViewBox(doc));
+            el.setAttribute('width', String(w));
+            el.setAttribute('height', String(w));
+            el.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            el.removeAttribute('x'); el.removeAttribute('y');
+            if (!el.getAttribute('xmlns')) el.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            return new XMLSerializer().serializeToString(el);
         }
 
 /* ==================== ألوان ثيم العرض ==================== */
@@ -798,26 +899,117 @@ function toggleSelect(tab, item, box){
         ];
         const SLOT_NAMES = {
             accent1: 'Accent 1', accent2: 'Accent 2', accent3: 'Accent 3', accent4: 'Accent 4',
-            accent5: 'Accent 5', accent6: 'Accent 6', dk1: 'Text / Dark 1', dk2: 'Text / Dark 2',
-            lt1: 'Background / Light 1', lt2: 'Background / Light 2', hlink: 'Hyperlink'
+            accent5: 'Accent 5', accent6: 'Accent 6', dk1: 'نص / داكن 1', dk2: 'نص / داكن 2',
+            lt1: 'خلفية / فاتح 1', lt2: 'خلفية / فاتح 2', hlink: 'ارتباط تشعّبي'
         };
+
+        const THEME_CACHE_KEY = 'shzThemeCache';
+        const SLICE = 262144;            /* 256 كيلوبايت: يكفي لالتقاط ملف الثيم بجزء أو جزأين */
+        const THEME_TIMEOUT = 20000;
 
         let themeColors = null;
         let themeTarget = 'icon-color';
         let themeLoading = false;
-        /* --- قارئ ZIP مصغّر: لا يحتاج أي مكتبة خارجية --- */
-        function zipIndex(bytes) {
-            const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-            let eocd = -1;
-            const floor = Math.max(0, bytes.length - 66000);
-            for (let i = bytes.length - 22; i >= floor; i--) {
-                if (bytes[i] === 0x50 && bytes[i + 1] === 0x4b && bytes[i + 2] === 0x05 && bytes[i + 3] === 0x06) { eocd = i; break; }
+
+        function withTimeout(promise, ms, msg) {
+            let t;
+            const guard = new Promise((_, rej) => { t = setTimeout(() => rej(new Error(msg)), ms); });
+            return Promise.race([promise, guard]).finally(() => clearTimeout(t));
+        }
+
+        /* ---------- ذاكرة داخل ملف العرض نفسه: تُبقي الألوان بعد إغلاق اللوحة ---------- */
+        function docSettingsGet(k) {
+            try { return Office.context.document.settings.get(k); } catch (e) { return null; }
+        }
+        function docSettingsSet(k, v) {
+            try {
+                Office.context.document.settings.set(k, v);
+                Office.context.document.settings.saveAsync(() => {});
+            } catch (e) {}
+        }
+
+        /* ---------- قراءة موجّهة: نجلب من ملف العرض الأجزاء اللازمة فقط ---------- */
+        function openPresentationFile() {
+            return new Promise((resolve, reject) => {
+                if (!window.Office || !Office.context || !Office.context.document || !Office.context.document.getFileAsync) {
+                    return reject(new Error('غير متاح خارج بوربوينت'));
+                }
+                Office.context.document.getFileAsync(Office.FileType.Compressed, { sliceSize: SLICE }, (res) => {
+                    if (res.status !== Office.AsyncResultStatus.Succeeded) {
+                        return reject(new Error((res.error && res.error.message) || 'تعذّرت قراءة العرض'));
+                    }
+                    resolve(res.value);
+                });
+            });
+        }
+
+        function makeReader(file) {
+            const cache = new Map();
+            let reads = 0;
+            const size = file.size;
+
+            const getSlice = (i) => {
+                if (cache.has(i)) return cache.get(i);
+                reads++;
+                const p = new Promise((resolve, reject) => {
+                    file.getSliceAsync(i, (r) => {
+                        if (r.status !== Office.AsyncResultStatus.Succeeded) {
+                            return reject(new Error((r.error && r.error.message) || 'تعذّرت قراءة جزء من العرض'));
+                        }
+                        const d = r.value.data;
+                        resolve(d instanceof Uint8Array ? d : new Uint8Array(d));
+                    });
+                });
+                cache.set(i, p);
+                return p;
+            };
+
+            return {
+                size: size,
+                sliceCount: file.sliceCount,
+                get reads() { return reads; },
+                async range(start, len) {
+                    start = Math.max(0, Math.floor(start));
+                    const end = Math.min(size, start + len);
+                    if (end <= start) return new Uint8Array(0);
+                    const first = Math.floor(start / SLICE);
+                    const last = Math.floor((end - 1) / SLICE);
+                    const out = new Uint8Array(end - start);
+                    for (let i = first; i <= last; i++) {
+                        const s = await getSlice(i);
+                        const base = i * SLICE;
+                        const from = Math.max(start, base) - base;
+                        const to = Math.min(end, base + s.length) - base;
+                        if (to > from) out.set(s.subarray(from, to), base + from - start);
+                    }
+                    return out;
+                }
+            };
+        }
+
+        async function findEndOfCentralDirectory(reader) {
+            const tailLen = Math.min(reader.size, 66000 + 22);
+            const tail = await reader.range(reader.size - tailLen, tailLen);
+            const dv = new DataView(tail.buffer, tail.byteOffset, tail.byteLength);
+            for (let i = tail.length - 22; i >= 0; i--) {
+                if (tail[i] === 0x50 && tail[i + 1] === 0x4b && tail[i + 2] === 0x05 && tail[i + 3] === 0x06) {
+                    const count = dv.getUint16(i + 10, true);
+                    const cdSize = dv.getUint32(i + 12, true);
+                    const cdOff = dv.getUint32(i + 16, true);
+                    if (count === 0xFFFF || cdOff === 0xFFFFFFFF || cdSize === 0xFFFFFFFF) {
+                        throw new Error('العرض بصيغة ZIP64 غير المدعومة');
+                    }
+                    return { count: count, cdSize: cdSize, cdOff: cdOff };
+                }
             }
-            if (eocd < 0) throw new Error('الملف ليس أرشيف ZIP صالحاً');
-            const count = dv.getUint16(eocd + 10, true);
-            let p = dv.getUint32(eocd + 16, true);
-            const map = {};
+            throw new Error('الملف ليس أرشيف ZIP صالحاً');
+        }
+
+        function parseCentralDirectory(bytes, count) {
+            const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
             const dec = new TextDecoder('utf-8');
+            const map = {};
+            let p = 0;
             for (let i = 0; i < count && p + 46 <= bytes.length; i++) {
                 if (dv.getUint32(p, true) !== 0x02014b50) break;
                 const nameLen = dv.getUint16(p + 28, true);
@@ -833,62 +1025,36 @@ function toggleSelect(tab, item, box){
             return map;
         }
 
-        async function zipText(bytes, entry) {
+        async function zipEntryText(reader, entry) {
             if (!entry) return null;
-            const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-            const nameLen = dv.getUint16(entry.lho + 26, true);
-            const extraLen = dv.getUint16(entry.lho + 28, true);
-            const start = entry.lho + 30 + nameLen + extraLen;
-            const data = bytes.subarray(start, start + entry.compSize);
+            const head = await reader.range(entry.lho, 30);
+            if (head.length < 30) throw new Error('ترويسة ناقصة داخل العرض');
+            const dv = new DataView(head.buffer, head.byteOffset, head.byteLength);
+            if (dv.getUint32(0, true) !== 0x04034b50) throw new Error('ترويسة ZIP غير متوقّعة');
+            const nameLen = dv.getUint16(26, true);
+            const extraLen = dv.getUint16(28, true);
+            const data = await reader.range(entry.lho + 30 + nameLen + extraLen, entry.compSize);
             if (entry.method === 0) return new TextDecoder('utf-8').decode(data);
+            if (entry.method !== 8) throw new Error('طريقة ضغط غير مدعومة داخل العرض');
             if (typeof DecompressionStream === 'undefined') throw new Error('المتصفح لا يدعم فك الضغط');
             const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
             return new TextDecoder('utf-8').decode(await new Response(stream).arrayBuffer());
         }
 
-        function getPresentationBytes() {
-            return new Promise((resolve, reject) => {
-                Office.context.document.getFileAsync(Office.FileType.Compressed, { sliceSize: 3 * 1024 * 1024 }, (res) => {
-                    if (res.status !== Office.AsyncResultStatus.Succeeded) {
-                        return reject(new Error((res.error && res.error.message) || 'تعذّرت قراءة العرض'));
-                    }
-                    const file = res.value;
-                    const parts = [];
-                    let total = 0;
-                    const step = (i) => {
-                        if (i >= file.sliceCount) {
-                            file.closeAsync();
-                            const out = new Uint8Array(total);
-                            let off = 0;
-                            parts.forEach(u => { out.set(u, off); off += u.length; });
-                            return resolve(out);
-                        }
-                        file.getSliceAsync(i, (r) => {
-                            if (r.status !== Office.AsyncResultStatus.Succeeded) {
-                                file.closeAsync();
-                                return reject(new Error((r.error && r.error.message) || 'تعذّرت قراءة العرض'));
-                            }
-                            const u = (r.value.data instanceof Uint8Array) ? r.value.data : new Uint8Array(r.value.data);
-                            parts.push(u); total += u.length;
-                            step(i + 1);
-                        });
-                    };
-                    step(0);
-                });
-            });
-        }
-
         function getActiveSlideIndex() {
             return new Promise((resolve) => {
+                let done = false;
+                const finish = (v) => { if (!done) { done = true; resolve(v); } };
+                setTimeout(() => finish(null), 2500);
                 try {
                     Office.context.document.getSelectedDataAsync(Office.CoercionType.SlideRange, (r) => {
                         try {
                             if (r.status === Office.AsyncResultStatus.Succeeded && r.value && r.value.slides && r.value.slides.length) {
-                                resolve(r.value.slides[0].index || null);
-                            } else resolve(null);
-                        } catch (e) { resolve(null); }
+                                finish(r.value.slides[0].index || null);
+                            } else finish(null);
+                        } catch (e) { finish(null); }
                     });
-                } catch (e) { resolve(null); }
+                } catch (e) { finish(null); }
             });
         }
 
@@ -924,19 +1090,19 @@ function toggleSelect(tab, item, box){
             return out;
         }
 
-        async function followTo(bytes, idx, part, typeSuffix) {
-            const rels = await zipText(bytes, idx[relsPathFor(part)]);
+        async function followTo(reader, idx, part, typeSuffix) {
+            const rels = await zipEntryText(reader, idx[relsPathFor(part)]);
             if (!rels) return null;
             const hit = parseRels(rels, part).filter(r => r.type.indexOf(typeSuffix) !== -1)[0];
             return hit ? hit.part : null;
         }
 
-        // يحدّد ملف الثيم الفعلي للشريحة النشطة: slide ← layout ← master ← theme
-        async function findThemePart(bytes, idx, slideIndex) {
+        /* يحدّد ملف الثيم الفعلي للشريحة النشطة: slide ← layout ← master ← theme */
+        async function findThemePart(reader, idx, slideIndex) {
             try {
                 if (slideIndex) {
-                    const pres = await zipText(bytes, idx['ppt/presentation.xml']);
-                    const rels = await zipText(bytes, idx['ppt/_rels/presentation.xml.rels']);
+                    const pres = await zipEntryText(reader, idx['ppt/presentation.xml']);
+                    const rels = await zipEntryText(reader, idx['ppt/_rels/presentation.xml.rels']);
                     if (pres && rels) {
                         const relList = parseRels(rels, 'ppt/presentation.xml');
                         const ids = [];
@@ -946,12 +1112,12 @@ function toggleSelect(tab, item, box){
                         const rid = ids[slideIndex - 1];
                         const slide = rid && (relList.filter(r => r.id === rid)[0] || {}).part;
                         if (slide) {
-                            const layout = await followTo(bytes, idx, slide, 'slideLayout');
+                            const layout = await followTo(reader, idx, slide, 'slideLayout');
                             if (layout) {
-                                const master = await followTo(bytes, idx, layout, 'slideMaster');
+                                const master = await followTo(reader, idx, layout, 'slideMaster');
                                 if (master) {
-                                    const theme = await followTo(bytes, idx, master, 'theme');
-                                    if (theme && idx[theme]) return { part: theme, exact: true };
+                                    const theme = await followTo(reader, idx, master, 'theme');
+                                    if (theme && idx[theme]) return { part: theme, master: master, exact: true };
                                 }
                             }
                         }
@@ -959,9 +1125,10 @@ function toggleSelect(tab, item, box){
                 }
             } catch (e) { /* نكمل للاحتياطي */ }
 
-            if (idx['ppt/theme/theme1.xml']) return { part: 'ppt/theme/theme1.xml', exact: false };
+            const master1 = idx['ppt/slideMasters/slideMaster1.xml'] ? 'ppt/slideMasters/slideMaster1.xml' : null;
+            if (idx['ppt/theme/theme1.xml']) return { part: 'ppt/theme/theme1.xml', master: master1, exact: false };
             const any = Object.keys(idx).filter(n => /^ppt\/theme\/theme\d+\.xml$/.test(n)).sort()[0];
-            return any ? { part: any, exact: false } : null;
+            return any ? { part: any, master: master1, exact: false } : null;
         }
 
         function parseThemeColors(xml) {
@@ -977,6 +1144,25 @@ function toggleSelect(tab, item, box){
                 if (hex) out[s.key] = '#' + hex.toUpperCase();
             });
             return out;
+        }
+
+        /* خريطة ألوان الشريحة الرئيسية: بوربوينت قد يعكس النص والخلفية عمّا في ملف الثيم */
+        function parseClrMap(xml) {
+            const m = (xml || '').match(/<p:clrMap\b[^>]*\/?>/);
+            if (!m) return null;
+            const out = {};
+            const re = /(\w+)="([^"]+)"/g;
+            let x;
+            while ((x = re.exec(m[0]))) out[x[1]] = x[2];
+            return out;
+        }
+        function applyClrMap(colors, map) {
+            if (!map) return colors;
+            const src = Object.assign({}, colors);
+            const pick = (role) => (map[role] && src[map[role]]) || null;
+            const pairs = [['dk1', 'tx1'], ['lt1', 'bg1'], ['dk2', 'tx2'], ['lt2', 'bg2']];
+            pairs.forEach(([slot, role]) => { const v = pick(role); if (v) colors[slot] = v; });
+            return colors;
         }
 
         function renderSwatches() {
@@ -1001,10 +1187,56 @@ function toggleSelect(tab, item, box){
                     if (themeTarget === 'outline-color' && document.getElementById('outline-width').value === '0') {
                         document.getElementById('outline-width').value = '2';
                     }
+                    renderPreview();
                     showNotification(SLOT_NAMES[s.key] + ' → ' + hex);
                 };
                 wrap.appendChild(d);
             });
+        }
+
+        /* يعرض ألوان آخر قراءة محفوظة داخل ملف العرض — بلا أي مسح، وفوراً */
+        function showCachedThemeColors() {
+            const status = document.getElementById('theme-status');
+            const cached = docSettingsGet(THEME_CACHE_KEY);
+            if (!cached || !cached.colors || !cached.colors.accent1) {
+                status.textContent = 'اضغطي ⟳ لقراءة ألوان الثيم.';
+                return false;
+            }
+            themeColors = cached.colors;
+            renderSwatches();
+            status.textContent = 'ألوان محفوظة' + (cached.themeName ? ' لثيم «' + cached.themeName + '»' : '')
+                + ' — اضغطي ⟳ للتحديث إن غيّرتِ الثيم.';
+            return true;
+        }
+
+        async function scanThemeColors() {
+            const slideIndex = await getActiveSlideIndex();
+            const file = await openPresentationFile();
+            try {
+                const reader = makeReader(file);
+                const eocd = await findEndOfCentralDirectory(reader);
+                const idx = parseCentralDirectory(await reader.range(eocd.cdOff, eocd.cdSize), eocd.count);
+                const found = await findThemePart(reader, idx, slideIndex);
+                if (!found) throw new Error('لم يُعثر على ملف الثيم داخل العرض');
+
+                const xml = await zipEntryText(reader, idx[found.part]) || '';
+                const colors = parseThemeColors(xml);
+                if (!colors.accent1) throw new Error('تعذّر قراءة مجموعة الألوان');
+
+                if (found.master && idx[found.master]) {
+                    try { applyClrMap(colors, parseClrMap(await zipEntryText(reader, idx[found.master]))); } catch (e) {}
+                }
+
+                return {
+                    colors: colors,
+                    exact: found.exact,
+                    themeName: (xml.match(/<a:theme\b[^>]*name="([^"]*)"/) || [])[1] || '',
+                    reads: reader.reads,
+                    sliceCount: file.sliceCount
+                };
+            } finally {
+                try { file.closeAsync(); } catch (e) {}
+            }
         }
 
         async function loadThemeColors(userTriggered) {
@@ -1015,25 +1247,19 @@ function toggleSelect(tab, item, box){
             btn.disabled = true;
             status.textContent = 'جارٍ قراءة ألوان الثيم…';
             try {
-                if (!window.Office || !Office.context || !Office.context.document || !Office.context.document.getFileAsync) {
-                    throw new Error('غير متاح خارج بوربوينت');
-                }
-                const slideIndex = await getActiveSlideIndex();
-                const bytes = await getPresentationBytes();
-                const idx = zipIndex(bytes);
-                const found = await findThemePart(bytes, idx, slideIndex);
-                if (!found) throw new Error('لم يُعثر على ملف الثيم داخل العرض');
-                const xml = await zipText(bytes, idx[found.part]);
-                const colors = parseThemeColors(xml || '');
-                if (!colors.accent1) throw new Error('تعذّر قراءة مجموعة الألوان');
-                themeColors = colors;
+                const res = await withTimeout(scanThemeColors(), THEME_TIMEOUT,
+                    'تأخّرت الاستجابة — جرّبي حفظ العرض ثم أعيدي المحاولة');
+                themeColors = res.colors;
                 renderSwatches();
+                docSettingsSet(THEME_CACHE_KEY, { colors: res.colors, themeName: res.themeName, at: Date.now() });
+
                 if (userTriggered) {
-                    document.getElementById('icon-color').value = colors.accent1.toLowerCase();
+                    document.getElementById('icon-color').value = res.colors.accent1.toLowerCase();
                     document.getElementById('apply-color').checked = true;
+                    renderPreview();
                 }
-                status.textContent = 'تم — ' + (found.exact ? 'ثيم الشريحة النشطة' : 'الثيم الرئيسي للعرض')
-                    + '. اختاري الهدف ثم اضغطي أي لون.';
+                status.textContent = 'تم — ' + (res.exact ? 'ثيم الشريحة النشطة' : 'الثيم الرئيسي للعرض')
+                    + ' · قُرئ ' + res.reads + ' من ' + res.sliceCount + ' جزءاً. اختاري الهدف ثم اضغطي أي لون.';
             } catch (err) {
                 status.textContent = 'تعذّرت القراءة: ' + err.message + ' — يمكنك اختيار اللون يدوياً.';
                 if (userTriggered) showNotification('تعذّرت قراءة ألوان الثيم: ' + err.message);
@@ -1042,7 +1268,6 @@ function toggleSelect(tab, item, box){
                 btn.disabled = false;
             }
         }
-
 
 /* ==================== دمج عدة أيقونات ==================== */
 function isolateUnit(svgString, idx){
@@ -1078,7 +1303,7 @@ function unitSize(svgString){
   const doc = parseSvg(svgString);
   if (!doc) return null;
   const el = doc.documentElement;
-  let w = parseFloat(el.getAttribute('width')), h = parseFloat(el.getAttribute('height'));
+  let w = numAttr(el, 'width'), h = numAttr(el, 'height');
   const vb = getViewBox(doc);
   if (!(w > 0) || !(h > 0)){
     const n = vb.split(/[\s,]+/).map(Number);
@@ -1196,11 +1421,11 @@ function buildWith(svg, st, styled){
   const applyColor = styled && st.applyColor;
   const shape = styled ? st.shape : 'none';
   const shadowOn = styled && st.shadowOn;
-  let processed = applyColor ? deepColorSVG(svg, st.iconColor) : svg;
+  const processed = applyColor ? deepColorSVG(svg, st.iconColor) : svg;
 
   if (shape === 'none' && !shadowOn) return resizeSvg(processed, w);
 
-  const parts = innerOf(processed);
+  const inner = embedSvg(processed, w);
   const fid = 'shz-shadow-' + (++shadowSeq);
   const fdef = shadowOn ? shadowFilter(fid, st) : '';
   const fattr = shadowOn ? ' filter="url(#' + fid + ')"' : '';
@@ -1209,9 +1434,7 @@ function buildWith(svg, st, styled){
     const pad = Math.max(4, Math.round(w * (.12 + st.blur * .02)));
     const total = w + pad * 2;
     return '<svg xmlns="http://www.w3.org/2000/svg" width="' + total + '" height="' + total + '" viewBox="0 0 ' + total + ' ' + total + '">'
-      + fdef + '<g transform="translate(' + pad + ',' + pad + ')"' + fattr + '>'
-      + '<svg width="' + w + '" height="' + w + '" viewBox="' + parts.viewBox + '" preserveAspectRatio="xMidYMid meet">' + parts.inner + '</svg>'
-      + '</g></svg>';
+      + fdef + '<g transform="translate(' + pad + ',' + pad + ')"' + fattr + '>' + inner + '</g></svg>';
   }
 
   const padding = Math.round(w * padFor(shape));
@@ -1224,9 +1447,12 @@ function buildWith(svg, st, styled){
 
   return '<svg xmlns="http://www.w3.org/2000/svg" width="' + total + '" height="' + total + '" viewBox="0 0 ' + total + ' ' + total + '">'
     + fdef + shapeHtml
-    + '<g transform="translate(' + padding + ',' + (padding + shiftY) + ')">'
-    + '<svg width="' + w + '" height="' + w + '" viewBox="' + parts.viewBox + '" preserveAspectRatio="xMidYMid meet">' + parts.inner + '</svg>'
-    + '</g></svg>';
+    + '<g transform="translate(' + padding + ',' + (padding + shiftY) + ')">' + inner + '</g></svg>';
+}
+
+/* نسخة بلا ظلّ من الإعدادات — تُستعمل لإعادة المحاولة إن رفض بوربوينت المرشّحات */
+function buildWithoutShadow(svg, st, styled){
+  return buildWith(svg, Object.assign({}, st, { shadowOn: false }), styled);
 }
 
 function buildContent(svg){
@@ -1309,35 +1535,89 @@ function savePreset(){
 }
 
 /* ==================== الإدراج ==================== */
-function sendToSlide(content){
-  Office.context.document.setSelectedDataAsync(content, { coercionType: Office.CoercionType.XmlSvg }, (result) => {
-    if (result.status === Office.AsyncResultStatus.Succeeded) showNotification('تم الإدراج بنجاح ✨');
-    else showNotification('تعذّر الإدراج: ' + ((result.error && result.error.message) || 'تأكدي من وجود شريحة مفتوحة'));
+const INSERT_LIMIT = 900 * 1024;   /* حدّ أمان لحجم الحمولة المرسلة لبوربوينت */
+
+function payloadBytes(s){ try { return new Blob([s]).size; } catch(e){ return s.length; } }
+
+function setSelectedSvg(content){
+  return new Promise((resolve) => {
+    try {
+      Office.context.document.setSelectedDataAsync(content, { coercionType: Office.CoercionType.XmlSvg }, (r) => {
+        if (r.status === Office.AsyncResultStatus.Succeeded) resolve({ ok:true });
+        else resolve({ ok:false, message:(r.error && r.error.message) || '' });
+      });
+    } catch(e){ resolve({ ok:false, message:e.message || '' }); }
   });
 }
+
+/* رسالة أوفيس الأصلية غامضة — نترجمها إلى سبب مفهوم */
+function insertHint(msg){
+  const m = (msg || '').toLowerCase();
+  if (m.indexOf('internal') !== -1 || m.indexOf('5001') !== -1)
+    return 'رفض بوربوينت هذا الشكل. تأكّدي أن شريحة مفتوحة ومحدّدة (لا فارز الشرائح ولا الشريحة الرئيسية)، وجرّبي أيقونة أبسط أو حجماً أصغر.';
+  if (m.indexOf('selection') !== -1 || m.indexOf('invalid') !== -1)
+    return 'لا يوجد موضع إدراج صالح — اضغطي داخل الشريحة أولاً ثم أعيدي المحاولة.';
+  return msg || 'تأكّدي من وجود شريحة مفتوحة ومحدّدة.';
+}
+
+/* يحاول الإدراج، وإن رفض بوربوينت المرشّحات يُعيد المحاولة بلا ظلّ — فتبقى الأيقونة متجهاً */
+async function sendToSlide(content, buildPlain){
+  if (payloadBytes(content) > INSERT_LIMIT){
+    showNotification('الحمولة كبيرة جداً — قلّلي عدد الأيقونات المحدّدة أو الحجم');
+    return false;
+  }
+  let res = await setSelectedSvg(content);
+  if (!res.ok && typeof buildPlain === 'function'){
+    let plain = null;
+    try { plain = buildPlain(); } catch(e){}
+    if (plain && plain !== content){
+      const again = await setSelectedSvg(plain);
+      if (again.ok){
+        showNotification('تم الإدراج بلا ظلّ — بوربوينت لا يدعم ظلّ SVG في هذا الملف ✨');
+        return true;
+      }
+      res = again;
+    }
+  }
+  if (res.ok){ showNotification('تم الإدراج بنجاح ✨'); return true; }
+  showNotification('تعذّر الإدراج: ' + insertHint(res.message));
+  return false;
+}
+
 function insert(svg){
   try {
     if (!window.Office || !Office.context || !Office.context.document){
       showNotification('الإضافة غير متصلة ببوربوينت'); return;
     }
-    sendToSlide(buildContent(svg));
+    if (currentTab === 'shapes'){ sendToSlide(buildContent(svg), null); return; }
+    const st = currentSettings();
+    const styled = currentTab === 'icons';
+    const retry = st.shadowOn ? (() => buildWithoutShadow(svg, st, styled)) : null;
+    sendToSlide(buildWith(svg, st, styled), retry);
   } catch(err){ console.error(err); showNotification('حدث خطأ: ' + err.message); }
 }
+
 async function insertSelected(tab){
   const items = selected[tab].slice();
   if (!items.length){ showNotification('لم تحدّدي أي أيقونة'); return; }
   const btn = $('batch-insert-' + tab);
   btn.disabled = true;
   try {
-    const units = [];
+    const texts = [];
     for (let i = 0; i < items.length; i++){
       if (!items[i]._text) items[i]._text = await items[i].file.text();
-      units.push(buildContent(items[i]._text));
+      texts.push(items[i]._text);
     }
     const cols = parseInt($('batch-cols-' + tab).value, 10) || 0;
-    const svg = composeGrid(units, cols);
+    const st = currentSettings();
+    const styled = (tab === 'icons');
+    const compose = (shadow) => composeGrid(
+      texts.map(t => (tab === 'shapes') ? t : buildWith(t, Object.assign({}, st, { shadowOn: shadow && st.shadowOn }), styled)),
+      cols);
+
+    const svg = compose(true);
     if (!svg) throw new Error('تعذّر تجهيز الأيقونات');
-    sendToSlide(svg);
+    await sendToSlide(svg, (tab !== 'shapes' && st.shadowOn) ? (() => compose(false)) : null);
   } catch(err){ showNotification('تعذّر الإدراج: ' + err.message); }
   finally { btn.disabled = (selected[tab].length === 0); }
 }
@@ -1436,8 +1716,11 @@ function initUI(){
   applyTheme(saved === null ? false : saved);
 }
 
-Office.onReady((info) => {
+const APP_VERSION = '2.0.2';
+
+Office.onReady(async (info) => {
   initUI();
+  const v = $('app-version'); if (v) v.textContent = 'v' + APP_VERSION;
   try {
     if (info && info.host === Office.HostType.PowerPoint){
       if (lsGet('shz_dark', null) === null){ const d = detectOfficeDark(); if (d !== null) applyTheme(d); }
@@ -1448,10 +1731,19 @@ Office.onReady((info) => {
       }
     }
   } catch(e){ console.error(e); }
+
   switchTab('logos');
   renderPreview();
-  setTimeout(() => { loadThemeColors(false); }, 600);
-  TABS.forEach(t => restoreLastFolder(t));
+
+  /* لا مسح تلقائي للعرض بعد الآن: نعرض آخر ألوان محفوظة داخل الملف فوراً،
+     والمسح الحقيقي لا يجري إلا بضغطة ⟳ */
+  try { showCachedThemeColors(); } catch(e){}
+
+  /* استعادة المجلدات بالتسلسل، والتبويب المفتوح أولاً — بدل ثلاث عمليات متوازية عند الإقلاع */
+  const order = [currentTab].concat(TABS.filter(t => t !== currentTab));
+  for (let i = 0; i < order.length; i++){
+    try { await restoreLastFolder(order[i]); } catch(e){}
+  }
 });
 </script>
 </body>
