@@ -1,622 +1,706 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Shaza pptx library</title>
-    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
-    <style>
-        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f3f2f1; overflow: hidden; }
-        .top-bar { background-color: #ffffff; padding: 10px 15px 0 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10; display: flex; flex-direction: column; gap: 8px; }
-        .top-bar h3 { color: #0078d4; margin: 0; font-size: 16px; text-align: center; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shaza pptx library</title>
+<script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+<style>
+:root{
+  --bg:#f3f2f1; --surf:#ffffff; --soft:#fafafa; --line:#e3e1df; --hd:#f0f4f8;
+  --txt:#252423; --mut:#605e5c; --acc:#0F5AA8; --accSoft:#eff6fc;
+  --inp:#ffffff; --inpLine:#c8c6c4; --onTxt:#ffffff; --danger:#c4314b; --dangerBg:#fde7e9;
+  --box:40px;
+}
+body.dark{
+  --bg:#1b1a19; --surf:#252423; --soft:#2a2928; --line:#3b3a39; --hd:#2f3336;
+  --txt:#f3f2f1; --mut:#a19f9d; --acc:#4CC2FF; --accSoft:#13303f;
+  --inp:#1f1e1d; --inpLine:#4a4948; --onTxt:#10222e; --danger:#ff8f9e; --dangerBg:#5a2a2a;
+}
+*{box-sizing:border-box}
+body{margin:0;display:flex;flex-direction:column;height:100vh;overflow:hidden;
+  font-family:'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--txt)}
 
-        .controls-panel { display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
-        .controls-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
-        .control-box { display: flex; align-items: center; gap: 5px; background-color: #f8f8f8; padding: 4px 8px; border-radius: 6px; border: 1px solid #edebe9; flex: 1; min-width: 80px; justify-content: center; }
-        .control-box label { font-size: 11px; color: #605e5c; font-weight: bold; margin: 0; }
-        .control-box input[type="number"], .control-box select { padding: 2px; font-size: 11px; border: 1px solid #c8c6c4; border-radius: 4px; text-align: center; }
-        .control-box input[type="number"] { width: 45px; }
-        .control-box input[type="color"] { width: 20px; height: 20px; padding: 0; border: none; cursor: pointer; background: none; }
+.bar{background:var(--surf);padding:8px 9px 9px;display:flex;flex-direction:column;gap:6px;
+  box-shadow:0 2px 5px rgba(0,0,0,.05);z-index:5}
+.head{display:flex;align-items:center;gap:6px}
+.head h3{color:var(--acc);margin:0;font-size:14px;font-weight:700;flex:1;text-align:center}
 
-        .shape-selector { background-color: #f8f8f8; padding: 8px; border-radius: 6px; border: 1px solid #edebe9; margin-bottom: 5px; display: flex; flex-direction: column; gap: 8px; }
-        .shape-options { display: flex; gap: 10px; justify-content: center; border-bottom: 1px solid #e1dfdd; padding-bottom: 5px; flex-wrap: wrap; }
-        .shape-option { display: flex; align-items: center; gap: 3px; font-size: 10px; cursor: pointer; }
-        .shape-details { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
+.folder{display:flex;align-items:center;gap:5px;background:var(--accSoft);border:1px solid var(--line);
+  border-radius:6px;padding:4px 7px;font-size:10px;color:var(--txt)}
+.folder b{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.folder .sp{margin-inline-start:auto;display:flex;gap:4px}
 
-        .theme-panel { background-color: #f8f8f8; padding: 6px 8px; border-radius: 6px; border: 1px solid #edebe9; display: flex; flex-direction: column; gap: 6px; }
-        .theme-head { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: space-between; }
-        .theme-label { font-size: 10px; font-weight: bold; color: #0078d4; }
-        .target-chips { display: flex; gap: 4px; }
-        .chip { font-size: 10px; padding: 2px 6px; border-radius: 10px; border: 1px solid #c8c6c4; background: #fff; color: #605e5c; cursor: pointer; }
-        .chip.active { background: #0078d4; border-color: #0078d4; color: #fff; font-weight: bold; }
-        .mini-btn { font-size: 12px; line-height: 1; padding: 2px 6px; border: 1px solid #c8c6c4; background: #fff; border-radius: 4px; cursor: pointer; color: #0078d4; }
-        .mini-btn:hover { background: #eff6fc; }
-        .mini-btn:disabled { opacity: 0.5; cursor: default; }
-        .swatches { display: flex; flex-wrap: wrap; gap: 4px; direction: ltr; }
-        .swatch { width: 22px; height: 22px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.25); cursor: pointer; position: relative; }
-        .swatch:hover { outline: 2px solid #0078d4; outline-offset: 1px; }
-        .swatch span { position: absolute; bottom: -1px; right: 1px; font-size: 7px; color: rgba(0,0,0,0.55); font-weight: bold; }
-        .theme-status { font-size: 9px; color: #605e5c; line-height: 1.5; }
-        .tabs-container { display: flex; gap: 5px; border-bottom: 1px solid #edebe9; margin-top: 2px; }
-        .tab-btn { flex: 1; background: none; border: none; padding: 8px 5px; cursor: pointer; font-size: 12px; color: #323130; border-bottom: 3px solid transparent; }
-        .tab-btn.active { font-weight: bold; color: #0078d4; border-bottom: 3px solid #0078d4; }
+.mini{font-size:10px;padding:2px 6px;border:1px solid var(--inpLine);background:var(--inp);
+  border-radius:4px;color:var(--acc);cursor:pointer;font-family:inherit}
+.mini:hover{background:var(--accSoft)}
+.mini:disabled{opacity:.5;cursor:default}
 
-        .main-content { flex-grow: 1; padding: 12px; overflow-y: auto; background-color: #f3f2f1; }
-        .btn-select { background-color: #0078d4; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 12px; margin-bottom: 8px; font-weight: bold;}
-        .btn-select:hover { background-color: #106ebe; }
-        .search-box { width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 12px; border: 1px solid #c8c6c4; border-radius: 4px; margin-bottom: 10px; font-family: inherit; }
-        .icon-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
-        .icon-box { width: 55px; height: 55px; background-color: white; border: 1px solid #c8c6c4; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; transition: transform 0.1s; }
-        .icon-box:hover { transform: scale(1.05); border-color: #0078d4; }
-        .icon-box.selected { border: 2px solid #0078d4; background: #eff6fc; box-shadow: 0 0 0 2px rgba(0,120,212,0.25); }
-        .icon-box.selected::after { content: '✓'; position: absolute; top: -6px; left: -6px; background: #0078d4; color: #fff; font-size: 9px; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .icon-box { position: relative; }
-        .batch-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; background: #fff; border: 1px solid #edebe9; border-radius: 6px; padding: 5px 7px; margin-bottom: 10px; }
-        .batch-bar.on { border-color: #0078d4; background: #f3f9fd; }
-        .batch-bar label { font-size: 10px; color: #605e5c; display: flex; align-items: center; gap: 3px; }
-        .batch-bar input[type="number"] { width: 34px; font-size: 11px; padding: 2px; border: 1px solid #c8c6c4; border-radius: 4px; text-align: center; }
-        .batch-count { font-size: 10px; font-weight: bold; color: #0078d4; }
-        .mini-btn.primary { background: #0078d4; color: #fff; border-color: #0078d4; font-weight: bold; }
-        .mini-btn.primary:disabled { background: #c8c6c4; border-color: #c8c6c4; color: #fff; }
-        .icon-box img { max-width: 100%; max-height: 100%; pointer-events: none; }
+.blk{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--soft)}
+.bh{background:var(--hd);padding:4px 8px;font-size:10px;font-weight:700;color:var(--acc);
+  display:flex;align-items:center;gap:5px;border-bottom:1px solid var(--line)}
+.bh .sp{margin-inline-start:auto;display:flex;gap:5px;align-items:center}
+.chev{color:var(--mut);font-size:9px;border:1px solid var(--inpLine);border-radius:4px;
+  width:17px;height:16px;display:flex;align-items:center;justify-content:center;background:var(--inp);cursor:pointer}
+.blk.closed .bb{display:none}
+.blk.closed .bh{border-bottom:none}
+.bb{padding:6px;display:flex;flex-direction:column;gap:6px}
 
-        .group-title { color: #323130; font-size: 12px; border-bottom: 2px solid #e1dfdd; padding: 6px 5px; margin-top: 5px; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .empty-hint { font-size: 11px; color: #605e5c; text-align: center; padding: 20px 10px; line-height: 1.7; }
-        #notification { position: fixed; bottom: 15px; left: 15px; right: 15px; padding: 8px; background: #323130; color: white; border-radius: 4px; font-size: 11px; text-align: center; display: none; z-index: 100; }
-    </style>
+.r{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.lbl{font-size:10px;color:var(--mut);font-weight:700}
+input[type=number]{width:38px;font-size:11px;padding:2px;border:1px solid var(--inpLine);
+  border-radius:4px;text-align:center;background:var(--inp);color:var(--txt)}
+select{font-size:10px;padding:2px;border:1px solid var(--inpLine);border-radius:4px;
+  background:var(--inp);color:var(--txt);font-family:inherit;max-width:100%}
+input[type=color]{width:20px;height:20px;padding:0;border:1px solid var(--inpLine);border-radius:4px;
+  cursor:pointer;background:none;flex:none}
+input[type=checkbox]{accent-color:var(--acc)}
+
+.cols{display:flex;gap:6px;align-items:stretch}
+.pv{border-radius:7px;background:var(--surf);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;flex:none;width:54px;height:54px;overflow:hidden}
+.pv img{max-width:46px;max-height:46px}
+
+.pstrip{display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
+.pchip{width:42px;height:42px;border-radius:8px;background:var(--surf);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;position:relative;flex:none;cursor:pointer}
+.pchip:hover{border-color:var(--acc)}
+.pchip:hover .x{display:flex}
+.pchip.on{border:2px solid var(--acc);box-shadow:0 0 0 2px rgba(15,90,168,.16)}
+.pchip img{max-width:32px;max-height:32px;pointer-events:none}
+.pchip .x{display:none;position:absolute;top:-5px;inset-inline-start:-5px;width:15px;height:15px;border-radius:50%;
+  background:var(--dangerBg);color:var(--danger);font-size:9px;align-items:center;
+  justify-content:center;border:1px solid var(--line);cursor:pointer}
+.padd{width:42px;height:42px;border-radius:8px;border:1px dashed var(--inpLine);display:flex;
+  align-items:center;justify-content:center;color:var(--acc);font-size:16px;flex:none;cursor:pointer;background:none}
+.pempty{font-size:9px;color:var(--mut);padding:6px 2px}
+
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.sgrid label{font-size:12px;text-align:center;padding:3px 0;border:1px solid var(--inpLine);
+  border-radius:5px;background:var(--inp);color:var(--mut);cursor:pointer;line-height:1.25}
+.sgrid label:hover{border-color:var(--acc)}
+.sgrid input{display:none}
+.sgrid input:checked + span{color:var(--onTxt)}
+.sgrid label.on{background:var(--acc);color:var(--onTxt);border-color:var(--acc);font-weight:700}
+
+.swrow{display:flex;gap:4px;direction:ltr;flex-wrap:wrap}
+.swatch{width:19px;height:19px;border-radius:4px;border:1px solid rgba(0,0,0,.25);cursor:pointer;position:relative}
+.swatch:hover{outline:2px solid var(--acc);outline-offset:1px}
+.swatch span{position:absolute;bottom:-2px;right:1px;font-size:7px;color:rgba(0,0,0,.5);font-weight:700}
+.chip{font-size:9px;padding:2px 5px;border-radius:10px;border:1px solid var(--inpLine);
+  background:var(--inp);color:var(--mut);cursor:pointer}
+.chip.active{background:var(--acc);border-color:var(--acc);color:var(--onTxt);font-weight:700}
+.theme-status{font-size:9px;color:var(--mut);line-height:1.5}
+
+.tabs{display:flex;border-bottom:1px solid var(--line);background:var(--surf)}
+.tab-btn{flex:1;background:none;border:none;padding:7px 4px;cursor:pointer;font-size:12px;
+  color:var(--mut);border-bottom:3px solid transparent;font-family:inherit}
+.tab-btn.active{font-weight:700;color:var(--acc);border-bottom-color:var(--acc)}
+
+.main{flex-grow:1;padding:9px;overflow-y:auto;background:var(--bg)}
+.btn-select{background:var(--acc);color:var(--onTxt);border:none;padding:8px;border-radius:5px;
+  cursor:pointer;width:100%;font-size:12px;font-weight:700;margin-bottom:7px;font-family:inherit}
+.search-box{width:100%;padding:5px 8px;font-size:11px;border:1px solid var(--inpLine);
+  border-radius:4px;background:var(--inp);color:var(--txt);font-family:inherit}
+.zoom{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--mut);margin:7px 0 6px}
+.zoom input[type=range]{flex:1;accent-color:var(--acc);height:4px}
+.batch-bar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;background:var(--surf);
+  border:1px solid var(--line);border-radius:6px;padding:5px 6px;margin-bottom:8px}
+.batch-bar.on{border-color:var(--acc);background:var(--accSoft)}
+.batch-bar label{font-size:10px;color:var(--mut);display:flex;align-items:center;gap:3px}
+.batch-bar input[type=number]{width:32px}
+.batch-count{font-size:10px;font-weight:700;color:var(--acc)}
+.mini.primary{background:var(--acc);color:var(--onTxt);border-color:var(--acc);font-weight:700}
+.mini.primary:disabled{background:var(--inpLine);border-color:var(--inpLine)}
+
+.group-title{font-size:10px;font-weight:700;color:var(--txt);border-bottom:2px solid var(--line);
+  padding:4px 2px;display:flex;justify-content:space-between;margin:4px 0 7px;cursor:pointer}
+.icon-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.icon-box{width:var(--box);height:var(--box);background:var(--surf);border:1px solid var(--line);
+  border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  padding:4px;position:relative;transition:transform .1s}
+.icon-box:hover{transform:scale(1.06);border-color:var(--acc)}
+.icon-box img{max-width:100%;max-height:100%;pointer-events:none}
+.icon-box.selected{border:2px solid var(--acc);background:var(--accSoft)}
+.icon-box.selected::after{content:'✓';position:absolute;top:-6px;inset-inline-start:-6px;background:var(--acc);
+  color:var(--onTxt);font-size:9px;width:15px;height:15px;border-radius:50%;display:flex;
+  align-items:center;justify-content:center}
+.empty-hint{font-size:11px;color:var(--mut);text-align:center;padding:14px 8px;line-height:1.7}
+#notification{position:fixed;bottom:12px;left:12px;right:12px;padding:8px;background:#323130;color:#fff;
+  border-radius:5px;font-size:11px;text-align:center;display:none;z-index:100}
+</style>
 </head>
 <body>
-    <div class="top-bar">
-        <h3>Shaza pptx library</h3>
-        <div id="global-controls" class="controls-panel">
-            <div class="controls-row">
-                <div class="control-box" id="size-control-group">
-                    <label>الحجم:</label>
-                    <input type="number" id="icon-width" value="50" min="10" max="200" step="1" title="إدخال يدوي من 10 إلى 200">
-                    <select id="size-preset" title="اختيار سريع للحجم"></select>
-                </div>
-                <div class="control-box" id="color-control-group">
-                    <input type="checkbox" id="apply-color" checked>
-                    <label>تلوين</label>
-                    <input type="color" id="icon-color" value="#4472C4">
-                </div>
-            </div>
-            <div id="theme-group" class="theme-panel">
-                <div class="theme-head">
-                    <span class="theme-label">ألوان ثيم العرض</span>
-                    <div class="target-chips" id="theme-target">
-                        <span class="chip active" data-target="icon-color">الأيقونة</span>
-                        <span class="chip" data-target="bg-color">الخلفية</span>
-                        <span class="chip" data-target="outline-color">الإطار</span>
-                    </div>
-                    <button type="button" class="mini-btn" id="theme-load" onclick="loadThemeColors(true)" title="قراءة ألوان الثيم من العرض الحالي">⟳</button>
-                </div>
-                <div id="theme-swatches" class="swatches"></div>
-                <div id="theme-status" class="theme-status">اضغطي ⟳ لقراءة ألوان الثيم من العرض المفتوح.</div>
-            </div>
-            <div id="shape-selector-group" class="shape-selector">
-                <div class="shape-options">
-                    <span style="font-size: 10px; font-weight: bold; color: #0078d4;">الشكل الحاوي:</span>
-                    <label class="shape-option"><input type="radio" name="bg-shape" value="none" checked> لا شيء</label>
-                    <label class="shape-option"><input type="radio" name="bg-shape" value="circle"> دائرة</label>
-                    <label class="shape-option"><input type="radio" name="bg-shape" value="square"> مربع</label>
-                    <label class="shape-option"><input type="radio" name="bg-shape" value="rounded"> مربع ناعم</label>
-                    <label class="shape-option"><input type="radio" name="bg-shape" value="diamond"> معيّن</label>
-                </div>
-                <div class="shape-details">
-                    <div id="bg-details" class="shape-details" style="display: none;">
-                        <div style="display: flex; align-items: center; gap: 3px;">
-                            <label style="font-size: 10px;">الخلفية:</label>
-                            <input type="color" id="bg-color" value="#ffffff">
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 3px;">
-                            <label style="font-size: 10px;">الإطار:</label>
-                            <input type="color" id="outline-color" value="#000000">
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 3px;">
-                            <label style="font-size: 10px;">السماكة:</label>
-                            <select id="outline-width" style="font-size: 10px;">
-                                <option value="0">بلا إطار</option>
-                                <option value="1">1 px</option>
-                                <option value="2">2 px</option>
-                                <option value="3">3 px</option>
-                                <option value="4">4 px</option>
-                                <option value="5">5 px</option>
-                                <option value="6">6 px</option>
-                                <option value="8">8 px</option>
-                                <option value="10">10 px</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 3px;">
-                        <input type="checkbox" id="apply-shadow">
-                        <label style="font-size: 10px;">ظل</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="tabs-container">
-            <button class="tab-btn active" onclick="switchTab('logos')" id="tab-logos">الشعارات</button>
-            <button class="tab-btn" onclick="switchTab('icons')" id="tab-icons">الأيقونات</button>
-            <button class="tab-btn" onclick="switchTab('shapes')" id="tab-shapes">الأشكال</button>
-        </div>
+<div class="bar">
+  <div class="head">
+    <button class="mini" id="theme-toggle" title="تبديل الوضع الداكن">🌙</button>
+    <h3>Shaza pptx library</h3>
+    <span style="width:26px"></span>
+  </div>
+
+  <div class="folder">📁 <b id="folder-name">لم يُحدَّد مجلد</b>
+    <span id="folder-count" style="color:var(--mut)"></span>
+    <span class="sp">
+      <button class="mini" id="folder-reload" title="إعادة تحميل المجلد">⟳</button>
+      <button class="mini" id="folder-change">تغيير</button>
+    </span>
+  </div>
+
+  <!-- كتلة الأنماط -->
+  <div class="blk" id="blk-presets" data-key="presets">
+    <div class="bh">🎨 الأنماط
+      <span class="sp"><button class="mini" id="preset-save">حفظ</button>
+      <span class="chev" data-toggle="presets">▾</span></span></div>
+    <div class="bb" style="padding:6px">
+      <div class="pstrip" id="preset-strip"></div>
     </div>
-    <div class="main-content">
-        <div id="section-logos">
-            <button class="btn-select" onclick="loadFlat('logos')">تحديد مجلد الشعارات</button>
-            <input type="search" class="search-box" id="search-logos" placeholder="بحث بالاسم…" oninput="filterGrid('logos')">
-            <div id="grid-logos" class="icon-grid"></div>
-            <div class="empty-hint" id="hint-logos">اضغطي الزر بالأعلى واختاري مجلد الشعارات (ملفات SVG).</div>
+  </div>
+
+  <div class="cols">
+    <!-- كتلة الأيقونة -->
+    <div class="blk" id="blk-icon" data-key="icon" style="flex:1.12">
+      <div class="bh">🔷 الأيقونة<span class="sp"><span class="chev" data-toggle="icon">▾</span></span></div>
+      <div class="bb">
+        <div class="r" style="flex-wrap:nowrap;gap:6px">
+          <div class="pv" id="preview-box" title="معاينة النتيجة"></div>
+          <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+            <div class="r" style="gap:3px"><span class="lbl">حجم</span>
+              <input type="number" id="icon-width" value="50" min="10" max="200" step="1"></div>
+            <select id="size-preset" title="اختيار سريع للحجم"></select>
+          </div>
         </div>
-        <div id="section-icons" style="display: none;">
-            <button class="btn-select" onclick="loadGrouped()">تحديد مجلد الأيقونات</button>
-            <input type="search" class="search-box" id="search-icons" placeholder="بحث بالاسم…" oninput="filterGrid('icons')">
-            <div id="grid-icons-container"></div>
-            <div class="empty-hint" id="hint-icons">اختاري المجلد الرئيسي للأيقونات — سيتم عرض كل مجلد فرعي كمجموعة مستقلة.</div>
-        </div>
-        <div id="section-shapes" style="display: none;">
-            <button class="btn-select" onclick="loadFlat('shapes')">تحديد مجلد الأشكال</button>
-            <input type="search" class="search-box" id="search-shapes" placeholder="بحث بالاسم…" oninput="filterGrid('shapes')">
-            <div id="grid-shapes" class="icon-grid"></div>
-            <div class="empty-hint" id="hint-shapes">الأشكال تُدرج كما هي بدون تلوين أو تحجيم.</div>
-        </div>
+        <div class="r" style="gap:4px"><span class="lbl">لون الأيقونة</span>
+          <input type="color" id="icon-color" value="#4472C4">
+          <span class="lbl"><input type="checkbox" id="apply-color" checked> تلوين</span></div>
+        <div class="r" style="gap:4px"><span class="lbl">ثيم</span>
+          <div class="swrow" id="theme-swatches"></div>
+          <button class="mini" id="theme-load" title="قراءة ألوان ثيم العرض">⟳</button></div>
+        <div class="r" style="gap:3px" id="theme-target">
+          <span class="chip active" data-target="icon-color">الأيقونة</span>
+          <span class="chip" data-target="bg-color">الشكل</span>
+          <span class="chip" data-target="outline-color">الإطار</span></div>
+        <div class="theme-status" id="theme-status">اضغطي ⟳ لقراءة ألوان الثيم.</div>
+      </div>
     </div>
-    <div id="notification"></div>
 
-    <script>
-        let currentTab = 'logos';
-        let filterSeq = 0;
-        const objectUrls = [];
-        const TABS = ['logos', 'icons', 'shapes'];
+    <!-- كتلة الشكل الحاوي -->
+    <div class="blk" id="blk-shape" data-key="shape" style="flex:1">
+      <div class="bh">⬛ الشكل الحاوي<span class="sp"><span class="chev" data-toggle="shape">▾</span></span></div>
+      <div class="bb">
+        <div class="sgrid" id="shape-grid"></div>
+        <div class="r" style="gap:4px"><span class="lbl">لون الشكل</span>
+          <input type="color" id="bg-color" value="#ffffff"></div>
+        <div class="r" style="gap:4px"><span class="lbl">الإطار</span>
+          <input type="color" id="outline-color" value="#000000">
+          <select id="outline-width">
+            <option value="0">بلا</option><option value="1">1px</option><option value="2">2px</option>
+            <option value="3">3px</option><option value="4">4px</option><option value="5">5px</option>
+            <option value="6">6px</option><option value="8">8px</option><option value="10">10px</option>
+          </select></div>
+      </div>
+    </div>
+  </div>
 
-        /* -------- إعدادات مستقلة لكل تبويب -------- */
+  <!-- كتلة الظل -->
+  <div class="blk" id="blk-shadow" data-key="shadow">
+    <div class="bh">🌑 الظل
+      <span class="sp"><span class="lbl"><input type="checkbox" id="apply-shadow"> مفعّل</span>
+      <span class="chev" data-toggle="shadow">▾</span></span></div>
+    <div class="bb" style="padding:6px">
+      <div class="r" style="gap:5px">
+        <span class="lbl">الانتشار</span>
+        <select id="shadow-blur">
+          <option value="1.2">ناعم</option><option value="2.5" selected>متوسط</option>
+          <option value="4">واسع</option><option value="6">واسع جداً</option></select>
+        <span class="lbl">الكثافة</span>
+        <select id="shadow-slope">
+          <option value="0.2">خفيف</option><option value="0.35" selected>متوسط</option>
+          <option value="0.5">قوي</option><option value="0.7">قوي جداً</option></select>
+        <span class="lbl">الإزاحة</span>
+        <select id="shadow-offset">
+          <option value="0">0</option><option value="1">1px</option><option value="2" selected>2px</option>
+          <option value="3">3px</option><option value="4">4px</option></select>
+      </div>
+    </div>
+  </div>
+</div>
 
-        const CONTROL_IDS = ['icon-width', 'apply-color', 'icon-color', 'bg-color', 'outline-color', 'outline-width', 'apply-shadow'];
-        const tabSettings = {};
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('logos')" id="tab-logos">الشعارات</button>
+  <button class="tab-btn" onclick="switchTab('icons')" id="tab-icons">الأيقونات</button>
+  <button class="tab-btn" onclick="switchTab('shapes')" id="tab-shapes">الأشكال</button>
+</div>
 
-        function snapshotSettings() {
-            const s = {};
-            CONTROL_IDS.forEach(id => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                s[id] = (el.type === 'checkbox') ? el.checked : el.value;
-            });
-            const r = document.querySelector('input[name="bg-shape"]:checked');
-            s.shape = r ? r.value : 'none';
-            return s;
-        }
+<div class="main">
+  <div id="section-logos">
+    <input type="search" class="search-box" id="search-logos" placeholder="بحث بالاسم…" oninput="filterGrid('logos')">
+    <div id="grid-logos" class="icon-grid"></div>
+    <div class="empty-hint" id="hint-logos">
+      <button class="btn-select" onclick="pickFolder('logos')">تحديد مجلد الشعارات</button>
+      اختاري مجلد الشعارات (ملفات SVG).</div>
+  </div>
+  <div id="section-icons" style="display:none">
+    <input type="search" class="search-box" id="search-icons" placeholder="بحث بالاسم…" oninput="filterGrid('icons')">
+    <div id="grid-icons-container"></div>
+    <div class="empty-hint" id="hint-icons">
+      <button class="btn-select" onclick="pickFolder('icons')">تحديد مجلد الأيقونات</button>
+      كل مجلد فرعي يظهر كمجموعة مستقلة.</div>
+  </div>
+  <div id="section-shapes" style="display:none">
+    <input type="search" class="search-box" id="search-shapes" placeholder="بحث بالاسم…" oninput="filterGrid('shapes')">
+    <div id="grid-shapes" class="icon-grid"></div>
+    <div class="empty-hint" id="hint-shapes">
+      <button class="btn-select" onclick="pickFolder('shapes')">تحديد مجلد الأشكال</button>
+      الأشكال تُدرج كما هي بدون تلوين أو تحجيم.</div>
+  </div>
+</div>
+<div id="notification"></div>
 
-        function restoreSettings(s) {
-            if (!s) return;
-            CONTROL_IDS.forEach(id => {
-                if (!(id in s)) return;
-                const el = document.getElementById(id);
-                if (!el) return;
-                if (el.type === 'checkbox') el.checked = s[id];
-                else el.value = s[id];
-            });
-            const r = document.querySelector('input[name="bg-shape"][value="' + (s.shape || 'none') + '"]');
-            if (r) r.checked = true;
-            document.getElementById('bg-details').style.display = (s.shape && s.shape !== 'none') ? 'flex' : 'none';
-            syncSizeUI();
-        }
+<script>
+/* ==================== حالة عامة ==================== */
+const TABS = ['logos','icons','shapes'];
+let currentTab = 'logos';
+let notifSeq = 0;
+const objectUrls = [];
+const SIZE_MIN = 10, SIZE_MAX = 200;
 
-        /* -------- الحجم: إدخال يدوي أو اختيار جاهز -------- */
+const SAMPLE_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
+  + '<path fill="#000" d="M12 2 2 7v10l10 5 10-5V7L12 2zm0 2.3 7.5 3.7-7.5 3.8L4.5 8 12 4.3zM4 9.6l7 3.5v6.3l-7-3.5V9.6zm9 9.8v-6.3l7-3.5v6.3l-7 3.5z"/></svg>';
 
-        const SIZE_MIN = 10, SIZE_MAX = 200;
+const SHAPES = [
+  {v:'none',g:'—',n:'لا شيء',pad:0},
+  {v:'circle',g:'●',n:'دائرة',pad:.40},
+  {v:'square',g:'■',n:'مربع',pad:.40},
+  {v:'rounded',g:'▢',n:'مربع ناعم',pad:.40},
+  {v:'diamond',g:'◆',n:'معيّن',pad:.62},
+  {v:'hexagon',g:'⬢',n:'سداسي',pad:.42},
+  {v:'octagon',g:'⯄',n:'مثمّن',pad:.40},
+  {v:'ring',g:'◎',n:'حلقة مزدوجة',pad:.46},
+  {v:'shield',g:'🛡',n:'درع',pad:.55}
+];
 
-        function buildSizePresets() {
-            const sel = document.getElementById('size-preset');
-            sel.innerHTML = '';
-            const manual = document.createElement('option');
-            manual.value = ''; manual.textContent = 'يدوي';
-            sel.appendChild(manual);
-            for (let v = SIZE_MIN; v <= SIZE_MAX; v += 10) {
-                const o = document.createElement('option');
-                o.value = String(v); o.textContent = v + ' px';
-                sel.appendChild(o);
-            }
-            sel.onchange = () => {
-                if (!sel.value) { document.getElementById('icon-width').focus(); return; }
-                document.getElementById('icon-width').value = sel.value;
-            };
-            const num = document.getElementById('icon-width');
-            num.oninput = () => syncSizeUI();
-            num.onchange = () => { num.value = String(clampSize(num.value)); syncSizeUI(); };
-        }
+function $(id){ return document.getElementById(id); }
 
-        function clampSize(v) {
-            let n = parseInt(v, 10);
-            if (!isFinite(n)) n = 50;
-            return Math.max(SIZE_MIN, Math.min(SIZE_MAX, n));
-        }
+function showNotification(msg){
+  const n = $('notification');
+  n.textContent = msg; n.style.display = 'block';
+  const my = ++notifSeq;
+  setTimeout(() => { if (my === notifSeq) n.style.display = 'none'; }, 3500);
+}
 
-        function syncSizeUI() {
-            const num = document.getElementById('icon-width');
-            const sel = document.getElementById('size-preset');
-            if (!num || !sel) return;
-            const v = parseInt(num.value, 10);
-            const match = Array.from(sel.options).filter(o => o.value && parseInt(o.value, 10) === v)[0];
-            sel.value = match ? match.value : '';
-        }
+/* ==================== تخزين محلي ==================== */
+function lsGet(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } }
+function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
 
-        /* ---------------- واجهة ---------------- */
+/* ==================== الوضع الداكن ==================== */
+function applyTheme(dark){
+  document.body.classList.toggle('dark', !!dark);
+  $('theme-toggle').textContent = dark ? '☀' : '🌙';
+  lsSet('shz_dark', !!dark);
+  renderPresets(); renderPreview();
+}
+function detectOfficeDark(){
+  try {
+    const bg = Office.context.officeTheme && Office.context.officeTheme.bodyBackgroundColor;
+    if (!bg) return null;
+    const h = String(bg).replace('#','');
+    if (!/^[0-9a-f]{6}$/i.test(h)) return null;
+    const l = (parseInt(h.slice(0,2),16)*.299 + parseInt(h.slice(2,4),16)*.587 + parseInt(h.slice(4,6),16)*.114);
+    return l < 128;
+  } catch(e){ return null; }
+}
 
-        function switchTab(tabName) {
-            if (tabSettings[currentTab] !== undefined || currentTab) tabSettings[currentTab] = snapshotSettings();
-            currentTab = tabName;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + tabName).classList.add('active');
+/* ==================== طيّ الكتل ==================== */
+function applyCollapse(){
+  const st = lsGet('shz_collapse', {});
+  document.querySelectorAll('.blk').forEach(b => {
+    const k = b.dataset.key;
+    const closed = !!st[k];
+    b.classList.toggle('closed', closed);
+    const ch = b.querySelector('.chev');
+    if (ch) ch.textContent = closed ? '▸' : '▾';
+  });
+}
+function toggleBlock(key){
+  const st = lsGet('shz_collapse', {});
+  st[key] = !st[key];
+  lsSet('shz_collapse', st);
+  applyCollapse();
+}
 
-            TABS.forEach(n => {
-                document.getElementById('section-' + n).style.display = (n === tabName) ? 'block' : 'none';
-            });
+/* ==================== إعدادات مستقلة لكل تبويب ==================== */
+const CONTROL_IDS = ['icon-width','apply-color','icon-color','bg-color','outline-color','outline-width',
+  'apply-shadow','shadow-blur','shadow-slope','shadow-offset'];
+const tabSettings = {};
 
-            restoreSettings(tabSettings[tabName]);
+function snapshotSettings(){
+  const s = {};
+  CONTROL_IDS.forEach(id => { const el = $(id); if (!el) return; s[id] = (el.type === 'checkbox') ? el.checked : el.value; });
+  const r = document.querySelector('input[name="bg-shape"]:checked');
+  s.shape = r ? r.value : 'none';
+  return s;
+}
+function restoreSettings(s){
+  if (!s) return;
+  CONTROL_IDS.forEach(id => {
+    if (!(id in s)) return;
+    const el = $(id); if (!el) return;
+    if (el.type === 'checkbox') el.checked = s[id]; else el.value = s[id];
+  });
+  const r = document.querySelector('input[name="bg-shape"][value="' + (s.shape || 'none') + '"]');
+  if (r) r.checked = true;
+  syncShapeUI(); syncSizeUI(); renderPreview();
+}
 
-            const globalControls = document.getElementById('global-controls');
-            if (tabName === 'shapes') {
-                globalControls.style.display = 'none';
-            } else {
-                globalControls.style.display = 'flex';
-                const isIcons = (tabName === 'icons');
-                document.getElementById('color-control-group').style.display = isIcons ? 'flex' : 'none';
-                document.getElementById('shape-selector-group').style.display = isIcons ? 'flex' : 'none';
-                document.getElementById('theme-group').style.display = isIcons ? 'flex' : 'none';
-            }
-        }
+/* ==================== الحجم ==================== */
+function clampSize(v){ let n = parseInt(v,10); if (!isFinite(n)) n = 50; return Math.max(SIZE_MIN, Math.min(SIZE_MAX, n)); }
+function buildSizePresets(){
+  const sel = $('size-preset');
+  sel.innerHTML = '<option value="">يدوي</option>';
+  for (let v = SIZE_MIN; v <= SIZE_MAX; v += 10){
+    const o = document.createElement('option'); o.value = String(v); o.textContent = v + ' px'; sel.appendChild(o);
+  }
+  sel.onchange = () => { if (!sel.value) { $('icon-width').focus(); return; } $('icon-width').value = sel.value; renderPreview(); };
+  const num = $('icon-width');
+  num.oninput = () => { syncSizeUI(); renderPreview(); };
+  num.onchange = () => { num.value = String(clampSize(num.value)); syncSizeUI(); renderPreview(); };
+}
+function syncSizeUI(){
+  const num = $('icon-width'), sel = $('size-preset');
+  if (!num || !sel) return;
+  const v = parseInt(num.value,10);
+  const m = Array.from(sel.options).filter(o => o.value && parseInt(o.value,10) === v)[0];
+  sel.value = m ? m.value : '';
+}
 
-        document.querySelectorAll('input[name="bg-shape"]').forEach(r => {
-            r.onchange = (e) => {
-                document.getElementById('bg-details').style.display = e.target.value === 'none' ? 'none' : 'flex';
-            };
-        });
+/* ==================== شبكة الأشكال ==================== */
+function buildShapeGrid(){
+  const g = $('shape-grid');
+  g.innerHTML = '';
+  SHAPES.forEach((s, i) => {
+    const l = document.createElement('label');
+    l.title = s.n;
+    l.innerHTML = '<input type="radio" name="bg-shape" value="' + s.v + '"' + (i === 0 ? ' checked' : '') + '><span>' + s.g + '</span>';
+    l.querySelector('input').onchange = () => { syncShapeUI(); renderPreview(); };
+    g.appendChild(l);
+  });
+}
+function syncShapeUI(){
+  document.querySelectorAll('#shape-grid label').forEach(l => {
+    l.classList.toggle('on', l.querySelector('input').checked);
+  });
+}
+function padFor(shape){
+  const s = SHAPES.filter(x => x.v === shape)[0];
+  return s ? s.pad : .40;
+}
 
-        function showNotification(msg) {
-            const n = document.getElementById('notification');
-            n.innerText = msg;
-            n.style.display = 'block';
-            const mySeq = ++filterSeq;
-            setTimeout(() => { if (mySeq === filterSeq) n.style.display = 'none'; }, 3500);
-        }
+/* ==================== التبويبات ==================== */
+function switchTab(tabName){
+  if (currentTab) tabSettings[currentTab] = snapshotSettings();
+  currentTab = tabName;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  $('tab-' + tabName).classList.add('active');
+  TABS.forEach(n => { $('section-' + n).style.display = (n === tabName) ? 'block' : 'none'; });
+  restoreSettings(tabSettings[tabName]);
 
-        function filterGrid(tab) {
-            const q = (document.getElementById('search-' + tab).value || '').trim().toLowerCase();
-            const root = document.getElementById('section-' + tab);
-            root.querySelectorAll('.icon-box').forEach(box => {
-                const name = (box.dataset.name || '').toLowerCase();
-                box.style.display = (!q || name.indexOf(q) !== -1) ? 'flex' : 'none';
-            });
-            root.querySelectorAll('.icon-grid').forEach(grid => {
-                const anyVisible = Array.from(grid.querySelectorAll('.icon-box')).some(b => b.style.display !== 'none');
-                const title = grid.previousElementSibling;
-                if (title && title.classList.contains('group-title')) {
-                    title.style.display = anyVisible ? 'flex' : 'none';
-                }
-            });
-        }
+  const isIcons = tabName === 'icons', isShapes = tabName === 'shapes';
+  $('blk-presets').style.display = isIcons ? '' : 'none';
+  $('blk-shape').style.display   = isIcons ? '' : 'none';
+  $('blk-shadow').style.display  = isIcons ? '' : 'none';
+  $('blk-icon').style.display    = isShapes ? 'none' : '';
+  document.querySelectorAll('#blk-icon .bb > .r, #blk-icon .theme-status').forEach((el, i) => {
+    if (i > 0) el.style.display = isIcons ? '' : 'none';   // الشعارات: الحجم فقط
+  });
+  updateFolderBar();
+  renderPreview();
+}
 
-        /* ------------- اختيار الملفات (مع بديل احتياطي) ------------- */
+/* ==================== البحث والتكبير ==================== */
+function filterGrid(tab){
+  const q = ($('search-' + tab).value || '').trim().toLowerCase();
+  const root = $('section-' + tab);
+  root.querySelectorAll('.icon-box').forEach(b => {
+    const name = (b.dataset.name || '').toLowerCase();
+    b.style.display = (!q || name.indexOf(q) !== -1) ? 'flex' : 'none';
+  });
+  root.querySelectorAll('.icon-grid').forEach(g => {
+    const any = Array.from(g.querySelectorAll('.icon-box')).some(b => b.style.display !== 'none');
+    const t = g.previousElementSibling;
+    if (t && t.classList.contains('group-title')) t.style.display = any ? 'flex' : 'none';
+  });
+}
+function buildZoomBars(){
+  TABS.forEach(tab => {
+    const wrap = document.createElement('div');
+    wrap.className = 'zoom';
+    wrap.innerHTML = '🔍 حجم المربعات <input type="range" id="zoom-' + tab + '" min="32" max="72" step="4">'
+      + '<span id="zoomval-' + tab + '" style="color:var(--acc);font-weight:700"></span>';
+    const s = $('search-' + tab);
+    s.parentNode.insertBefore(wrap, s.nextSibling);
+    const rng = wrap.querySelector('input');
+    rng.value = lsGet('shz_zoom', 40);
+    rng.oninput = () => setZoom(rng.value);
+  });
+  setZoom(lsGet('shz_zoom', 40));
+}
+function setZoom(px){
+  px = Math.max(32, Math.min(72, parseInt(px,10) || 40));
+  document.documentElement.style.setProperty('--box', px + 'px');
+  lsSet('shz_zoom', px);
+  TABS.forEach(t => {
+    const r = $('zoom-' + t), v = $('zoomval-' + t);
+    if (r) r.value = px;
+    if (v) v.textContent = px + 'px';
+  });
+}
 
-        async function collectFromDirHandle(handle, prefix) {
-            let out = [];
-            for await (const entry of handle.values()) {
-                if (entry.kind === 'file') {
-                    if (entry.name.toLowerCase().endsWith('.svg')) {
-                        out.push({ dir: prefix, name: entry.name, file: await entry.getFile() });
-                    }
-                } else if (entry.kind === 'directory') {
-                    const sub = await handle.getDirectoryHandle(entry.name);
-                    out = out.concat(await collectFromDirHandle(sub, prefix ? prefix + '/' + entry.name : entry.name));
-                }
-            }
-            return out;
-        }
+/* ==================== ذاكرة المجلد (IndexedDB) ==================== */
+function idbOpen(){
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('shzLib', 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore('kv'); };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function idbSet(k, v){
+  try { const db = await idbOpen(); await new Promise((res, rej) => {
+    const tx = db.transaction('kv','readwrite'); tx.objectStore('kv').put(v, k);
+    tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); } catch(e){}
+}
+async function idbGet(k){
+  try { const db = await idbOpen(); return await new Promise((res, rej) => {
+    const tx = db.transaction('kv','readonly'); const q = tx.objectStore('kv').get(k);
+    q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); } catch(e){ return null; }
+}
 
-        // بديل يعمل داخل بوربوينت سطح المكتب حيث يُمنع showDirectoryPicker أحياناً
-        function pickViaInput() {
-            return new Promise((resolve) => {
-                const inp = document.createElement('input');
-                inp.type = 'file';
-                inp.multiple = true;
-                inp.accept = '.svg,image/svg+xml';
-                inp.setAttribute('webkitdirectory', '');
-                inp.setAttribute('directory', '');
-                inp.style.display = 'none';
-                document.body.appendChild(inp);
-                inp.addEventListener('change', () => {
-                    const files = Array.from(inp.files || []).filter(f => f.name.toLowerCase().endsWith('.svg'));
-                    const out = files.map(f => {
-                        const rel = f.webkitRelativePath || f.name;
-                        const parts = rel.split('/');
-                        parts.pop();
-                        if (parts.length) parts.shift();
-                        return { dir: parts.join('/'), name: f.name, file: f };
-                    });
-                    inp.remove();
-                    resolve(out);
-                });
-                inp.click();
-            });
-        }
+const dirHandles = { logos:null, icons:null, shapes:null };
+const folderInfo = { logos:null, icons:null, shapes:null };   // {name, count}
 
-        async function pickSvgs() {
-            if (typeof window.showDirectoryPicker === 'function') {
-                try {
-                    const handle = await window.showDirectoryPicker();
-                    return await collectFromDirHandle(handle, '');
-                } catch (e) {
-                    if (e && (e.name === 'AbortError' || e.name === 'NotAllowedError' && e.message && e.message.indexOf('user') !== -1)) {
-                        return null; // ألغت المستخدمة الاختيار
-                    }
-                    // أي منع آخر: ننتقل للطريقة الاحتياطية
-                }
-            }
-            return await pickViaInput();
-        }
+function updateFolderBar(){
+  const info = folderInfo[currentTab];
+  $('folder-name').textContent = info ? info.name : 'لم يُحدَّد مجلد';
+  $('folder-name').title = info && info.path ? info.path : '';
+  $('folder-count').textContent = info ? ('— ' + info.count + ' ملف') : '';
+  $('folder-reload').disabled = !dirHandles[currentTab];
+}
 
-        /* ---------------- التحديد المتعدد ---------------- */
+/* ==================== اختيار الملفات ==================== */
+async function collectFromDirHandle(handle, prefix){
+  let out = [];
+  for await (const entry of handle.values()){
+    if (entry.kind === 'file'){
+      if (entry.name.toLowerCase().endsWith('.svg')) out.push({ dir: prefix, name: entry.name, file: await entry.getFile() });
+    } else if (entry.kind === 'directory'){
+      const sub = await handle.getDirectoryHandle(entry.name);
+      out = out.concat(await collectFromDirHandle(sub, prefix ? prefix + '/' + entry.name : entry.name));
+    }
+  }
+  return out;
+}
+function pickViaInput(){
+  return new Promise((resolve) => {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.multiple = true; inp.accept = '.svg,image/svg+xml';
+    inp.setAttribute('webkitdirectory',''); inp.setAttribute('directory','');
+    inp.style.display = 'none';
+    document.body.appendChild(inp);
+    inp.addEventListener('change', () => {
+      const files = Array.from(inp.files || []).filter(f => f.name.toLowerCase().endsWith('.svg'));
+      let root = '';
+      const out = files.map(f => {
+        const rel = f.webkitRelativePath || f.name;
+        const parts = rel.split('/');
+        parts.pop();
+        if (parts.length) root = root || parts[0];
+        if (parts.length) parts.shift();
+        return { dir: parts.join('/'), name: f.name, file: f };
+      });
+      inp.remove();
+      resolve({ items: out, handle: null, name: root || 'مجلد' });
+    });
+    inp.click();
+  });
+}
+async function pickSvgs(){
+  if (typeof window.showDirectoryPicker === 'function'){
+    try {
+      const handle = await window.showDirectoryPicker();
+      return { items: await collectFromDirHandle(handle, ''), handle: handle, name: handle.name };
+    } catch(e){
+      if (e && e.name === 'AbortError') return null;
+    }
+  }
+  return await pickViaInput();
+}
 
-        const multiMode = { logos: false, icons: false, shapes: false };
-        const selected = { logos: [], icons: [], shapes: [] };
-        const MAX_BATCH = 60;
+async function pickFolder(tab){
+  const res = await pickSvgs();
+  if (!res) return;
+  dirHandles[tab] = res.handle || null;
+  if (res.handle) { try { await idbSet('dir_' + tab, res.handle); } catch(e){} }
+  await renderItems(tab, res.items, res.name);
+}
+async function reloadFolder(tab){
+  const h = dirHandles[tab];
+  if (!h) { showNotification('لا يوجد مجلد محفوظ — اضغطي «تغيير»'); return; }
+  try {
+    if (h.queryPermission){
+      let p = await h.queryPermission({ mode: 'read' });
+      if (p !== 'granted' && h.requestPermission) p = await h.requestPermission({ mode: 'read' });
+      if (p !== 'granted') { showNotification('لم يُسمح بالوصول للمجلد'); return; }
+    }
+    const items = await collectFromDirHandle(h, '');
+    await renderItems(tab, items, h.name);
+  } catch(err){ showNotification('تعذّرت إعادة القراءة: ' + err.message); }
+}
+async function restoreLastFolder(tab){
+  const h = await idbGet('dir_' + tab);
+  if (!h) return;
+  dirHandles[tab] = h;
+  folderInfo[tab] = { name: h.name, count: 0 };
+  updateFolderBar();
+  try {
+    if (h.queryPermission){
+      const p = await h.queryPermission({ mode: 'read' });
+      if (p !== 'granted'){
+        const hint = $('hint-' + tab);
+        if (hint) hint.innerHTML = '<button class="btn-select" onclick="reloadFolder(\'' + tab + '\')">'
+          + 'استعادة المجلد السابق: ' + h.name + '</button>اضغطي للسماح بقراءته من جديد.';
+        return;
+      }
+    }
+    const items = await collectFromDirHandle(h, '');
+    await renderItems(tab, items, h.name);
+  } catch(e){}
+}
 
-        function buildBatchBars() {
-            TABS.forEach(tab => {
-                const bar = document.createElement('div');
-                bar.className = 'batch-bar';
-                bar.id = 'batch-' + tab;
-                bar.innerHTML =
-                    '<button type="button" class="mini-btn" id="multi-btn-' + tab + '">☑ تحديد متعدد</button>'
-                    + '<span class="batch-count" id="batch-count-' + tab + '">لا يوجد تحديد</span>'
-                    + '<label title="0 = ترتيب تلقائي">أعمدة: <input type="number" id="batch-cols-' + tab + '" value="0" min="0" max="12"></label>'
-                    + '<button type="button" class="mini-btn primary" id="batch-insert-' + tab + '" disabled>إدراج المحدد</button>'
-                    + '<button type="button" class="mini-btn" id="batch-clear-' + tab + '">مسح</button>';
-                const search = document.getElementById('search-' + tab);
-                search.parentNode.insertBefore(bar, search.nextSibling);
-                document.getElementById('multi-btn-' + tab).onclick = () => toggleMulti(tab);
-                document.getElementById('batch-insert-' + tab).onclick = () => insertSelected(tab);
-                document.getElementById('batch-clear-' + tab).onclick = () => clearSelection(tab);
-            });
-        }
+/* ==================== عرض الشبكة ==================== */
+function clearUrls(){ while (objectUrls.length){ try { URL.revokeObjectURL(objectUrls.pop()); } catch(e){} } }
 
-        function toggleMulti(tab) {
-            multiMode[tab] = !multiMode[tab];
-            document.getElementById('batch-' + tab).classList.toggle('on', multiMode[tab]);
-            document.getElementById('multi-btn-' + tab).textContent = multiMode[tab] ? '✕ إنهاء التحديد' : '☑ تحديد متعدد';
-            if (!multiMode[tab]) clearSelection(tab);
-            else showNotification('وضع التحديد المتعدد: اضغطي الأيقونات ثم "إدراج المحدد"');
-            updateBatchUI(tab);
-        }
+function makeBox(item, tab){
+  const box = document.createElement('div');
+  box.className = 'icon-box';
+  box.dataset.name = item.name.replace(/\.svg$/i,'');
+  box.title = item.dir ? item.dir + '/' + item.name : item.name;
+  const img = document.createElement('img');
+  const url = URL.createObjectURL(item.file);
+  objectUrls.push(url);
+  img.src = url; img.alt = item.name;
+  box.appendChild(img);
+  box.onmouseenter = async () => {
+    try {
+      if (!item._text) item._text = await item.file.text();
+      previewSample = item._text;
+      renderPreview();
+    } catch(e){}
+  };
+  box.onclick = async () => {
+    if (multiMode[tab]) { toggleSelect(tab, item, box); return; }
+    try { if (!item._text) item._text = await item.file.text(); insert(item._text); }
+    catch(err){ showNotification('تعذّرت قراءة الملف: ' + item.name); }
+  };
+  return box;
+}
 
-        function clearSelection(tab) {
-            selected[tab] = [];
-            document.querySelectorAll('#section-' + tab + ' .icon-box.selected').forEach(b => b.classList.remove('selected'));
-            updateBatchUI(tab);
-        }
+async function renderItems(tab, items, folderName){
+  clearSelection(tab);
+  clearUrls();
+  const hint = $('hint-' + tab);
+  folderInfo[tab] = { name: folderName || 'مجلد', count: items.length };
+  updateFolderBar();
 
-        function updateBatchUI(tab) {
-            const n = selected[tab].length;
-            document.getElementById('batch-count-' + tab).textContent = n ? ('المحدد: ' + n) : 'لا يوجد تحديد';
-            document.getElementById('batch-insert-' + tab).disabled = (n === 0);
-        }
+  if (tab === 'icons'){
+    const c = $('grid-icons-container');
+    c.innerHTML = '';
+    if (!items.length){ hint.style.display = 'block'; showNotification('لا توجد ملفات SVG في المجلد'); return; }
+    hint.style.display = 'none';
+    const groups = new Map();
+    items.forEach(it => {
+      const key = it.dir ? it.dir.split('/')[0] : 'بدون مجلد';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(it);
+    });
+    Array.from(groups.keys()).sort((a,b) => a.localeCompare(b,'ar')).forEach(key => {
+      const list = groups.get(key).sort((a,b) => a.name.localeCompare(b.name,'ar'));
+      const title = document.createElement('div');
+      title.className = 'group-title';
+      const nm = document.createElement('span'); nm.textContent = key + ' (' + list.length + ')';
+      const ar = document.createElement('span'); ar.textContent = '▾';
+      title.appendChild(nm); title.appendChild(ar);
+      const grid = document.createElement('div');
+      grid.className = 'icon-grid';
+      title.onclick = () => {
+        const hidden = grid.style.display === 'none';
+        grid.style.display = hidden ? 'flex' : 'none';
+        ar.textContent = hidden ? '▾' : '▸';
+      };
+      list.forEach(it => grid.appendChild(makeBox(it, 'icons')));
+      c.appendChild(title); c.appendChild(grid);
+    });
+    showNotification('تم تحميل ' + items.length + ' أيقونة في ' + groups.size + ' مجموعة');
+  } else {
+    const g = $('grid-' + tab);
+    g.innerHTML = '';
+    if (!items.length){ hint.style.display = 'block'; showNotification('لا توجد ملفات SVG في المجلد'); return; }
+    hint.style.display = 'none';
+    items.sort((a,b) => a.name.localeCompare(b.name,'ar'));
+    items.forEach(it => g.appendChild(makeBox(it, tab)));
+    showNotification('تم تحميل ' + items.length + ' ملف');
+  }
+  filterGrid(tab);
+}
 
-        function toggleSelect(tab, item, box) {
-            const i = selected[tab].indexOf(item);
-            if (i === -1) {
-                if (selected[tab].length >= MAX_BATCH) { showNotification('الحد الأقصى ' + MAX_BATCH + ' أيقونة في الدفعة'); return; }
-                selected[tab].push(item);
-                box.classList.add('selected');
-            } else {
-                selected[tab].splice(i, 1);
-                box.classList.remove('selected');
-            }
-            updateBatchUI(tab);
-        }
+/* ==================== التحديد المتعدد ==================== */
+const multiMode = { logos:false, icons:false, shapes:false };
+const selected = { logos:[], icons:[], shapes:[] };
+const MAX_BATCH = 60;
 
-        function makeBox(item, tab) {
-            const box = document.createElement('div');
-            box.className = 'icon-box';
-            box.dataset.name = item.name.replace(/\.svg$/i, '');
-            box.title = item.dir ? item.dir + '/' + item.name : item.name;
-            const img = document.createElement('img');
-            const url = URL.createObjectURL(item.file);
-            objectUrls.push(url);
-            img.src = url;
-            img.alt = item.name;
-            box.appendChild(img);
-            box.onclick = async () => {
-                if (multiMode[tab]) { toggleSelect(tab, item, box); return; }
-                try {
-                    const text = await item.file.text();
-                    insert(text);
-                } catch (err) {
-                    showNotification('تعذّرت قراءة الملف: ' + item.name);
-                }
-            };
-            return box;
-        }
+function buildBatchBars(){
+  TABS.forEach(tab => {
+    const bar = document.createElement('div');
+    bar.className = 'batch-bar'; bar.id = 'batch-' + tab;
+    bar.innerHTML = '<button type="button" class="mini" id="multi-btn-' + tab + '">☑ تحديد متعدد</button>'
+      + '<span class="batch-count" id="batch-count-' + tab + '">لا يوجد تحديد</span>'
+      + '<label title="0 = تلقائي">أعمدة: <input type="number" id="batch-cols-' + tab + '" value="0" min="0" max="12"></label>'
+      + '<button type="button" class="mini primary" id="batch-insert-' + tab + '" disabled>إدراج المحدد</button>'
+      + '<button type="button" class="mini" id="batch-clear-' + tab + '">مسح</button>';
+    const z = $('zoom-' + tab).parentNode;
+    z.parentNode.insertBefore(bar, z.nextSibling);
+    $('multi-btn-' + tab).onclick = () => toggleMulti(tab);
+    $('batch-insert-' + tab).onclick = () => insertSelected(tab);
+    $('batch-clear-' + tab).onclick = () => clearSelection(tab);
+  });
+}
+function toggleMulti(tab){
+  multiMode[tab] = !multiMode[tab];
+  $('batch-' + tab).classList.toggle('on', multiMode[tab]);
+  $('multi-btn-' + tab).textContent = multiMode[tab] ? '✕ إنهاء التحديد' : '☑ تحديد متعدد';
+  if (!multiMode[tab]) clearSelection(tab); else showNotification('اضغطي الأيقونات ثم «إدراج المحدد»');
+  updateBatchUI(tab);
+}
+function clearSelection(tab){
+  selected[tab] = [];
+  document.querySelectorAll('#section-' + tab + ' .icon-box.selected').forEach(b => b.classList.remove('selected'));
+  updateBatchUI(tab);
+}
+function updateBatchUI(tab){
+  const n = selected[tab].length;
+  const c = $('batch-count-' + tab); if (!c) return;
+  c.textContent = n ? ('المحدد: ' + n) : 'لا يوجد تحديد';
+  $('batch-insert-' + tab).disabled = (n === 0);
+}
+function toggleSelect(tab, item, box){
+  const i = selected[tab].indexOf(item);
+  if (i === -1){
+    if (selected[tab].length >= MAX_BATCH){ showNotification('الحد الأقصى ' + MAX_BATCH + ' أيقونة'); return; }
+    selected[tab].push(item); box.classList.add('selected');
+  } else { selected[tab].splice(i,1); box.classList.remove('selected'); }
+  updateBatchUI(tab);
+}
 
-        // عزل معرّفات وأصناف كل أيقونة حتى لا تتصادم عند دمج عدة أيقونات في رسم واحد
-        function isolateUnit(svgString, idx) {
-            const doc = parseSvg(svgString);
-            if (!doc) return svgString;
-            const pre = 'u' + idx + '_';
-
-            const ids = [];
-            doc.querySelectorAll('[id]').forEach(el => { ids.push(el.getAttribute('id')); });
-            if (ids.length) {
-                doc.querySelectorAll('*').forEach(el => {
-                    for (let i = 0; i < el.attributes.length; i++) {
-                        const at = el.attributes[i];
-                        let v = at.value;
-                        if (v.indexOf('#') === -1) continue;
-                        ids.forEach(id => {
-                            v = v.split('url(#' + id + ')').join('url(#' + pre + id + ')');
-                            if (v === '#' + id) v = '#' + pre + id;
-                        });
-                        if (v !== at.value) el.setAttribute(at.name, v);
-                    }
-                });
-                doc.querySelectorAll('[id]').forEach(el => el.setAttribute('id', pre + el.getAttribute('id')));
-            }
-
-            doc.querySelectorAll('[class]').forEach(el => {
-                const cls = (el.getAttribute('class') || '').trim().split(/\s+/).filter(Boolean).map(c => pre + c).join(' ');
-                el.setAttribute('class', cls);
-            });
-            doc.querySelectorAll('style').forEach(el => {
-                el.textContent = (el.textContent || '').replace(/\.([A-Za-z_][\w-]*)/g, '.' + pre + '$1');
-            });
-
-            return new XMLSerializer().serializeToString(doc);
-        }
-
-        function unitSize(svgString) {
-            const doc = parseSvg(svgString);
-            if (!doc) return null;
-            const el = doc.documentElement;
-            let w = parseFloat(el.getAttribute('width'));
-            let h = parseFloat(el.getAttribute('height'));
-            const vb = getViewBox(doc);
-            if (!(w > 0) || !(h > 0)) {
-                const n = vb.split(/[\s,]+/).map(Number);
-                w = n[2] > 0 ? n[2] : 100;
-                h = n[3] > 0 ? n[3] : 100;
-            }
-            return { w: w, h: h, viewBox: vb, doc: doc };
-        }
-
-        // يرصّ الأيقونات المحددة في شبكة داخل رسم SVG واحد
-        function composeGrid(units, cols) {
-            const parsed = units.map((u, i) => unitSize(isolateUnit(u, i))).filter(Boolean);
-            if (!parsed.length) return null;
-            if (parsed.length === 1) return new XMLSerializer().serializeToString(parsed[0].doc);
-
-            const cellW = Math.max.apply(null, parsed.map(p => p.w));
-            const cellH = Math.max.apply(null, parsed.map(p => p.h));
-            const n = parsed.length;
-            const c = (cols > 0) ? Math.min(cols, n) : Math.ceil(Math.sqrt(n));
-            const rows = Math.ceil(n / c);
-            const gap = Math.max(4, Math.round(Math.max(cellW, cellH) * 0.15));
-            const totalW = c * cellW + (c - 1) * gap;
-            const totalH = rows * cellH + (rows - 1) * gap;
-
-            let body = '';
-            parsed.forEach((p, i) => {
-                const col = i % c, row = Math.floor(i / c);
-                const x = Math.round((col * (cellW + gap) + (cellW - p.w) / 2) * 100) / 100;
-                const y = Math.round((row * (cellH + gap) + (cellH - p.h) / 2) * 100) / 100;
-                const el = p.doc.documentElement;
-                el.setAttribute('width', String(p.w));
-                el.setAttribute('height', String(p.h));
-                el.setAttribute('viewBox', p.viewBox);
-                el.removeAttribute('x'); el.removeAttribute('y');
-                body += '<g transform="translate(' + x + ',' + y + ')">' + new XMLSerializer().serializeToString(el) + '</g>';
-            });
-
-            return '<svg xmlns="http://www.w3.org/2000/svg" width="' + totalW + '" height="' + totalH
-                + '" viewBox="0 0 ' + totalW + ' ' + totalH + '">' + body + '</svg>';
-        }
-
-        async function insertSelected(tab) {
-            const items = selected[tab].slice();
-            if (!items.length) { showNotification('لم تحدّدي أي أيقونة'); return; }
-            const btn = document.getElementById('batch-insert-' + tab);
-            btn.disabled = true;
-            try {
-                const units = [];
-                for (let i = 0; i < items.length; i++) {
-                    const text = await items[i].file.text();
-                    units.push(buildContent(text));
-                }
-                const cols = parseInt(document.getElementById('batch-cols-' + tab).value, 10) || 0;
-                const svg = composeGrid(units, cols);
-                if (!svg) throw new Error('تعذّر تجهيز الأيقونات');
-                sendToSlide(svg);
-                showNotification('جارٍ إدراج ' + items.length + ' أيقونة كرسم واحد');
-            } catch (err) {
-                showNotification('تعذّر الإدراج: ' + err.message);
-            } finally {
-                btn.disabled = (selected[tab].length === 0);
-            }
-        }
-
-        function clearUrls() {
-            while (objectUrls.length) { try { URL.revokeObjectURL(objectUrls.pop()); } catch (e) {} }
-        }
-
-        async function loadFlat(tab) {
-            const items = await pickSvgs();
-            if (items === null) return;
-            const g = document.getElementById('grid-' + tab);
-            clearSelection(tab);
-            clearUrls();
-            g.innerHTML = '';
-            const hint = document.getElementById('hint-' + tab);
-            if (!items.length) {
-                hint.style.display = 'block';
-                showNotification('لم يتم العثور على ملفات SVG داخل المجلد المختار');
-                return;
-            }
-            hint.style.display = 'none';
-            items.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
-            items.forEach(it => g.appendChild(makeBox(it, tab)));
-            filterGrid(tab);
-            showNotification('تم تحميل ' + items.length + ' ملف');
-        }
-
-        async function loadGrouped() {
-            const items = await pickSvgs();
-            if (items === null) return;
-            const c = document.getElementById('grid-icons-container');
-            const hint = document.getElementById('hint-icons');
-            clearSelection('icons');
-            clearUrls();
-            c.innerHTML = '';
-            if (!items.length) {
-                hint.style.display = 'block';
-                showNotification('لم يتم العثور على ملفات SVG داخل المجلد المختار');
-                return;
-            }
-            hint.style.display = 'none';
-
-            const groups = new Map();
-            items.forEach(it => {
-                const key = it.dir ? it.dir.split('/')[0] : 'بدون مجلد';
-                if (!groups.has(key)) groups.set(key, []);
-                groups.get(key).push(it);
-            });
-
-            Array.from(groups.keys()).sort((a, b) => a.localeCompare(b, 'ar')).forEach(key => {
-                const list = groups.get(key).sort((a, b) => a.name.localeCompare(b.name, 'ar'));
-                const title = document.createElement('div');
-                title.className = 'group-title';
-                const nameSpan = document.createElement('span');
-                nameSpan.textContent = key + ' (' + list.length + ')';
-                const arrow = document.createElement('span');
-                arrow.textContent = '▼';
-                title.appendChild(nameSpan);
-                title.appendChild(arrow);
-
-                const grid = document.createElement('div');
-                grid.className = 'icon-grid';
-                title.onclick = () => {
-                    const hidden = grid.style.display === 'none';
-                    grid.style.display = hidden ? 'flex' : 'none';
-                    arrow.textContent = hidden ? '▼' : '◀';
-                };
-                list.forEach(it => grid.appendChild(makeBox(it, 'icons')));
-                c.appendChild(title);
-                c.appendChild(grid);
-            });
-
-            filterGrid('icons');
-            showNotification('تم تحميل ' + items.length + ' أيقونة في ' + groups.size + ' مجموعة');
-        }
-
-        /* ---------------- معالجة SVG ---------------- */
-
+/* ==================== محرّك SVG (مُختبَر) ==================== */
         const DARK_RE = /^(#000|#000000|black|#2c3030|#1a1a1a|#111|#111111|currentcolor)$/i;
         const DARK_CSS_RE = /(#000000|#000|black|#2c3030|#1a1a1a|#111111|#111|currentColor)/gi;
         const SHAPE_TAGS = ['path', 'circle', 'rect', 'polygon', 'polyline', 'ellipse', 'line'];
@@ -702,18 +786,7 @@
             return { inner: inner, viewBox: getViewBox(doc) };
         }
 
-        let shadowSeq = 0;
-        function shadowFilter(id) {
-            return '<defs><filter id="' + id + '" x="-25%" y="-25%" width="150%" height="150%">'
-                + '<feGaussianBlur in="SourceAlpha" stdDeviation="2.5" />'
-                + '<feOffset dx="2" dy="2" result="offsetblur" />'
-                + '<feComponentTransfer><feFuncA type="linear" slope="0.35" /></feComponentTransfer>'
-                + '<feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>'
-                + '</filter></defs>';
-        }
-
-        /* ---------- ألوان ثيم العرض (قراءة theme1.xml من داخل الـ pptx) ---------- */
-
+/* ==================== ألوان ثيم العرض ==================== */
         const THEME_SLOTS = [
             { key: 'accent1', label: 'A1' }, { key: 'accent2', label: 'A2' }, { key: 'accent3', label: 'A3' },
             { key: 'accent4', label: 'A4' }, { key: 'accent5', label: 'A5' }, { key: 'accent6', label: 'A6' },
@@ -730,15 +803,6 @@
         let themeColors = null;
         let themeTarget = 'icon-color';
         let themeLoading = false;
-
-        document.querySelectorAll('#theme-target .chip').forEach(ch => {
-            ch.onclick = () => {
-                document.querySelectorAll('#theme-target .chip').forEach(c => c.classList.remove('active'));
-                ch.classList.add('active');
-                themeTarget = ch.dataset.target;
-            };
-        });
-
         /* --- قارئ ZIP مصغّر: لا يحتاج أي مكتبة خارجية --- */
         function zipIndex(bytes) {
             const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
@@ -977,130 +1041,366 @@
             }
         }
 
-        /* ---------------- الإدراج ---------------- */
 
-        function sendToSlide(content) {
-            Office.context.document.setSelectedDataAsync(content, { coercionType: Office.CoercionType.XmlSvg }, (result) => {
-                if (result.status === Office.AsyncResultStatus.Succeeded) {
-                    showNotification('تم الإدراج بنجاح ✨');
-                } else {
-                    showNotification('تعذّر الإدراج: ' + ((result.error && result.error.message) || 'تأكدي من وجود شريحة مفتوحة'));
-                }
-            });
-        }
-
-        function buildContent(svg) {
-            // تبويب الأشكال: إدراج كما هو
-            if (currentTab === 'shapes') return svg;
-
-            const styled = (currentTab === 'icons');
-            const w = clampSize(document.getElementById('icon-width').value);
-            const applyColor = styled && document.getElementById('apply-color').checked;
-            const iconColor = document.getElementById('icon-color').value || '#4472C4';
-            const shape = styled ? (document.querySelector('input[name="bg-shape"]:checked') || {}).value || 'none' : 'none';
-            const applyShadow = styled && document.getElementById('apply-shadow').checked;
-            const bgColor = document.getElementById('bg-color').value || '#ffffff';
-            const outlineColor = document.getElementById('outline-color').value || '#000000';
-            const outlineWidth = parseInt(document.getElementById('outline-width').value, 10) || 0;
-
-            let processed = applyColor ? deepColorSVG(svg, iconColor) : svg;
-
-            // لا شكل حاوٍ ولا ظل: نضبط المقاس فقط
-            if (shape === 'none' && !applyShadow) return resizeSvg(processed, w);
-
-            const parts = innerOf(processed);
-            const filterId = 'shz-shadow-' + (++shadowSeq);
-            const filterDef = applyShadow ? shadowFilter(filterId) : '';
-            const filterAttr = applyShadow ? ' filter="url(#' + filterId + ')"' : '';
-
-            // ظل بدون شكل حاوٍ: نغلّف الأيقونة بهامش يكفي للظل
-            if (shape === 'none') {
-                const pad = Math.max(4, Math.round(w * 0.12));
-                const total = w + pad * 2;
-                return '<svg xmlns="http://www.w3.org/2000/svg" width="' + total + '" height="' + total + '" viewBox="0 0 ' + total + ' ' + total + '">'
-                    + filterDef
-                    + '<g transform="translate(' + pad + ',' + pad + ')"' + filterAttr + '>'
-                    + '<svg width="' + w + '" height="' + w + '" viewBox="' + parts.viewBox + '" preserveAspectRatio="xMidYMid meet">' + parts.inner + '</svg>'
-                    + '</g></svg>';
-            }
-
-            const padding = Math.round(w * 0.40);
-            const containerSize = w + padding * 2;
-            const c = containerSize / 2;
-            const inset = Math.max(5, outlineWidth);
-            const strokeAttr = outlineWidth > 0 ? ' stroke="' + outlineColor + '" stroke-width="' + outlineWidth + '"' : '';
-            let shapeHtml = '';
-            if (shape === 'circle') {
-                shapeHtml = '<circle cx="' + c + '" cy="' + c + '" r="' + (containerSize / 2 - inset) + '" fill="' + bgColor + '"' + strokeAttr + filterAttr + ' />';
-            } else if (shape === 'square') {
-                shapeHtml = '<rect x="' + inset + '" y="' + inset + '" width="' + (containerSize - inset * 2) + '" height="' + (containerSize - inset * 2) + '" fill="' + bgColor + '"' + strokeAttr + filterAttr + ' />';
-            } else if (shape === 'diamond') {
-                const half = containerSize / 2 - inset;
-                const pts = [c + ',' + (c - half), (c + half) + ',' + c, c + ',' + (c + half), (c - half) + ',' + c].join(' ');
-                shapeHtml = '<polygon points="' + pts + '" fill="' + bgColor + '"' + strokeAttr + filterAttr + ' />';
-            } else if (shape === 'rounded') {
-                shapeHtml = '<rect x="' + inset + '" y="' + inset + '" width="' + (containerSize - inset * 2) + '" height="' + (containerSize - inset * 2) + '" rx="' + Math.round(containerSize * 0.15) + '" fill="' + bgColor + '"' + strokeAttr + filterAttr + ' />';
-            }
-
-            return '<svg xmlns="http://www.w3.org/2000/svg" width="' + containerSize + '" height="' + containerSize + '" viewBox="0 0 ' + containerSize + ' ' + containerSize + '">'
-                + filterDef
-                + shapeHtml
-                + '<g transform="translate(' + padding + ',' + padding + ')">'
-                + '<svg width="' + w + '" height="' + w + '" viewBox="' + parts.viewBox + '" preserveAspectRatio="xMidYMid meet">' + parts.inner + '</svg>'
-                + '</g></svg>';
-        }
-
-        function insert(svg) {
-            try {
-                if (!window.Office || !Office.context || !Office.context.document) {
-                    showNotification('الإضافة غير متصلة ببوربوينت — أعيدي فتح اللوحة');
-                    return;
-                }
-                sendToSlide(buildContent(svg));
-            } catch (err) {
-                console.error(err);
-                showNotification('حدث خطأ: ' + err.message);
-            }
-        }
-
-        /* ---------------- ثيم الأوفيس ---------------- */
-
-        function updateThemeColor() {
-            try {
-                if (!Office.context || !Office.context.officeTheme) return;
-                let a = Office.context.officeTheme.accent1;
-                if (!a) return;
-                a = String(a).trim();
-                if (/^[0-9a-f]{6}$/i.test(a)) a = '#' + a;
-                if (/^#[0-9a-f]{6}$/i.test(a)) document.getElementById('icon-color').value = a;
-            } catch (e) { /* الثيم غير متاح في هذه النسخة */ }
-        }
-
-        function initUI() {
-            buildSizePresets();
-            buildBatchBars();
-            syncSizeUI();
-            const base = snapshotSettings();
-            TABS.forEach(t => { if (!tabSettings[t]) tabSettings[t] = JSON.parse(JSON.stringify(base)); });
-            TABS.forEach(t => updateBatchUI(t));
-        }
-
-        Office.onReady((info) => {
-            try {
-                if (info && info.host === Office.HostType.PowerPoint) {
-                    updateThemeColor();
-                    if (Office.EventType && Office.EventType.OfficeThemeChanged) {
-                        try {
-                            Office.context.document.addHandlerAsync(Office.EventType.OfficeThemeChanged, updateThemeColor);
-                        } catch (e) { /* غير مدعوم في هذه النسخة */ }
-                    }
-                }
-            } catch (e) { console.error(e); }
-            initUI();
-            switchTab('logos');
-            // محاولة صامتة لقراءة ألوان الثيم عند الفتح (لا تُغيّر اللون المختار)
-            setTimeout(() => { loadThemeColors(false); }, 600);
+/* ==================== دمج عدة أيقونات ==================== */
+function isolateUnit(svgString, idx){
+  const doc = parseSvg(svgString);
+  if (!doc) return svgString;
+  const pre = 'u' + idx + '_';
+  const ids = [];
+  doc.querySelectorAll('[id]').forEach(el => ids.push(el.getAttribute('id')));
+  if (ids.length){
+    doc.querySelectorAll('*').forEach(el => {
+      for (let i = 0; i < el.attributes.length; i++){
+        const at = el.attributes[i];
+        let v = at.value;
+        if (v.indexOf('#') === -1) continue;
+        ids.forEach(id => {
+          v = v.split('url(#' + id + ')').join('url(#' + pre + id + ')');
+          if (v === '#' + id) v = '#' + pre + id;
         });
-    </script>
+        if (v !== at.value) el.setAttribute(at.name, v);
+      }
+    });
+    doc.querySelectorAll('[id]').forEach(el => el.setAttribute('id', pre + el.getAttribute('id')));
+  }
+  doc.querySelectorAll('[class]').forEach(el => {
+    el.setAttribute('class', (el.getAttribute('class')||'').trim().split(/\s+/).filter(Boolean).map(c => pre + c).join(' '));
+  });
+  doc.querySelectorAll('style').forEach(el => {
+    el.textContent = (el.textContent || '').replace(/\.([A-Za-z_][\w-]*)/g, '.' + pre + '$1');
+  });
+  return new XMLSerializer().serializeToString(doc);
+}
+function unitSize(svgString){
+  const doc = parseSvg(svgString);
+  if (!doc) return null;
+  const el = doc.documentElement;
+  let w = parseFloat(el.getAttribute('width')), h = parseFloat(el.getAttribute('height'));
+  const vb = getViewBox(doc);
+  if (!(w > 0) || !(h > 0)){
+    const n = vb.split(/[\s,]+/).map(Number);
+    w = n[2] > 0 ? n[2] : 100; h = n[3] > 0 ? n[3] : 100;
+  }
+  return { w:w, h:h, viewBox:vb, doc:doc };
+}
+function composeGrid(units, cols){
+  const parsed = units.map((u,i) => unitSize(isolateUnit(u,i))).filter(Boolean);
+  if (!parsed.length) return null;
+  if (parsed.length === 1) return new XMLSerializer().serializeToString(parsed[0].doc);
+  const cellW = Math.max.apply(null, parsed.map(p => p.w));
+  const cellH = Math.max.apply(null, parsed.map(p => p.h));
+  const n = parsed.length;
+  const c = (cols > 0) ? Math.min(cols, n) : Math.ceil(Math.sqrt(n));
+  const rows = Math.ceil(n / c);
+  const gap = Math.max(4, Math.round(Math.max(cellW, cellH) * .15));
+  const totalW = c * cellW + (c - 1) * gap;
+  const totalH = rows * cellH + (rows - 1) * gap;
+  let body = '';
+  parsed.forEach((p,i) => {
+    const col = i % c, row = Math.floor(i / c);
+    const x = Math.round((col * (cellW + gap) + (cellW - p.w) / 2) * 100) / 100;
+    const y = Math.round((row * (cellH + gap) + (cellH - p.h) / 2) * 100) / 100;
+    const el = p.doc.documentElement;
+    el.setAttribute('width', String(p.w)); el.setAttribute('height', String(p.h));
+    el.setAttribute('viewBox', p.viewBox);
+    el.removeAttribute('x'); el.removeAttribute('y');
+    body += '<g transform="translate(' + x + ',' + y + ')">' + new XMLSerializer().serializeToString(el) + '</g>';
+  });
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="' + totalW + '" height="' + totalH
+    + '" viewBox="0 0 ' + totalW + ' ' + totalH + '">' + body + '</svg>';
+}
+
+/* ==================== بناء النتيجة ==================== */
+let shadowSeq = 0;
+function shadowFilter(id, st){
+  return '<defs><filter id="' + id + '" x="-35%" y="-35%" width="170%" height="170%">'
+    + '<feGaussianBlur in="SourceAlpha" stdDeviation="' + st.blur + '" />'
+    + '<feOffset dx="' + st.off + '" dy="' + st.off + '" result="offsetblur" />'
+    + '<feComponentTransfer><feFuncA type="linear" slope="' + st.slope + '" /></feComponentTransfer>'
+    + '<feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>'
+    + '</filter></defs>';
+}
+
+function currentSettings(){
+  const r = document.querySelector('input[name="bg-shape"]:checked');
+  return {
+    w: clampSize($('icon-width').value),
+    applyColor: $('apply-color').checked,
+    iconColor: $('icon-color').value || '#4472C4',
+    shape: r ? r.value : 'none',
+    shapeFill: $('bg-color').value || '#ffffff',
+    outlineColor: $('outline-color').value || '#000000',
+    outlineWidth: parseInt($('outline-width').value, 10) || 0,
+    shadowOn: $('apply-shadow').checked,
+    blur: parseFloat($('shadow-blur').value) || 2.5,
+    slope: parseFloat($('shadow-slope').value) || .35,
+    off: parseFloat($('shadow-offset').value) || 0
+  };
+}
+function applySettings(st){
+  $('icon-width').value = st.w;
+  $('apply-color').checked = !!st.applyColor;
+  $('icon-color').value = st.iconColor;
+  const r = document.querySelector('input[name="bg-shape"][value="' + st.shape + '"]');
+  if (r) r.checked = true;
+  $('bg-color').value = st.shapeFill;
+  $('outline-color').value = st.outlineColor;
+  $('outline-width').value = String(st.outlineWidth);
+  $('apply-shadow').checked = !!st.shadowOn;
+  $('shadow-blur').value = String(st.blur);
+  $('shadow-slope').value = String(st.slope);
+  $('shadow-offset').value = String(st.off);
+  syncShapeUI(); syncSizeUI(); renderPreview();
+}
+
+function shapeMarkup(shape, c, total, inset, fill, strokeAttr, filterAttr){
+  const R = total / 2 - inset;
+  const poly = (pts) => '<polygon points="' + pts + '" fill="' + fill + '"' + strokeAttr + filterAttr + ' stroke-linejoin="round" />';
+  const ring = (d) => [0,1,2,3,4,5].map(i => { const a = (d + i * 60) * Math.PI / 180;
+    return (c + R * Math.cos(a)).toFixed(1) + ',' + (c + R * Math.sin(a)).toFixed(1); }).join(' ');
+
+  if (shape === 'circle') return '<circle cx="' + c + '" cy="' + c + '" r="' + R + '" fill="' + fill + '"' + strokeAttr + filterAttr + ' />';
+  if (shape === 'square') return '<rect x="' + inset + '" y="' + inset + '" width="' + (total - inset*2) + '" height="' + (total - inset*2) + '" fill="' + fill + '"' + strokeAttr + filterAttr + ' />';
+  if (shape === 'rounded') return '<rect x="' + inset + '" y="' + inset + '" width="' + (total - inset*2) + '" height="' + (total - inset*2) + '" rx="' + Math.round(total * .15) + '" fill="' + fill + '"' + strokeAttr + filterAttr + ' />';
+  if (shape === 'diamond'){
+    const side = (total - inset * 2) / Math.SQRT2;
+    const x0 = Math.round((c - side / 2) * 100) / 100;
+    return '<rect x="' + x0 + '" y="' + x0 + '" width="' + (Math.round(side*100)/100) + '" height="' + (Math.round(side*100)/100)
+      + '" rx="' + Math.round(side * .14) + '" transform="rotate(45 ' + c + ' ' + c + ')" fill="' + fill + '"' + strokeAttr + filterAttr + ' />';
+  }
+  if (shape === 'hexagon') return poly(ring(0));
+  if (shape === 'octagon'){
+    const pts = [0,1,2,3,4,5,6,7].map(i => { const a = (22.5 + i * 45) * Math.PI / 180;
+      return (c + R * Math.cos(a)).toFixed(1) + ',' + (c + R * Math.sin(a)).toFixed(1); }).join(' ');
+    return poly(pts);
+  }
+  if (shape === 'ring'){
+    const inner = Math.max(2, R - Math.max(4, R * .12));
+    return '<circle cx="' + c + '" cy="' + c + '" r="' + R + '" fill="' + fill + '"' + strokeAttr + filterAttr + ' />'
+      + '<circle cx="' + c + '" cy="' + c + '" r="' + inner.toFixed(1) + '" fill="none" stroke="'
+      + (strokeAttr ? (strokeAttr.match(/stroke="([^"]+)"/) || [])[1] : '#888') + '" stroke-width="'
+      + Math.max(1, Math.round(R * .05)) + '" opacity="0.55" />';
+  }
+  if (shape === 'shield'){
+    const l = inset, rr = total - inset, tp = inset, bt = total - inset;
+    const sh = tp + (bt - tp) * .62, k = Math.round(total * .12);
+    return '<path d="M ' + l + ' ' + (tp + k) + ' Q ' + l + ' ' + tp + ' ' + (l + k) + ' ' + tp
+      + ' L ' + (rr - k) + ' ' + tp + ' Q ' + rr + ' ' + tp + ' ' + rr + ' ' + (tp + k)
+      + ' L ' + rr + ' ' + sh + ' Q ' + rr + ' ' + (bt - k * .6) + ' ' + c + ' ' + bt
+      + ' Q ' + l + ' ' + (bt - k * .6) + ' ' + l + ' ' + sh + ' Z" fill="' + fill + '"'
+      + strokeAttr + filterAttr + ' stroke-linejoin="round" />';
+  }
+  return '';
+}
+
+function buildWith(svg, st, styled){
+  const w = st.w;
+  const applyColor = styled && st.applyColor;
+  const shape = styled ? st.shape : 'none';
+  const shadowOn = styled && st.shadowOn;
+  let processed = applyColor ? deepColorSVG(svg, st.iconColor) : svg;
+
+  if (shape === 'none' && !shadowOn) return resizeSvg(processed, w);
+
+  const parts = innerOf(processed);
+  const fid = 'shz-shadow-' + (++shadowSeq);
+  const fdef = shadowOn ? shadowFilter(fid, st) : '';
+  const fattr = shadowOn ? ' filter="url(#' + fid + ')"' : '';
+
+  if (shape === 'none'){
+    const pad = Math.max(4, Math.round(w * (.12 + st.blur * .02)));
+    const total = w + pad * 2;
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + total + '" height="' + total + '" viewBox="0 0 ' + total + ' ' + total + '">'
+      + fdef + '<g transform="translate(' + pad + ',' + pad + ')"' + fattr + '>'
+      + '<svg width="' + w + '" height="' + w + '" viewBox="' + parts.viewBox + '" preserveAspectRatio="xMidYMid meet">' + parts.inner + '</svg>'
+      + '</g></svg>';
+  }
+
+  const padding = Math.round(w * padFor(shape));
+  const total = w + padding * 2;
+  const c = total / 2;
+  const inset = Math.max(5, st.outlineWidth);
+  const strokeAttr = st.outlineWidth > 0 ? ' stroke="' + st.outlineColor + '" stroke-width="' + st.outlineWidth + '"' : '';
+  const shapeHtml = shapeMarkup(shape, c, total, inset, st.shapeFill, strokeAttr, fattr);
+  const shiftY = (shape === 'shield') ? -Math.round(w * .07) : 0;
+
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="' + total + '" height="' + total + '" viewBox="0 0 ' + total + ' ' + total + '">'
+    + fdef + shapeHtml
+    + '<g transform="translate(' + padding + ',' + (padding + shiftY) + ')">'
+    + '<svg width="' + w + '" height="' + w + '" viewBox="' + parts.viewBox + '" preserveAspectRatio="xMidYMid meet">' + parts.inner + '</svg>'
+    + '</g></svg>';
+}
+
+function buildContent(svg){
+  if (currentTab === 'shapes') return svg;
+  return buildWith(svg, currentSettings(), currentTab === 'icons');
+}
+
+/* ==================== المعاينة ==================== */
+let previewSample = SAMPLE_SVG;
+function svgToDataUri(s){ return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s); }
+function renderPreview(){
+  const box = $('preview-box');
+  if (!box) return;
+  try {
+    const svg = (currentTab === 'shapes') ? previewSample
+      : buildWith(previewSample, currentSettings(), currentTab === 'icons');
+    box.innerHTML = '<img alt="معاينة" src="' + svgToDataUri(svg) + '">';
+  } catch(e){ box.textContent = '—'; }
+}
+
+/* ==================== الأنماط ==================== */
+function getPresets(){ return lsGet('shz_presets', []); }
+function setPresets(p){ lsSet('shz_presets', p); renderPresets(); }
+function defaultPresets(){
+  return [
+    { w:60, applyColor:true, iconColor:'#c0392b', shape:'square', shapeFill:'#ffffff', outlineColor:'#000000',
+      outlineWidth:0, shadowOn:false, blur:2.5, slope:.35, off:2 },
+    { w:60, applyColor:true, iconColor:'#0f5aa8', shape:'circle', shapeFill:'#eaf2fb', outlineColor:'#0f5aa8',
+      outlineWidth:3, shadowOn:false, blur:2.5, slope:.35, off:2 },
+    { w:60, applyColor:true, iconColor:'#ffffff', shape:'diamond', shapeFill:'#0f5aa8', outlineColor:'#000000',
+      outlineWidth:0, shadowOn:true, blur:2.5, slope:.35, off:2 },
+    { w:50, applyColor:true, iconColor:'#3b3a39', shape:'none', shapeFill:'#ffffff', outlineColor:'#000000',
+      outlineWidth:0, shadowOn:false, blur:2.5, slope:.35, off:2 }
+  ];
+}
+function renderPresets(){
+  const strip = $('preset-strip');
+  if (!strip) return;
+  const ps = getPresets();
+  strip.innerHTML = '';
+  if (!ps.length){
+    const e = document.createElement('span');
+    e.className = 'pempty';
+    e.textContent = 'لا توجد أنماط — اضبطي الإعدادات ثم اضغطي «حفظ».';
+    strip.appendChild(e);
+  }
+  ps.forEach((st, i) => {
+    const d = document.createElement('div');
+    d.className = 'pchip';
+    d.title = 'تطبيق هذا النمط';
+    let img;
+    try { img = '<img alt="نمط" src="' + svgToDataUri(buildWith(SAMPLE_SVG, st, true)) + '">'; }
+    catch(e){ img = '?'; }
+    d.innerHTML = '<span class="x" title="حذف">✕</span>' + img;
+    d.onclick = (ev) => {
+      if (ev.target.classList.contains('x')){
+        ev.stopPropagation();
+        const all = getPresets(); all.splice(i,1); setPresets(all);
+        showNotification('حُذف النمط');
+        return;
+      }
+      applySettings(st);
+      document.querySelectorAll('#preset-strip .pchip').forEach(x => x.classList.remove('on'));
+      d.classList.add('on');
+      showNotification('طُبِّق النمط');
+    };
+    strip.appendChild(d);
+  });
+  const add = document.createElement('button');
+  add.className = 'padd'; add.title = 'حفظ الإعدادات الحالية كنمط'; add.textContent = '＋';
+  add.onclick = savePreset;
+  strip.appendChild(add);
+}
+function savePreset(){
+  const ps = getPresets();
+  if (ps.length >= 12){ showNotification('الحد الأقصى 12 نمطاً — احذفي واحداً أولاً'); return; }
+  ps.push(currentSettings());
+  setPresets(ps);
+  showNotification('حُفظ النمط الحالي');
+}
+
+/* ==================== الإدراج ==================== */
+function sendToSlide(content){
+  Office.context.document.setSelectedDataAsync(content, { coercionType: Office.CoercionType.XmlSvg }, (result) => {
+    if (result.status === Office.AsyncResultStatus.Succeeded) showNotification('تم الإدراج بنجاح ✨');
+    else showNotification('تعذّر الإدراج: ' + ((result.error && result.error.message) || 'تأكدي من وجود شريحة مفتوحة'));
+  });
+}
+function insert(svg){
+  try {
+    if (!window.Office || !Office.context || !Office.context.document){
+      showNotification('الإضافة غير متصلة ببوربوينت'); return;
+    }
+    sendToSlide(buildContent(svg));
+  } catch(err){ console.error(err); showNotification('حدث خطأ: ' + err.message); }
+}
+async function insertSelected(tab){
+  const items = selected[tab].slice();
+  if (!items.length){ showNotification('لم تحدّدي أي أيقونة'); return; }
+  const btn = $('batch-insert-' + tab);
+  btn.disabled = true;
+  try {
+    const units = [];
+    for (let i = 0; i < items.length; i++){
+      if (!items[i]._text) items[i]._text = await items[i].file.text();
+      units.push(buildContent(items[i]._text));
+    }
+    const cols = parseInt($('batch-cols-' + tab).value, 10) || 0;
+    const svg = composeGrid(units, cols);
+    if (!svg) throw new Error('تعذّر تجهيز الأيقونات');
+    sendToSlide(svg);
+  } catch(err){ showNotification('تعذّر الإدراج: ' + err.message); }
+  finally { btn.disabled = (selected[tab].length === 0); }
+}
+
+/* ==================== التشغيل ==================== */
+function wireControls(){
+  ['icon-color','bg-color','outline-color','outline-width','apply-color','apply-shadow',
+   'shadow-blur','shadow-slope','shadow-offset'].forEach(id => {
+    const el = $(id); if (!el) return;
+    el.addEventListener('input', renderPreview);
+    el.addEventListener('change', renderPreview);
+  });
+  document.querySelectorAll('.chev').forEach(ch => { ch.onclick = () => toggleBlock(ch.dataset.toggle); });
+  $('theme-toggle').onclick = () => applyTheme(!document.body.classList.contains('dark'));
+  $('folder-change').onclick = () => pickFolder(currentTab);
+  $('folder-reload').onclick = () => reloadFolder(currentTab);
+  $('preset-save').onclick = savePreset;
+  $('theme-load').onclick = () => loadThemeColors(true);
+  document.querySelectorAll('#theme-target .chip').forEach(ch => {
+    ch.onclick = () => {
+      document.querySelectorAll('#theme-target .chip').forEach(c => c.classList.remove('active'));
+      ch.classList.add('active');
+      themeTarget = ch.dataset.target;
+    };
+  });
+}
+
+function initUI(){
+  buildSizePresets();
+  buildShapeGrid();
+  buildZoomBars();
+  buildBatchBars();
+  wireControls();
+  applyCollapse();
+  if (!localStorage.getItem('shz_presets')) setPresets(defaultPresets()); else renderPresets();
+  syncSizeUI(); syncShapeUI();
+  const base = snapshotSettings();
+  TABS.forEach(t => { if (!tabSettings[t]) tabSettings[t] = JSON.parse(JSON.stringify(base)); });
+  TABS.forEach(t => updateBatchUI(t));
+  const saved = lsGet('shz_dark', null);
+  applyTheme(saved === null ? false : saved);
+}
+
+Office.onReady((info) => {
+  initUI();
+  try {
+    if (info && info.host === Office.HostType.PowerPoint){
+      if (lsGet('shz_dark', null) === null){ const d = detectOfficeDark(); if (d !== null) applyTheme(d); }
+      if (Office.EventType && Office.EventType.OfficeThemeChanged){
+        try { Office.context.document.addHandlerAsync(Office.EventType.OfficeThemeChanged, () => {
+          if (lsGet('shz_dark', null) === null){ const d = detectOfficeDark(); if (d !== null) applyTheme(d); }
+        }); } catch(e){}
+      }
+    }
+  } catch(e){ console.error(e); }
+  switchTab('logos');
+  renderPreview();
+  setTimeout(() => { loadThemeColors(false); }, 600);
+  TABS.forEach(t => restoreLastFolder(t));
+});
+</script>
 </body>
 </html>
