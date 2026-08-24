@@ -96,9 +96,13 @@ input[type=checkbox]{accent-color:var(--acc)}
 .sgrid input:checked + span{color:var(--onTxt)}
 .sgrid label.on{background:var(--acc);color:var(--onTxt);border-color:var(--acc);font-weight:700}
 
-.swrow{display:flex;gap:4px;direction:ltr;flex-wrap:wrap}
+.swrow{display:flex;gap:4px;direction:ltr;flex-wrap:wrap;align-items:center}
+#num-row input{width:40px}
+.gsep{width:1px;align-self:stretch;background:var(--line);margin:0 2px}
 .swatch{width:19px;height:19px;border-radius:4px;border:1px solid rgba(0,0,0,.25);cursor:pointer;position:relative}
 .swatch:hover{outline:2px solid var(--acc);outline-offset:1px}
+.swatch.on{outline:2px solid var(--acc);outline-offset:1px;box-shadow:0 0 0 1px var(--surf)}
+.chip.hasgrad::after{content:"▨";margin-inline-start:3px;font-size:8px;opacity:.9}
 .swatch span{position:absolute;bottom:-2px;right:1px;font-size:7px;color:rgba(0,0,0,.5);font-weight:700}
 .chip{font-size:9px;padding:2px 5px;border-radius:10px;border:1px solid var(--inpLine);
   background:var(--inp);color:var(--mut);cursor:pointer}
@@ -154,7 +158,7 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
   <div class="head">
     <button class="mini" id="theme-toggle" title="تبديل الوضع الداكن">🌙</button>
     <h3>Shaza pptx library</h3>
-    <span class="ver" id="app-version" title="رقم نسخة الصفحة المحمّلة">v2.0.2</span>
+    <span class="ver" id="app-version" title="رقم نسخة الصفحة المحمّلة">v2.1.0</span>
   </div>
 
   <div class="folder">📁 <b id="folder-name">لم يُحدَّد مجلد</b>
@@ -192,13 +196,14 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
           <input type="color" id="icon-color" value="#4472C4">
           <span class="lbl"><input type="checkbox" id="apply-color" checked> تلوين</span></div>
         <div class="r" style="gap:4px"><span class="lbl">ثيم</span>
+          <button class="mini" id="theme-load" title="قراءة ألوان ثيم العرض">⟳</button>
           <div class="swrow" id="theme-swatches"></div>
-          <button class="mini" id="theme-load" title="قراءة ألوان ثيم العرض">⟳</button></div>
+          <div class="swrow" id="grad-swatches"></div></div>
         <div class="r" style="gap:3px" id="theme-target">
           <span class="chip active" data-target="icon-color">الأيقونة</span>
           <span class="chip" data-target="bg-color">الشكل</span>
           <span class="chip" data-target="outline-color">الإطار</span></div>
-        <div class="theme-status" id="theme-status">اضغطي ⟳ لقراءة ألوان الثيم.</div>
+        <div class="theme-status" id="theme-status">اختاري الهدف ثم اضغطي أي لون أو تدرّج · ⟳ لقراءة ألوان الثيم.</div>
       </div>
     </div>
 
@@ -218,6 +223,12 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
           </select></div>
         <div class="r" style="gap:4px">
           <span class="lbl"><input type="checkbox" id="apply-shadow"> ظل</span></div>
+        <div class="r" id="num-row" style="gap:4px;flex-wrap:nowrap;border-top:1px solid var(--line);padding-top:6px;margin-top:2px">
+          <span class="lbl">أرقام</span>
+          <input type="number" id="num-from" value="1" min="1" max="20">
+          <span class="lbl">–</span>
+          <input type="number" id="num-to" value="10" min="1" max="20"></div>
+        <div class="r"><button type="button" class="mini primary" id="num-insert" style="width:100%">إدراج الأرقام</button></div>
       </div>
     </div>
   </div>
@@ -334,12 +345,15 @@ function toggleBlock(key){
 const CONTROL_IDS = ['icon-width','apply-color','icon-color','bg-color','outline-color','outline-width','apply-shadow'];
 const SHADOW_BLUR = 2.5, SHADOW_SLOPE = 0.35, SHADOW_OFFSET = 2;
 const tabSettings = {};
+/* لكل هدف: مفتاح تدرّج أو null (لون صلب) */
+const gradFor = { 'icon-color': null, 'bg-color': null, 'outline-color': null };
 
 function snapshotSettings(){
   const s = {};
   CONTROL_IDS.forEach(id => { const el = $(id); if (!el) return; s[id] = (el.type === 'checkbox') ? el.checked : el.value; });
   const r = document.querySelector('input[name="bg-shape"]:checked');
   s.shape = r ? r.value : 'none';
+  s.grads = { 'icon-color': gradFor['icon-color'], 'bg-color': gradFor['bg-color'], 'outline-color': gradFor['outline-color'] };
   return s;
 }
 function restoreSettings(s){
@@ -351,6 +365,8 @@ function restoreSettings(s){
   });
   const r = document.querySelector('input[name="bg-shape"][value="' + (s.shape || 'none') + '"]');
   if (r) r.checked = true;
+  Object.keys(gradFor).forEach(k => { gradFor[k] = (s.grads && s.grads[k]) || null; });
+  syncGradUI();
   syncShapeUI(); syncSizeUI(); renderPreview();
 }
 
@@ -817,6 +833,48 @@ function toggleSelect(tab, item, box){
             return new XMLSerializer().serializeToString(doc);
         }
 
+        /* ---------- التدرّجات: قيم ثابتة، قُطرية من الزاوية العليا اليسرى ---------- */
+        const GRADS = [
+            { key: 'g1', label: 'G1', name: 'فاتح',  from: '#FFFFFF', mid: '#F4F6F8', to: '#DEE3E9' },
+            { key: 'g2', label: 'G2', name: 'متوسط', from: '#FFFFFF', mid: '#EDF0F4', to: '#C2C9D2' },
+            { key: 'g3', label: 'G3', name: 'قوي',   from: '#FAFBFC', mid: '#DFE3E8', to: '#9AA3AE' }
+        ];
+        function gradByKey(k){ return k ? (GRADS.filter(g => g.key === k)[0] || null) : null; }
+        function gradCss(g){ return 'linear-gradient(135deg,' + g.from + ' 0%,' + g.mid + ' 50%,' + g.to + ' 100%)'; }
+
+        let gradSeq = 0;
+        function linGradDef(id, g, x1, y1, x2, y2){
+            return '<linearGradient id="' + id + '" gradientUnits="userSpaceOnUse"'
+                + ' x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '">'
+                + '<stop offset="0" stop-color="' + g.from + '"/>'
+                + '<stop offset="0.5" stop-color="' + g.mid + '"/>'
+                + '<stop offset="1" stop-color="' + g.to + '"/>'
+                + '</linearGradient>';
+        }
+        /* يدسّ تعريفاً داخل وسم svg الافتتاحي */
+        function injectDefs(svgString, defs){
+            if (!defs) return svgString;
+            return svgString.replace(/(<svg\b[^>]*>)/, '$1<defs>' + defs + '</defs>');
+        }
+        /* تلوين الأيقونة بتدرّج: بإحداثيات viewBox حتى يمتدّ عبر الأيقونة كاملةً لا عبر كل مسار */
+        function deepGradSVG(svgString, g){
+            const doc = parseSvg(svgString);
+            if (!doc) return svgString;
+            const vb = getViewBox(doc).split(/[\s,]+/).map(Number);
+            const id = 'shzg' + (++gradSeq);
+            const colored = deepColorSVG(svgString, 'url(#' + id + ')');
+            return injectDefs(colored, linGradDef(id, g, vb[0], vb[1], vb[0] + vb[2], vb[1] + vb[3]));
+        }
+        /* رقم داخل الشكل الحاوي — يُعامَل معاملة الأيقونة تماماً */
+        function numberSvg(n){
+            const s = String(n);
+            const fz = (s.length > 1) ? 50 : 64;
+            return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">'
+                + '<text x="50" y="50" text-anchor="middle" dy="0.35em"'
+                + ' font-family="Segoe UI, Arial, sans-serif" font-size="' + fz + '"'
+                + ' font-weight="700" fill="#000">' + s + '</text></svg>';
+        }
+
         /* قراءة مقاس رقمي آمنة: ترفض النِّسب المئوية وتقبل الوحدات المطلقة */
         function numAttr(el, name) {
             const v = el.getAttribute(name);
@@ -1182,6 +1240,7 @@ function toggleSelect(tab, item, box){
                 d.onclick = () => {
                     const input = document.getElementById(themeTarget);
                     if (!input) return;
+                    clearGrad(themeTarget);
                     input.value = hex.toLowerCase();
                     if (themeTarget === 'icon-color') document.getElementById('apply-color').checked = true;
                     if (themeTarget === 'outline-color' && document.getElementById('outline-width').value === '0') {
@@ -1199,7 +1258,7 @@ function toggleSelect(tab, item, box){
             const status = document.getElementById('theme-status');
             const cached = docSettingsGet(THEME_CACHE_KEY);
             if (!cached || !cached.colors || !cached.colors.accent1) {
-                status.textContent = 'اضغطي ⟳ لقراءة ألوان الثيم.';
+                status.textContent = 'اختاري الهدف ثم اضغطي أي لون أو تدرّج · ⟳ لقراءة ألوان الثيم.';
                 return false;
             }
             themeColors = cached.colors;
@@ -1239,6 +1298,43 @@ function toggleSelect(tab, item, box){
             }
         }
 
+        /* ---------- مقاس الشريحة بالنقاط: يلزم لتوزيع الأيقونات المدرَجة ---------- */
+        const SLIDE_SIZE_KEY = 'shzSlideSize';
+        const EMU_PER_PT = 12700;
+        const DEFAULT_SLIDE = { w: 960, h: 540 };   /* 16:9 عريضة */
+        let slideSizePt = null;
+
+        async function readSlideSize() {
+            const file = await openPresentationFile();
+            try {
+                const reader = makeReader(file);
+                const eocd = await findEndOfCentralDirectory(reader);
+                const idx = parseCentralDirectory(await reader.range(eocd.cdOff, eocd.cdSize), eocd.count);
+                const xml = await zipEntryText(reader, idx['ppt/presentation.xml']) || '';
+                const tag = (xml.match(/<p:sldSz\b[^>]*>/) || [])[0];
+                if (!tag) throw new Error('لم يُعثر على مقاس الشريحة');
+                const cx = parseInt((tag.match(/\bcx="(\d+)"/) || [])[1], 10);
+                const cy = parseInt((tag.match(/\bcy="(\d+)"/) || [])[1], 10);
+                if (!(cx > 0) || !(cy > 0)) throw new Error('مقاس شريحة غير مفهوم');
+                return { w: cx / EMU_PER_PT, h: cy / EMU_PER_PT };
+            } finally {
+                try { file.closeAsync(); } catch (e) {}
+            }
+        }
+
+        async function getSlideSize() {
+            if (slideSizePt) return slideSizePt;
+            const cached = docSettingsGet(SLIDE_SIZE_KEY);
+            if (cached && cached.w > 0 && cached.h > 0) { slideSizePt = cached; return slideSizePt; }
+            try {
+                slideSizePt = await withTimeout(readSlideSize(), 15000, 'تأخّرت قراءة مقاس الشريحة');
+                docSettingsSet(SLIDE_SIZE_KEY, slideSizePt);
+            } catch (e) {
+                slideSizePt = DEFAULT_SLIDE;
+            }
+            return slideSizePt;
+        }
+
         async function loadThemeColors(userTriggered) {
             if (themeLoading) return;
             const status = document.getElementById('theme-status');
@@ -1269,75 +1365,6 @@ function toggleSelect(tab, item, box){
             }
         }
 
-/* ==================== دمج عدة أيقونات ==================== */
-function isolateUnit(svgString, idx){
-  const doc = parseSvg(svgString);
-  if (!doc) return svgString;
-  const pre = 'u' + idx + '_';
-  const ids = [];
-  doc.querySelectorAll('[id]').forEach(el => ids.push(el.getAttribute('id')));
-  if (ids.length){
-    doc.querySelectorAll('*').forEach(el => {
-      for (let i = 0; i < el.attributes.length; i++){
-        const at = el.attributes[i];
-        let v = at.value;
-        if (v.indexOf('#') === -1) continue;
-        ids.forEach(id => {
-          v = v.split('url(#' + id + ')').join('url(#' + pre + id + ')');
-          if (v === '#' + id) v = '#' + pre + id;
-        });
-        if (v !== at.value) el.setAttribute(at.name, v);
-      }
-    });
-    doc.querySelectorAll('[id]').forEach(el => el.setAttribute('id', pre + el.getAttribute('id')));
-  }
-  doc.querySelectorAll('[class]').forEach(el => {
-    el.setAttribute('class', (el.getAttribute('class')||'').trim().split(/\s+/).filter(Boolean).map(c => pre + c).join(' '));
-  });
-  doc.querySelectorAll('style').forEach(el => {
-    el.textContent = (el.textContent || '').replace(/\.([A-Za-z_][\w-]*)/g, '.' + pre + '$1');
-  });
-  return new XMLSerializer().serializeToString(doc);
-}
-function unitSize(svgString){
-  const doc = parseSvg(svgString);
-  if (!doc) return null;
-  const el = doc.documentElement;
-  let w = numAttr(el, 'width'), h = numAttr(el, 'height');
-  const vb = getViewBox(doc);
-  if (!(w > 0) || !(h > 0)){
-    const n = vb.split(/[\s,]+/).map(Number);
-    w = n[2] > 0 ? n[2] : 100; h = n[3] > 0 ? n[3] : 100;
-  }
-  return { w:w, h:h, viewBox:vb, doc:doc };
-}
-function composeGrid(units, cols){
-  const parsed = units.map((u,i) => unitSize(isolateUnit(u,i))).filter(Boolean);
-  if (!parsed.length) return null;
-  if (parsed.length === 1) return new XMLSerializer().serializeToString(parsed[0].doc);
-  const cellW = Math.max.apply(null, parsed.map(p => p.w));
-  const cellH = Math.max.apply(null, parsed.map(p => p.h));
-  const n = parsed.length;
-  const c = (cols > 0) ? Math.min(cols, n) : Math.ceil(Math.sqrt(n));
-  const rows = Math.ceil(n / c);
-  const gap = Math.max(4, Math.round(Math.max(cellW, cellH) * .15));
-  const totalW = c * cellW + (c - 1) * gap;
-  const totalH = rows * cellH + (rows - 1) * gap;
-  let body = '';
-  parsed.forEach((p,i) => {
-    const col = i % c, row = Math.floor(i / c);
-    const x = Math.round((col * (cellW + gap) + (cellW - p.w) / 2) * 100) / 100;
-    const y = Math.round((row * (cellH + gap) + (cellH - p.h) / 2) * 100) / 100;
-    const el = p.doc.documentElement;
-    el.setAttribute('width', String(p.w)); el.setAttribute('height', String(p.h));
-    el.setAttribute('viewBox', p.viewBox);
-    el.removeAttribute('x'); el.removeAttribute('y');
-    body += '<g transform="translate(' + x + ',' + y + ')">' + new XMLSerializer().serializeToString(el) + '</g>';
-  });
-  return '<svg xmlns="http://www.w3.org/2000/svg" width="' + totalW + '" height="' + totalH
-    + '" viewBox="0 0 ' + totalW + ' ' + totalH + '">' + body + '</svg>';
-}
-
 /* ==================== بناء النتيجة ==================== */
 let shadowSeq = 0;
 function shadowFilter(id, st){
@@ -1360,6 +1387,9 @@ function currentSettings(){
     outlineColor: $('outline-color').value || '#000000',
     outlineWidth: parseInt($('outline-width').value, 10) || 0,
     shadowOn: $('apply-shadow').checked,
+    iconGrad: gradFor['icon-color'],
+    shapeGrad: gradFor['bg-color'],
+    outlineGrad: gradFor['outline-color'],
     blur: SHADOW_BLUR, slope: SHADOW_SLOPE, off: SHADOW_OFFSET
   };
 }
@@ -1373,6 +1403,10 @@ function applySettings(st){
   $('outline-color').value = st.outlineColor;
   $('outline-width').value = String(st.outlineWidth);
   $('apply-shadow').checked = !!st.shadowOn;
+  gradFor['icon-color'] = st.iconGrad || null;
+  gradFor['bg-color'] = st.shapeGrad || null;
+  gradFor['outline-color'] = st.outlineGrad || null;
+  syncGradUI();
   syncShapeUI(); syncSizeUI(); renderPreview();
 }
 
@@ -1421,7 +1455,10 @@ function buildWith(svg, st, styled){
   const applyColor = styled && st.applyColor;
   const shape = styled ? st.shape : 'none';
   const shadowOn = styled && st.shadowOn;
-  const processed = applyColor ? deepColorSVG(svg, st.iconColor) : svg;
+
+  const iconGrad = styled ? gradByKey(st.iconGrad) : null;
+  let processed = svg;
+  if (applyColor) processed = iconGrad ? deepGradSVG(svg, iconGrad) : deepColorSVG(svg, st.iconColor);
 
   if (shape === 'none' && !shadowOn) return resizeSvg(processed, w);
 
@@ -1441,12 +1478,29 @@ function buildWith(svg, st, styled){
   const total = w + padding * 2;
   const c = total / 2;
   const inset = Math.max(5, st.outlineWidth);
-  const strokeAttr = st.outlineWidth > 0 ? ' stroke="' + st.outlineColor + '" stroke-width="' + st.outlineWidth + '"' : '';
-  const shapeHtml = shapeMarkup(shape, c, total, inset, st.shapeFill, strokeAttr, fattr);
+
+  /* تدرّجات الشكل والإطار تُرسم في فضاء الـsvg الخارجي: من زاوية إلى زاوية */
+  let gdefs = '';
+  let fill = st.shapeFill;
+  const shapeGrad = gradByKey(st.shapeGrad);
+  if (shapeGrad){
+    const gid = 'shzg' + (++gradSeq);
+    gdefs += linGradDef(gid, shapeGrad, 0, 0, total, total);
+    fill = 'url(#' + gid + ')';
+  }
+  let strokeColor = st.outlineColor;
+  const outGrad = gradByKey(st.outlineGrad);
+  if (outGrad && st.outlineWidth > 0){
+    const gid = 'shzg' + (++gradSeq);
+    gdefs += linGradDef(gid, outGrad, 0, 0, total, total);
+    strokeColor = 'url(#' + gid + ')';
+  }
+  const strokeAttr = st.outlineWidth > 0 ? ' stroke="' + strokeColor + '" stroke-width="' + st.outlineWidth + '"' : '';
+  const shapeHtml = shapeMarkup(shape, c, total, inset, fill, strokeAttr, fattr);
   const shiftY = (shape === 'shield') ? -Math.round(w * .07) : 0;
 
   return '<svg xmlns="http://www.w3.org/2000/svg" width="' + total + '" height="' + total + '" viewBox="0 0 ' + total + ' ' + total + '">'
-    + fdef + shapeHtml
+    + (gdefs ? '<defs>' + gdefs + '</defs>' : '') + fdef + shapeHtml
     + '<g transform="translate(' + padding + ',' + (padding + shiftY) + ')">' + inner + '</g></svg>';
 }
 
@@ -1471,6 +1525,93 @@ function renderPreview(){
       : buildWith(previewSample, currentSettings(), currentTab === 'icons');
     box.innerHTML = '<img alt="معاينة" src="' + svgToDataUri(svg) + '">';
   } catch(e){ box.textContent = '—'; }
+}
+
+/* ==================== مربّعات التدرّج ==================== */
+function targetName(t){
+  return t === 'icon-color' ? 'الأيقونة' : (t === 'bg-color' ? 'الشكل' : 'الإطار');
+}
+function renderGradSwatches(){
+  const wrap = $('grad-swatches');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const sep = document.createElement('span');
+  sep.className = 'gsep';
+  wrap.appendChild(sep);
+  GRADS.forEach(g => {
+    const d = document.createElement('div');
+    d.className = 'swatch';
+    d.dataset.grad = g.key;
+    d.title = 'تدرّج ' + g.name + ' — ' + g.from + ' ← ' + g.to;
+    d.style.background = gradCss(g);
+    const t = document.createElement('span');
+    t.textContent = g.label;
+    d.appendChild(t);
+    d.onclick = () => toggleGrad(g.key);
+    wrap.appendChild(d);
+  });
+  syncGradUI();
+}
+function toggleGrad(key){
+  gradFor[themeTarget] = (gradFor[themeTarget] === key) ? null : key;
+  const g = gradByKey(gradFor[themeTarget]);
+  if (g){
+    if (themeTarget === 'icon-color') $('apply-color').checked = true;
+    if (themeTarget === 'bg-color'){
+      const cur = document.querySelector('input[name="bg-shape"]:checked');
+      if (!cur || cur.value === 'none'){
+        const r = document.querySelector('input[name="bg-shape"][value="circle"]');
+        if (r){ r.checked = true; syncShapeUI(); }
+      }
+    }
+    if (themeTarget === 'outline-color' && $('outline-width').value === '0') $('outline-width').value = '2';
+    showNotification('تدرّج ' + g.name + ' → ' + targetName(themeTarget));
+  } else {
+    showNotification('أُلغي التدرّج عن ' + targetName(themeTarget));
+  }
+  syncGradUI();
+  renderPreview();
+}
+function clearGrad(target){
+  if (!gradFor[target]) return;
+  gradFor[target] = null;
+  syncGradUI();
+}
+function syncGradUI(){
+  const active = gradFor[themeTarget];
+  document.querySelectorAll('#grad-swatches .swatch').forEach(d => {
+    d.classList.toggle('on', d.dataset.grad === active);
+  });
+  document.querySelectorAll('#theme-target .chip').forEach(ch => {
+    ch.classList.toggle('hasgrad', !!gradFor[ch.dataset.target]);
+  });
+}
+
+/* ==================== الأرقام ==================== */
+function clampBound(v){
+  let n = parseInt(v, 10);
+  if (!isFinite(n)) n = 1;
+  return Math.max(1, Math.min(20, n));
+}
+async function insertNumbers(){
+  if (!window.Office || !Office.context || !Office.context.document){
+    showNotification('الإضافة غير متصلة ببوربوينت'); return;
+  }
+  const a = clampBound($('num-from').value), b = clampBound($('num-to').value);
+  const from = Math.min(a, b), to = Math.max(a, b);
+  $('num-from').value = from; $('num-to').value = to;
+
+  const texts = [];
+  for (let n = from; n <= to; n++) texts.push(numberSvg(n));
+
+  const btn = $('num-insert');
+  btn.disabled = true;
+  try {
+    const colsEl = $('batch-cols-icons');
+    const cols = colsEl ? (parseInt(colsEl.value, 10) || 0) : 0;
+    await insertEachSeparately('icons', texts, currentSettings(), true, cols);
+  } catch(err){ showNotification('تعذّر الإدراج: ' + err.message); }
+  finally { btn.disabled = false; }
 }
 
 /* ==================== الأنماط ==================== */
@@ -1539,10 +1680,18 @@ const INSERT_LIMIT = 900 * 1024;   /* حدّ أمان لحجم الحمولة ا
 
 function payloadBytes(s){ try { return new Blob([s]).size; } catch(e){ return s.length; } }
 
-function setSelectedSvg(content){
+function setSelectedSvg(content, place){
   return new Promise((resolve) => {
     try {
-      Office.context.document.setSelectedDataAsync(content, { coercionType: Office.CoercionType.XmlSvg }, (r) => {
+      const opts = { coercionType: Office.CoercionType.XmlSvg };
+      if (place){
+        /* بوربوينت يشترط تمرير الموضعين معاً، والقياس بالنقاط.
+           لا نمرّر imageHeight — بوربوينت يستنتج الارتفاع من النسبة، وهو المسار المُوثَّق. */
+        opts.imageLeft = place.left;
+        opts.imageTop = place.top;
+        if (place.width > 0) opts.imageWidth = place.width;
+      }
+      Office.context.document.setSelectedDataAsync(content, opts, (r) => {
         if (r.status === Office.AsyncResultStatus.Succeeded) resolve({ ok:true });
         else resolve({ ok:false, message:(r.error && r.error.message) || '' });
       });
@@ -1597,6 +1746,87 @@ function insert(svg){
   } catch(err){ console.error(err); showNotification('حدث خطأ: ' + err.message); }
 }
 
+/* وحدات SVG تُقرأ في بوربوينت كبكسل عند 96 نقطة/إنش */
+const PX_TO_PT = 0.75;
+
+function svgPixelSize(svgString){
+  const doc = parseSvg(svgString);
+  if (!doc) return null;
+  const el = doc.documentElement;
+  let w = numAttr(el, 'width'), h = numAttr(el, 'height');
+  if (!(w > 0) || !(h > 0)){
+    const n = getViewBox(doc).split(/[\s,]+/).map(Number);
+    w = n[2] > 0 ? n[2] : 100;
+    h = n[3] > 0 ? n[3] : 100;
+  }
+  return { w: w, h: h };
+}
+
+/* يوزّع مقاسات الأيقونات على شبكة داخل الشريحة، ويعيد موضع كلٍّ منها بالنقاط */
+function planGrid(sizes, cols, slide){
+  const n = sizes.length;
+  const cellW = Math.max.apply(null, sizes.map(s => s.w)) * PX_TO_PT;
+  const cellH = Math.max.apply(null, sizes.map(s => s.h)) * PX_TO_PT;
+  const gap = Math.max(4, Math.round(Math.max(cellW, cellH) * .15));
+  /* في الوضع التلقائي نختار عدداً من الأعمدة يتّسع له عرض الشريحة فعلاً */
+  const fit = Math.max(1, Math.floor((slide.w - 12 + gap) / (cellW + gap)));
+  const c = (cols > 0) ? Math.min(cols, n) : Math.max(1, Math.min(fit, Math.ceil(Math.sqrt(n)), n));
+  const rows = Math.ceil(n / c);
+  const totalW = c * cellW + (c - 1) * gap;
+  const totalH = rows * cellH + (rows - 1) * gap;
+  const left0 = Math.max(6, (slide.w - totalW) / 2);
+  const top0  = Math.max(6, (slide.h - totalH) / 2);
+
+  const spots = sizes.map((s, i) => {
+    const col = i % c, row = Math.floor(i / c);
+    const wPt = s.w * PX_TO_PT, hPt = s.h * PX_TO_PT;
+    return {
+      left:  Math.round(left0 + col * (cellW + gap) + (cellW - wPt) / 2),
+      top:   Math.round(top0  + row * (cellH + gap) + (cellH - hPt) / 2),
+      width: Math.round(wPt)
+    };
+  });
+  return { spots: spots, overflow: (totalW > slide.w - 12 || totalH > slide.h - 12), cols: c, rows: rows };
+}
+
+/* إدراج كل أيقونة ككائن مستقل على الشريحة — لا تجميع، فلا حاجة لفكّه ولا يضيع الظل */
+async function insertEachSeparately(tab, texts, st, styled, cols){
+  const built = texts.map(t => (tab === 'shapes') ? t : buildWith(t, st, styled));
+  const sizes = built.map(s => svgPixelSize(s) || { w: 100, h: 100 });
+
+  const tooBig = built.filter(s => payloadBytes(s) > INSERT_LIMIT).length;
+  if (tooBig){ showNotification('أيقونة أو أكثر أكبر من الحدّ المسموح — صغّري الحجم'); return; }
+
+  const slide = await getSlideSize();
+  const plan = planGrid(sizes, cols, slide);
+  const spill = plan.overflow ? ' — بعضها خارج حدود الشريحة، صغّري الحجم أو غيّري الأعمدة' : '';
+
+  let done = 0, failed = 0, noShadow = 0;
+  for (let i = 0; i < built.length; i++){
+    if (built.length > 3) showNotification('جارٍ الإدراج… ' + (i + 1) + ' من ' + built.length);
+    let res = await setSelectedSvg(built[i], plan.spots[i]);
+    if (!res.ok && styled && st.shadowOn){
+      let plain = null;
+      try { plain = buildWith(texts[i], Object.assign({}, st, { shadowOn: false }), styled); } catch(e){}
+      if (plain){
+        const again = await setSelectedSvg(plain, plan.spots[i]);
+        if (again.ok) noShadow++;
+        res = again;
+      }
+    }
+    if (res.ok) done++; else failed++;
+  }
+
+  if (!failed){
+    showNotification('أُدرجت ' + done + ' أيقونة ككائنات مستقلة'
+      + (noShadow ? ' (' + noShadow + ' منها بلا ظلّ)' : '') + ' ✨' + spill);
+  } else if (done){
+    showNotification('أُدرجت ' + done + ' من ' + built.length + ' — تعذّر إدراج ' + failed + spill);
+  } else {
+    showNotification('تعذّر الإدراج: ' + insertHint(''));
+  }
+}
+
 async function insertSelected(tab){
   const items = selected[tab].slice();
   if (!items.length){ showNotification('لم تحدّدي أي أيقونة'); return; }
@@ -1609,15 +1839,7 @@ async function insertSelected(tab){
       texts.push(items[i]._text);
     }
     const cols = parseInt($('batch-cols-' + tab).value, 10) || 0;
-    const st = currentSettings();
-    const styled = (tab === 'icons');
-    const compose = (shadow) => composeGrid(
-      texts.map(t => (tab === 'shapes') ? t : buildWith(t, Object.assign({}, st, { shadowOn: shadow && st.shadowOn }), styled)),
-      cols);
-
-    const svg = compose(true);
-    if (!svg) throw new Error('تعذّر تجهيز الأيقونات');
-    await sendToSlide(svg, (tab !== 'shapes' && st.shadowOn) ? (() => compose(false)) : null);
+    await insertEachSeparately(tab, texts, currentSettings(), tab === 'icons', cols);
   } catch(err){ showNotification('تعذّر الإدراج: ' + err.message); }
   finally { btn.disabled = (selected[tab].length === 0); }
 }
@@ -1681,8 +1903,17 @@ function wireScrollbar(){
 function wireControls(){
   ['icon-color','bg-color','outline-color','outline-width','apply-color','apply-shadow'].forEach(id => {
     const el = $(id); if (!el) return;
-    el.addEventListener('input', renderPreview);
-    el.addEventListener('change', renderPreview);
+    const onEdit = () => {
+      if (id === 'icon-color' || id === 'bg-color' || id === 'outline-color') clearGrad(id);
+      renderPreview();
+    };
+    el.addEventListener('input', onEdit);
+    el.addEventListener('change', onEdit);
+  });
+  $('num-insert').onclick = insertNumbers;
+  ['num-from','num-to'].forEach(id => {
+    const el = $(id); if (!el) return;
+    el.addEventListener('change', () => { el.value = clampBound(el.value); });
   });
   document.querySelectorAll('.chev').forEach(ch => { ch.onclick = () => toggleBlock(ch.dataset.toggle); });
   $('theme-toggle').onclick = () => applyTheme(!document.body.classList.contains('dark'));
@@ -1695,6 +1926,7 @@ function wireControls(){
       document.querySelectorAll('#theme-target .chip').forEach(c => c.classList.remove('active'));
       ch.classList.add('active');
       themeTarget = ch.dataset.target;
+      syncGradUI();
     };
   });
 }
@@ -1704,6 +1936,7 @@ function initUI(){
   buildShapeGrid();
   buildZoomBars();
   buildBatchBars();
+  renderGradSwatches();
   wireControls();
   wireScrollbar();
   applyCollapse();
@@ -1716,7 +1949,7 @@ function initUI(){
   applyTheme(saved === null ? false : saved);
 }
 
-const APP_VERSION = '2.0.2';
+const APP_VERSION = '2.1.0';
 
 Office.onReady(async (info) => {
   initUI();
