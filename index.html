@@ -756,81 +756,249 @@ function toggleSelect(tab, item, box){
 }
 
 /* ==================== محرّك SVG (مُختبَر) ==================== */
-        const DARK_RE = /^(#000|#000000|black|#2c3030|#1a1a1a|#111|#111111|currentcolor)$/i;
-        const SHAPE_TAGS = ['path', 'circle', 'rect', 'polygon', 'polyline', 'ellipse', 'line'];
+        /* ============================================================
+           محرّك تلوين SVG — النسخة المُصحَّحة
+           يعالج: قوائم الألوان الداكنة المحدودة، الـ CSS/classes،
+           أصناف MsftOfcThm_* التي يعيد بوربوينت تلوينها من الثيم،
+           والأقنعة/القصّ التي يجب ألّا تُلوَّن.
+           ============================================================ */
+
+        /* ---------- 1) تحليل أي لون، لا قائمة بيضاء ---------- */
+        const NAMED_COLORS = {
+          black:'#000000', white:'#ffffff', gray:'#808080', grey:'#808080',
+          silver:'#c0c0c0', dimgray:'#696969', dimgrey:'#696969',
+          darkslategray:'#2f4f4f', darkslategrey:'#2f4f4f', navy:'#000080',
+          maroon:'#800000', purple:'#800080', teal:'#008080', olive:'#808000',
+          red:'#ff0000', lime:'#00ff00', blue:'#0000ff', yellow:'#ffff00',
+          fuchsia:'#ff00ff', aqua:'#00ffff', green:'#008000'
+        };
+
+        function parseColor(v) {
+          if (!v) return null;
+          let s = String(v).trim().toLowerCase();
+          if (NAMED_COLORS[s]) s = NAMED_COLORS[s];
+
+          let m = s.match(/^#([0-9a-f]{3,8})$/);
+          if (m) {
+            let h = m[1];
+            if (h.length === 3 || h.length === 4) h = h.split('').map(c => c + c).join('');
+            if (h.length !== 6 && h.length !== 8) return null;
+            return {
+              r: parseInt(h.slice(0,2),16),
+              g: parseInt(h.slice(2,4),16),
+              b: parseInt(h.slice(4,6),16),
+              a: h.length === 8 ? parseInt(h.slice(6,8),16)/255 : 1
+            };
+          }
+          m = s.match(/^rgba?\(([^)]+)\)$/);
+          if (m) {
+            const p = m[1].split(/[,\s/]+/).filter(Boolean);
+            if (p.length < 3) return null;
+            const num = (x, max) => x.indexOf('%') !== -1 ? parseFloat(x)/100*max : parseFloat(x);
+            return {
+              r: num(p[0],255), g: num(p[1],255), b: num(p[2],255),
+              a: p.length > 3 ? num(p[3],1) : 1
+            };
+          }
+          return null;
+        }
+
+        /* سطوع إدراكي 0..1 */
+        function brightness(c) {
+          return (0.299*c.r + 0.587*c.g + 0.114*c.b) / 255;
+        }
+
+        /* عتبة: كل ما ليس أبيض/شبه أبيض يُلوَّن. عدّليها أو مرّري mode:'all' */
+        const LIGHT_KEEP = 0.90;
+
+        function isRecolorable(value, mode) {
+          if (!value) return false;
+          const v = String(value).trim().toLowerCase();
+          if (!v || v === 'none' || v === 'transparent' || v === 'inherit') return false;
+          if (v.indexOf('url(') === 0) return false;          /* تدرّج/نمط موجود مسبقاً */
+          if (v === 'currentcolor') return true;
+          const c = parseColor(v);
+          if (!c) return false;
+          if (c.a === 0) return false;
+          if (mode === 'all') return true;
+          if (mode === 'dark') return brightness(c) <= 0.55;
+          return brightness(c) <= LIGHT_KEEP;                 /* الافتراضي */
+        }
+
+        /* ---------- 2) أدوات DOM ---------- */
+        const SHAPE_TAGS = ['path','circle','rect','polygon','polyline','ellipse','line','text','tspan','use'];
+        const SKIP_SUBTREES = ['clippath','mask','filter'];   /* تلوينها يُفسد القصّ والأقنعة */
 
         function parseSvg(svgString) {
-            const doc = new DOMParser().parseFromString(svgString, 'image/svg+xml');
-            if (doc.getElementsByTagName('parsererror').length) return null;
-            if (!doc.documentElement || doc.documentElement.tagName.toLowerCase() !== 'svg') return null;
-            return doc;
+          const doc = new DOMParser().parseFromString(svgString, 'image/svg+xml');
+          if (doc.getElementsByTagName('parsererror').length) return null;
+          if (!doc.documentElement || doc.documentElement.tagName.toLowerCase() !== 'svg') return null;
+          return doc;
         }
 
-        /* القيمة المصرّح بها على العنصر نفسه (من style أوّلاً ثم من الخاصية) */
+        function insideSkipped(el) {
+          let n = el.parentNode;
+          while (n && n.nodeType === 1) {
+            if (SKIP_SUBTREES.indexOf(n.tagName.toLowerCase()) !== -1) return true;
+            n = n.parentNode;
+          }
+          return false;
+        }
+
         function ownPaint(el, prop) {
-            const style = el.getAttribute('style');
-            if (style) {
-                const m = style.match(new RegExp('(?:^|[;\\s])' + prop + '\\s*:\\s*([^;]+)', 'i'));
-                if (m) return m[1].trim();
-            }
-            const a = el.getAttribute(prop);
-            return a ? a.trim() : null;
+          const style = el.getAttribute && el.getAttribute('style');
+          if (style) {
+            const m = style.match(new RegExp('(?:^|[;\\s])' + prop + '\\s*:\\s*([^;]+)', 'i'));
+            if (m) return m[1].trim();
+          }
+          const a = el.getAttribute && el.getAttribute(prop);
+          return a ? a.trim() : null;
         }
-        /* أقرب قيمة معلَنة على العنصر أو أيٍّ من آبائه، بما فيهم عنصر svg الجذر */
+
         function inheritedPaint(el, prop) {
-            let n = el;
-            while (n && n.nodeType === 1) {
-                const v = ownPaint(n, prop);
-                if (v) return v;
-                n = n.parentNode;
-            }
-            return null;
+          let n = el;
+          while (n && n.nodeType === 1) {
+            const v = ownPaint(n, prop);
+            if (v) return v;
+            n = n.parentNode;
+          }
+          return null;
         }
 
-        /* محرك تلوين SVG: يستبدل الأسود/الداكن/currentColor باللون المختار */
-        function deepColorSVG(svgString, fillColor) {
-            const doc = parseSvg(svgString);
-            if (!doc) return svgString;
-
-            doc.querySelectorAll('*').forEach(el => {
-                const tag = el.tagName.toLowerCase();
-
-                /* 1) استبدال كل طلاء داكن مُصرَّح به صراحةً — خاصيةً كان أم style أم CSS */
-                ['fill', 'stroke'].forEach(prop => {
-                    const a = el.getAttribute(prop);
-                    if (a && DARK_RE.test(a.trim())) el.setAttribute(prop, fillColor);
+        /* ---------- 3) تسطيح الـ CSS: ينقل قواعد <style> إلى style مضمّن ثم يحذف الأصناف ----------
+           هذا ما يحلّ مشكلتين معاً:
+           (أ) الأيقونات التي يأتي لونها من class ولم يكن المحرّك يراه.
+           (ب) أصناف MsftOfcThm_* التي يعيد بوربوينت تلوينها من ألوان الثيم
+               متجاهلاً أيّ fill نكتبه — وهي سبب "بعض الأيقونات ما تتلوّن". */
+        function flattenStyles(doc) {
+          const styles = Array.prototype.slice.call(doc.getElementsByTagName('style'));
+          styles.forEach(st => {
+            const css = (st.textContent || '').replace(/\/\*[\s\S]*?\*\//g, '');
+            const re = /([^{}]+)\{([^{}]*)\}/g;
+            let m;
+            while ((m = re.exec(css)) !== null) {
+              const sel = m[1].trim(), decls = m[2].trim();
+              if (!sel || !decls || sel.charAt(0) === '@') continue;
+              sel.split(',').forEach(one => {
+                one = one.trim();
+                if (!one) return;
+                let nodes;
+                try { nodes = Array.prototype.slice.call(doc.querySelectorAll(one)); }
+                catch (e) { return; }
+                nodes.forEach(n => {
+                  /* الـ style المضمّن أولى من قاعدة CSS ⇒ نضع القاعدة قبله */
+                  const prev = n.getAttribute('style') || '';
+                  n.setAttribute('style', decls.replace(/;?\s*$/, ';') + prev);
                 });
+              });
+            }
+            if (st.parentNode) st.parentNode.removeChild(st);
+          });
+          /* لم تعد الأصناف تعني شيئاً — وحذفها يمنع بوربوينت من إعادة التلوين */
+          Array.prototype.slice.call(doc.querySelectorAll('[class]'))
+            .forEach(n => n.removeAttribute('class'));
+        }
 
-                const style = el.getAttribute('style');
-                if (style) {
-                    let s = style;
-                    s = s.replace(/(^|[;\s])fill\s*:\s*([^;]+)/gi, (m, p, v) => DARK_RE.test(v.trim()) ? p + 'fill:' + fillColor : m);
-                    s = s.replace(/(^|[;\s])stroke\s*:\s*([^;]+)/gi, (m, p, v) => DARK_RE.test(v.trim()) ? p + 'stroke:' + fillColor : m);
-                    if (s !== style) el.setAttribute('style', s);
-                }
+        /* ---------- 4) المحرّك ---------- */
+        function deepColorSVG(svgString, fillColor, opts) {
+          opts = opts || {};
+          const mode = opts.mode || 'default';        /* 'dark' | 'default' | 'all' */
+          const doc = parseSvg(svgString);
+          if (!doc) return svgString;
 
-                if (tag === 'style') {
-                    let css = el.textContent || '';
-                    css = css.replace(/fill\s*:\s*([^;}]+)/gi, (m, v) => DARK_RE.test(v.trim()) ? 'fill:' + fillColor : m);
-                    css = css.replace(/stroke\s*:\s*([^;}]+)/gi, (m, v) => DARK_RE.test(v.trim()) ? 'stroke:' + fillColor : m);
-                    el.textContent = css;
-                }
+          flattenStyles(doc);
 
-                /* 2) قاعدة «الأسود الافتراضي» لأيقونات بلا أي طلاء مُصرَّح.
-                      تُطبَّق فقط إن لم يُصرَّح fill ولا stroke في أي مستوى أعلى —
-                      وهذا ما يحمي الأيقونات الخطّية التي تضع fill="none" على الجذر. */
-                if (SHAPE_TAGS.indexOf(tag) === -1) return;
-                if (el.getAttribute('class')) return;
-                if (ownPaint(el, 'fill')) return;
-                const os = ownPaint(el, 'stroke');
-                if (os && os !== 'none') return;
-                if (inheritedPaint(el, 'fill') !== null) return;
-                const is = inheritedPaint(el, 'stroke');
-                if (is && is !== 'none') return;
-                el.setAttribute('fill', fillColor);
+          const all = Array.prototype.slice.call(doc.querySelectorAll('*'));
+
+          all.forEach(el => {
+            if (insideSkipped(el)) return;
+
+            /* (1) كل طلاء مُصرَّح به: خاصيةً أو style مضمّن */
+            ['fill', 'stroke'].forEach(prop => {
+              const a = el.getAttribute(prop);
+              if (a && isRecolorable(a, mode)) el.setAttribute(prop, fillColor);
             });
 
-            return new XMLSerializer().serializeToString(doc);
+            const style = el.getAttribute('style');
+            if (style) {
+              let s = style;
+              ['fill', 'stroke'].forEach(prop => {
+                s = s.replace(new RegExp('(^|[;\\s])' + prop + '\\s*:\\s*([^;]+)', 'gi'),
+                  (mm, p, v) => isRecolorable(v, mode) ? p + prop + ':' + fillColor : mm);
+              });
+              if (s !== style) el.setAttribute('style', s);
+            }
+
+            /* (2) توحيد التدرّجات الداخلية للأيقونة (اختياري) */
+            if (opts.recolorStops && el.tagName.toLowerCase() === 'stop') {
+              const sc = ownPaint(el, 'stop-color') || el.getAttribute('stop-color');
+              if (sc && isRecolorable(sc, mode)) el.setAttribute('stop-color', fillColor);
+            }
+
+            /* (3) قاعدة «الأسود الافتراضي»: شكل بلا أي طلاء مُصرَّح في أيّ مستوى */
+            if (SHAPE_TAGS.indexOf(el.tagName.toLowerCase()) === -1) return;
+            if (ownPaint(el, 'fill')) return;
+            const os = ownPaint(el, 'stroke');
+            if (os && os !== 'none') return;
+            if (inheritedPaint(el, 'fill') !== null) return;
+            const is = inheritedPaint(el, 'stroke');
+            if (is && is !== 'none') return;
+            el.setAttribute('fill', fillColor);
+          });
+
+          /* بوربوينت يقرأ الخصائص (fill=) أوثق مما يقرأ style المضمّن ⇒ ننقلها */
+          styleToAttributes(doc);
+
+          return new XMLSerializer().serializeToString(doc);
+        }
+
+        /* بعد حذف كل الـ CSS لم يعد للـ style المضمّن أفضلية على شيء،
+           فننقل fill/stroke إلى خصائص صريحة يفهمها بوربوينت بثقة */
+        const PAINT_PROPS = ['fill','stroke','fill-opacity','stroke-opacity','stroke-width',
+                             'stroke-linecap','stroke-linejoin','opacity','fill-rule'];
+        function styleToAttributes(doc) {
+          Array.prototype.slice.call(doc.querySelectorAll('[style]')).forEach(el => {
+            let s = el.getAttribute('style') || '';
+            PAINT_PROPS.forEach(p => {
+              const re = new RegExp('(?:^|;)\\s*' + p + '\\s*:\\s*([^;]+)', 'i');
+              const m = s.match(re);
+              if (!m) return;
+              el.setAttribute(p, m[1].trim());
+              s = s.replace(re, '');
+            });
+            s = s.replace(/^[;\s]+|[;\s]+$/g, '');
+            if (s) el.setAttribute('style', s); else el.removeAttribute('style');
+          });
+        }
+
+        /* ---------- 5) تشخيص: لماذا لم تتلوّن أيقونة؟ ---------- */
+        function diagnoseIcon(svgString) {
+          const doc = parseSvg(svgString);
+          if (!doc) return { ok:false, reasons:['ملف SVG غير صالح أو تالف'] };
+          const reasons = [];
+          const s = svgString;
+
+          if (/<image\b/i.test(s))
+            reasons.push('يحتوي صورة نقطية مضمّنة (<image>) — لا يمكن تلوينها برمجياً إطلاقاً.');
+          if (/MsftOfcThm_/.test(s))
+            reasons.push('يستعمل أصناف MsftOfcThm_* — بوربوينت يعيد تلوينها من ألوان الثيم ويتجاهل الـ fill.');
+          if (/<style/i.test(s))
+            reasons.push('لونه يأتي من كتلة <style>/class وليس من خاصية fill مباشرة.');
+          if (/fill\s*=\s*"url\(/i.test(s) || /fill\s*:\s*url\(/i.test(s))
+            reasons.push('مملوء بتدرّج أو نمط (url(#…)) — يحتاج تلوين نقاط التدرّج (stop-color).');
+
+          const paints = {};
+          Array.prototype.slice.call(doc.querySelectorAll('*')).forEach(el => {
+            ['fill','stroke'].forEach(p => {
+              const v = ownPaint(el, p);
+              if (v && v !== 'none') paints[v.toLowerCase()] = (paints[v.toLowerCase()] || 0) + 1;
+            });
+          });
+          const odd = Object.keys(paints).filter(v => v.indexOf('url(') !== 0 && !isRecolorable(v, 'dark'));
+          if (odd.length)
+            reasons.push('ألوان ليست ضمن قائمة الداكن القديمة: ' + odd.join('، '));
+
+          return { ok: reasons.length === 0, reasons: reasons, paints: paints };
         }
 
         /* ---------- التدرّجات: قيم ثابتة، قُطرية من الزاوية العليا اليسرى ---------- */
