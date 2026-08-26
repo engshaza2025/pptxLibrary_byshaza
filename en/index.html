@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html dir="ltr" lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,12 +22,12 @@ body{margin:0;display:flex;flex-direction:row;height:100vh;overflow:hidden;
   font-family:'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--txt)}
 #scroller{flex:1;min-width:0;overflow-y:auto;display:flex;flex-direction:column}
 
-/* شريط تمرير واضح يُسحب بالماوس */
-#scroller{padding-left:15px;scrollbar-width:none}
+/* Visible scrollbar that can be dragged with the mouse */
+#scroller{padding-right:15px;scrollbar-width:none}
 #scroller::-webkit-scrollbar{width:0;height:0}
 
-/* شريط تمرير ظاهر دائماً ويُسحب بالماوس */
-#sbar{position:fixed;left:3px;top:7px;bottom:7px;width:11px;border-radius:7px;
+/* Always-visible scrollbar, draggable with the mouse */
+#sbar{position:fixed;right:3px;top:7px;bottom:7px;width:11px;border-radius:7px;
   background:var(--line);z-index:30;display:none;cursor:pointer}
 #sthumb{position:absolute;left:1px;right:1px;top:0;height:40px;border-radius:6px;
   background:var(--mut);cursor:grab}
@@ -185,25 +185,25 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
 <div id="scroller">
 <div class="bar">
   <div class="head">
-    <button class="mini" id="theme-toggle" title="تبديل الوضع الداكن">🌙</button>
+    <button class="mini" id="theme-toggle" title="Toggle dark mode">🌙</button>
     <h3>Shaza Toolkit</h3>
-    <span class="ver" id="app-version" title="رقم نسخة الصفحة المحمّلة">v2</span>
+    <span class="ver" id="app-version" title="Loaded page version">v2</span>
   </div>
 
-  <div class="folder">📁 <b id="folder-name">لم يُحدَّد مجلد</b>
+  <div class="folder">📁 <b id="folder-name">No folder selected</b>
     <span id="folder-count" style="color:var(--mut)"></span>
     <span class="sp">
-      <button class="mini" id="folder-reload" title="إعادة تحميل المجلد">⟳</button>
-      <button class="mini" id="folder-change">تغيير</button>
+      <button class="mini" id="folder-reload" title="Reload folder">⟳</button>
+      <button class="mini" id="folder-change">Change</button>
     </span>
   </div>
 
-  <!-- كتلة الأنماط -->
+  <!-- Presets block -->
   <div class="blk" id="blk-presets" data-key="presets">
-    <div class="bh">🎨 الأنماط
-      <span class="sp"><button class="mini" id="preset-save">حفظ</button>
-      <button class="mini" id="preset-export" title="تصدير الأنماط كملف لمشاركتها مع الفريق">⭳</button>
-      <button class="mini" id="preset-import" title="استيراد ملف أنماط">⭱</button>
+    <div class="bh">🎨 Presets
+      <span class="sp"><button class="mini" id="preset-save">Save</button>
+      <button class="mini" id="preset-export" title="Export presets to a file you can share with your team">⭳</button>
+      <button class="mini" id="preset-import" title="Import a presets file">⭱</button>
       <span class="chev" data-toggle="presets">▾</span></span></div>
     <div class="bb" style="padding:6px">
       <div class="pstrip" id="preset-strip"></div>
@@ -211,65 +211,65 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
   </div>
 
   <div class="cols">
-    <!-- كتلة الأيقونة -->
+    <!-- Icon block -->
     <div class="blk" id="blk-icon" data-key="icon" style="flex:1.12">
-      <div class="bh">🔷 الأيقونة<span class="sp"><span class="chev" data-toggle="icon">▾</span></span></div>
+      <div class="bh">🔷 Icon<span class="sp"><span class="chev" data-toggle="icon">▾</span></span></div>
       <div class="bb">
         <div class="r" style="flex-wrap:nowrap;gap:6px">
-          <div class="pv" id="preview-box" title="معاينة النتيجة"></div>
+          <div class="pv" id="preview-box" title="Preview of the result"></div>
           <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
-            <div class="r" style="gap:3px"><span class="lbl">حجم</span>
+            <div class="r" style="gap:3px"><span class="lbl">Size</span>
               <input type="number" id="icon-width" value="50" min="10" max="200" step="1"></div>
-            <select id="size-preset" title="اختيار سريع للحجم"></select>
+            <select id="size-preset" title="Quick size picker"></select>
           </div>
         </div>
-        <div class="r" style="gap:4px"><span class="lbl">لون الأيقونة</span>
+        <div class="r" style="gap:4px"><span class="lbl">Icon colour</span>
           <input type="color" id="icon-color" value="#4472C4"></div>
-        <div class="r" style="gap:4px"><span class="lbl">ثيم</span>
+        <div class="r" style="gap:4px"><span class="lbl">Theme</span>
           <span class="info" id="theme-info" data-tip-live="theme-status">i</span>
-          <button class="mini" id="theme-load" title="قراءة ألوان ثيم العرض">⟳</button>
+          <button class="mini" id="theme-load" title="Read the presentation theme colours">⟳</button>
           <div class="swrow" id="theme-swatches"></div>
           <div class="swrow" id="grad-swatches"></div></div>
         <div class="r hidden" id="gbuild">
-          <span class="lbl">تدرّج مخصّص</span>
-          <span class="gslot" id="gb-a" data-tip="اللون الأول — اضغط مربّعاً من صفّ ألوان الثيم">١</span>
+          <span class="lbl">Custom gradient</span>
+          <span class="gslot" id="gb-a" data-tip="First colour — click a swatch in the theme row">1</span>
           <span class="garrow">←</span>
-          <span class="gslot" id="gb-b" data-tip="اللون الثاني — اضغط مربّعاً من صفّ ألوان الثيم">٢</span>
+          <span class="gslot" id="gb-b" data-tip="Second colour — click a swatch in the theme row">2</span>
           <span class="gprev" id="gb-prev"></span>
-          <button type="button" class="mini" id="gb-swap" data-tip="عكس اتجاه اللونين">⇄</button>
-          <button type="button" class="mini" id="gb-apply" data-tip="تطبيق التدرّج على الهدف المختار" disabled>طبّق</button>
-          <button type="button" class="mini" id="gb-cancel" data-tip="إلغاء">✕</button>
+          <button type="button" class="mini" id="gb-swap" data-tip="Swap the two colours">⇄</button>
+          <button type="button" class="mini" id="gb-apply" data-tip="Apply the gradient to the selected target" disabled>Apply</button>
+          <button type="button" class="mini" id="gb-cancel" data-tip="Cancel">✕</button>
         </div>
         <div class="r" style="gap:3px" id="theme-target">
-          <span class="chip active" data-target="icon-color">الأيقونة</span>
-          <span class="chip" data-target="bg-color">الشكل</span>
-          <span class="chip" data-target="outline-color">الإطار</span></div>
-        <div class="theme-status" id="theme-status">اختر الهدف ثم اضغط أي لون أو تدرّج · ⟳ لقراءة ألوان الثيم.</div>
+          <span class="chip active" data-target="icon-color">Icon</span>
+          <span class="chip" data-target="bg-color">Shape</span>
+          <span class="chip" data-target="outline-color">Outline</span></div>
+        <div class="theme-status" id="theme-status">Pick a target, then click any colour or gradient · ⟳ reads the theme colours.</div>
       </div>
     </div>
 
-    <!-- كتلة الشكل الحاوي -->
+    <!-- Container-shape block -->
     <div class="blk" id="blk-shape" data-key="shape" style="flex:1">
-      <div class="bh">⬛ الشكل الحاوي<span class="sp"><span class="chev" data-toggle="shape">▾</span></span></div>
+      <div class="bh">⬛ Container shape<span class="sp"><span class="chev" data-toggle="shape">▾</span></span></div>
       <div class="bb">
         <div class="sgrid" id="shape-grid"></div>
-        <div class="r" style="gap:4px"><span class="lbl">لون الشكل</span>
+        <div class="r" style="gap:4px"><span class="lbl">Shape colour</span>
           <input type="color" id="bg-color" value="#ffffff"></div>
-        <div class="r" style="gap:4px"><span class="lbl">الإطار</span>
+        <div class="r" style="gap:4px"><span class="lbl">Outline</span>
           <input type="color" id="outline-color" value="#000000">
           <select id="outline-width">
-            <option value="0">بلا</option><option value="1">1px</option><option value="2">2px</option>
+            <option value="0">None</option><option value="1">1px</option><option value="2">2px</option>
             <option value="3">3px</option><option value="4">4px</option><option value="5">5px</option>
             <option value="6">6px</option><option value="8">8px</option><option value="10">10px</option>
           </select></div>
         <div class="r" style="gap:4px">
-          <span class="lbl"><input type="checkbox" id="apply-shadow"> ظل</span></div>
+          <span class="lbl"><input type="checkbox" id="apply-shadow"> Shadow</span></div>
         <div class="r" id="num-row" style="gap:4px;flex-wrap:nowrap;border-top:1px solid var(--line);padding-top:6px;margin-top:2px">
-          <span class="lbl">أرقام</span>
+          <span class="lbl">Numbers</span>
           <input type="number" id="num-from" value="1" min="1" max="99">
           <span class="lbl">–</span>
           <input type="number" id="num-to" value="10" min="1" max="99"></div>
-        <div class="r"><button type="button" class="mini primary" id="num-insert" style="width:100%">إدراج الأرقام</button></div>
+        <div class="r"><button type="button" class="mini primary" id="num-insert" style="width:100%">Insert numbers</button></div>
       </div>
     </div>
   </div>
@@ -277,39 +277,39 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
 </div>
 
 <div class="tabs" id="tabs">
-  <button class="tab-btn active" onclick="switchTab('logos')" id="tab-logos">الشعارات</button>
-  <button class="tab-btn" onclick="switchTab('icons')" id="tab-icons">الأيقونات</button>
-  <button class="tab-btn" onclick="switchTab('shapes')" id="tab-shapes">الأشكال</button>
+  <button class="tab-btn active" onclick="switchTab('logos')" id="tab-logos">Logos</button>
+  <button class="tab-btn" onclick="switchTab('icons')" id="tab-icons">Icons</button>
+  <button class="tab-btn" onclick="switchTab('shapes')" id="tab-shapes">Shapes</button>
 </div>
 
 <div class="main">
   <div id="section-logos">
-    <input type="search" class="search-box" id="search-logos" placeholder="بحث بالاسم…" oninput="filterGrid('logos')">
+    <input type="search" class="search-box" id="search-logos" placeholder="Search by name…" oninput="filterGrid('logos')">
     <div id="grid-logos" class="icon-grid"></div>
     <div class="empty-hint" id="hint-logos">
-      <button class="btn-select" onclick="pickFolder('logos')">تحديد مجلد الشعارات</button>
-      اختر مجلد الشعارات (ملفات SVG).</div>
+      <button class="btn-select" onclick="pickFolder('logos')">Choose logos folder</button>
+      Pick the folder that holds your logo SVGs.</div>
   </div>
   <div id="section-icons" style="display:none">
-    <input type="search" class="search-box" id="search-icons" placeholder="بحث بالاسم…" oninput="filterGrid('icons')">
+    <input type="search" class="search-box" id="search-icons" placeholder="Search by name…" oninput="filterGrid('icons')">
     <div id="grid-icons-container"></div>
     <div class="empty-hint" id="hint-icons">
-      <button class="btn-select" onclick="pickFolder('icons')">تحديد مجلد الأيقونات</button>
-      كل مجلد فرعي يظهر كمجموعة مستقلة.</div>
+      <button class="btn-select" onclick="pickFolder('icons')">Choose icons folder</button>
+      Every subfolder shows up as its own group.</div>
   </div>
   <div id="section-shapes" style="display:none">
-    <input type="search" class="search-box" id="search-shapes" placeholder="بحث بالاسم…" oninput="filterGrid('shapes')">
+    <input type="search" class="search-box" id="search-shapes" placeholder="Search by name…" oninput="filterGrid('shapes')">
     <div id="grid-shapes" class="icon-grid"></div>
     <div class="empty-hint" id="hint-shapes">
-      <button class="btn-select" onclick="pickFolder('shapes')">تحديد مجلد الأشكال</button>
-      الأشكال تُدرج كما هي بدون تلوين أو تحجيم.</div>
+      <button class="btn-select" onclick="pickFolder('shapes')">Choose shapes folder</button>
+      Shapes are inserted as they are — no recolouring, no resizing.</div>
   </div>
 </div>
 </div>
 <div id="notification"></div>
 
 <script>
-/* ==================== حالة عامة ==================== */
+/* ==================== Global state ==================== */
 const TABS = ['logos','icons','shapes'];
 let currentTab = 'logos';
 let notifSeq = 0;
@@ -321,15 +321,15 @@ const SAMPLE_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
   + '<path fill="#000" d="M12 2 2 7v10l10 5 10-5V7L12 2zm0 2.3 7.5 3.7-7.5 3.8L4.5 8 12 4.3zM4 9.6l7 3.5v6.3l-7-3.5V9.6zm9 9.8v-6.3l7-3.5v6.3l-7 3.5z"/></svg>';
 
 const SHAPES = [
-  {v:'none',g:'—',n:'لا شيء',pad:0},
-  {v:'circle',g:'●',n:'دائرة',pad:.40},
-  {v:'square',g:'■',n:'مربع',pad:.40},
-  {v:'rounded',g:'▢',n:'مربع ناعم',pad:.40},
-  {v:'diamond',g:'◆',n:'معيّن',pad:.62},
-  {v:'hexagon',g:'⬢',n:'سداسي',pad:.42},
-  {v:'octagon',g:'⯄',n:'مثمّن',pad:.40},
-  {v:'ring',g:'◎',n:'حلقة مزدوجة',pad:.46},
-  {v:'shield',g:'🛡',n:'درع',pad:.55}
+  {v:'none',g:'—',n:'None',pad:0},
+  {v:'circle',g:'●',n:'Circle',pad:.40},
+  {v:'square',g:'■',n:'Square',pad:.40},
+  {v:'rounded',g:'▢',n:'Rounded square',pad:.40},
+  {v:'diamond',g:'◆',n:'Diamond',pad:.62},
+  {v:'hexagon',g:'⬢',n:'Hexagon',pad:.42},
+  {v:'octagon',g:'⯄',n:'Octagon',pad:.40},
+  {v:'ring',g:'◎',n:'Double ring',pad:.46},
+  {v:'shield',g:'🛡',n:'Shield',pad:.55}
 ];
 
 function $(id){ return document.getElementById(id); }
@@ -341,11 +341,11 @@ function showNotification(msg){
   setTimeout(() => { if (my === notifSeq) n.style.display = 'none'; }, 3500);
 }
 
-/* ==================== تخزين محلي ==================== */
+/* ==================== Local storage ==================== */
 function lsGet(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } }
 function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
 
-/* ==================== الوضع الداكن ==================== */
+/* ==================== Dark mode ==================== */
 function applyTheme(dark){
   document.body.classList.toggle('dark', !!dark);
   $('theme-toggle').textContent = dark ? '☀' : '🌙';
@@ -363,7 +363,7 @@ function detectOfficeDark(){
   } catch(e){ return null; }
 }
 
-/* ==================== طيّ الكتل ==================== */
+/* ==================== Collapsible blocks ==================== */
 function applyCollapse(){
   const st = lsGet('shz_collapse', {});
   document.querySelectorAll('.blk').forEach(b => {
@@ -382,11 +382,11 @@ function toggleBlock(key){
   setTimeout(updateScrollbar, 30);
 }
 
-/* ==================== إعدادات مستقلة لكل تبويب ==================== */
+/* ==================== Per-tab settings ==================== */
 const CONTROL_IDS = ['icon-width','icon-color','bg-color','outline-color','outline-width','apply-shadow'];
 const SHADOW_BLUR = 2.5, SHADOW_SLOPE = 0.35, SHADOW_OFFSET = 2;
 const tabSettings = {};
-/* لكل هدف: مفتاح تدرّج أو null (لون صلب) */
+/* per target: a gradient key, or null for a solid colour */
 const gradFor = { 'icon-color': null, 'bg-color': null, 'outline-color': null };
 
 function snapshotSettings(){
@@ -414,11 +414,11 @@ function restoreSettings(s){
   syncShapeUI(); syncSizeUI(); renderPreview();
 }
 
-/* ==================== الحجم ==================== */
+/* ==================== Size ==================== */
 function clampSize(v){ let n = parseInt(v,10); if (!isFinite(n)) n = 50; return Math.max(SIZE_MIN, Math.min(SIZE_MAX, n)); }
 function buildSizePresets(){
   const sel = $('size-preset');
-  sel.innerHTML = '<option value="">يدوي</option>';
+  sel.innerHTML = '<option value="">Manual</option>';
   for (let v = SIZE_MIN; v <= SIZE_MAX; v += 10){
     const o = document.createElement('option'); o.value = String(v); o.textContent = v + ' px'; sel.appendChild(o);
   }
@@ -435,7 +435,7 @@ function syncSizeUI(){
   sel.value = m ? m.value : '';
 }
 
-/* ==================== شبكة الأشكال ==================== */
+/* ==================== Shape grid ==================== */
 function buildShapeGrid(){
   const g = $('shape-grid');
   g.innerHTML = '';
@@ -457,7 +457,7 @@ function padFor(shape){
   return s ? s.pad : .40;
 }
 
-/* ==================== التبويبات ==================== */
+/* ==================== Tabs ==================== */
 function switchTab(tabName){
   if (currentTab) tabSettings[currentTab] = snapshotSettings();
   currentTab = tabName;
@@ -471,14 +471,14 @@ function switchTab(tabName){
   $('blk-shape').style.display   = isIcons ? '' : 'none';
   $('blk-icon').style.display    = isShapes ? 'none' : '';
   document.querySelectorAll('#blk-icon .bb > .r, #blk-icon .theme-status').forEach((el, i) => {
-    if (i > 0) el.style.display = isIcons ? '' : 'none';   // الشعارات: الحجم فقط
+    if (i > 0) el.style.display = isIcons ? '' : 'none';   // logos tab: size only
   });
   updateFolderBar();
   renderPreview();
   setTimeout(updateScrollbar, 30);
 }
 
-/* ==================== البحث والتكبير ==================== */
+/* ==================== Search and zoom ==================== */
 function filterGrid(tab){
   const q = ($('search-' + tab).value || '').trim().toLowerCase();
   const root = $('section-' + tab);
@@ -496,7 +496,7 @@ function buildZoomBars(){
   TABS.forEach(tab => {
     const wrap = document.createElement('div');
     wrap.className = 'zoom';
-    wrap.innerHTML = '🔍 حجم المربعات <input type="range" id="zoom-' + tab + '" min="32" max="72" step="4">'
+    wrap.innerHTML = '🔍 Tile size <input type="range" id="zoom-' + tab + '" min="32" max="72" step="4">'
       + '<span id="zoomval-' + tab + '" style="color:var(--acc);font-weight:700"></span>';
     const s = $('search-' + tab);
     s.parentNode.insertBefore(wrap, s.nextSibling);
@@ -518,7 +518,7 @@ function setZoom(px){
   });
 }
 
-/* ==================== ذاكرة المجلد (IndexedDB) ==================== */
+/* ==================== Folder memory (IndexedDB) ==================== */
 function idbOpen(){
   return new Promise((res, rej) => {
     const r = indexedDB.open('shzLib', 1);
@@ -543,13 +543,13 @@ const folderInfo = { logos:null, icons:null, shapes:null };   // {name, count}
 
 function updateFolderBar(){
   const info = folderInfo[currentTab];
-  $('folder-name').textContent = info ? info.name : 'لم يُحدَّد مجلد';
+  $('folder-name').textContent = info ? info.name : 'No folder selected';
   $('folder-name').title = info && info.path ? info.path : '';
-  $('folder-count').textContent = info ? ('— ' + info.count + ' ملف') : '';
+  $('folder-count').textContent = info ? ('— ' + info.count + ' files') : '';
   $('folder-reload').disabled = !dirHandles[currentTab];
 }
 
-/* ==================== اختيار الملفات ==================== */
+/* ==================== File picking ==================== */
 async function collectFromDirHandle(handle, prefix){
   let out = [];
   for await (const entry of handle.values()){
@@ -581,7 +581,7 @@ function pickViaInput(){
         return { dir: parts.join('/'), name: f.name, file: f };
       });
       inp.remove();
-      resolve({ items: out, handle: null, name: root || 'مجلد' });
+      resolve({ items: out, handle: null, name: root || 'Folder' });
     });
     inp.click();
   });
@@ -607,16 +607,16 @@ async function pickFolder(tab){
 }
 async function reloadFolder(tab){
   const h = dirHandles[tab];
-  if (!h) { showNotification('لا يوجد مجلد محفوظ — اضغط «تغيير»'); return; }
+  if (!h) { showNotification('No folder remembered — click Change'); return; }
   try {
     if (h.queryPermission){
       let p = await h.queryPermission({ mode: 'read' });
       if (p !== 'granted' && h.requestPermission) p = await h.requestPermission({ mode: 'read' });
-      if (p !== 'granted') { showNotification('لم يُسمح بالوصول للمجلد'); return; }
+      if (p !== 'granted') { showNotification('Folder access was not granted'); return; }
     }
     const items = await collectFromDirHandle(h, '');
     await renderItems(tab, items, h.name);
-  } catch(err){ showNotification('تعذّرت إعادة القراءة: ' + err.message); }
+  } catch(err){ showNotification('Could not re-read the folder: ' + err.message); }
 }
 async function restoreLastFolder(tab){
   const h = await idbGet('dir_' + tab);
@@ -630,7 +630,7 @@ async function restoreLastFolder(tab){
       if (p !== 'granted'){
         const hint = $('hint-' + tab);
         if (hint) hint.innerHTML = '<button class="btn-select" onclick="reloadFolder(\'' + tab + '\')">'
-          + 'استعادة المجلد السابق: ' + h.name + '</button>اضغط للسماح بقراءته من جديد.';
+          + 'Restore previous folder: ' + h.name + '</button>Click to grant read access again.';
         return;
       }
     }
@@ -639,15 +639,15 @@ async function restoreLastFolder(tab){
   } catch(e){}
 }
 
-/* ==================== عرض الشبكة ==================== */
-/* تحرير معاينات تبويب واحد فقط — لا تُمسّ معاينات التبويبات الأخرى */
+/* ==================== Grid rendering ==================== */
+/* Release the previews of one tab only — other tabs keep theirs */
 function clearUrls(tab){
   const list = objectUrls[tab] || [];
   while (list.length){ try { URL.revokeObjectURL(list.pop()); } catch(e){} }
   if (iconObservers[tab]){ try { iconObservers[tab].disconnect(); } catch(e){} iconObservers[tab] = null; }
 }
 
-/* تحميل كسول: لا تُبنى معاينة الأيقونة إلا حين تقترب من الشاشة */
+/* Lazy loading: an icon preview is built only as it approaches the viewport */
 function observerFor(tab){
   if (iconObservers[tab]) return iconObservers[tab];
   if (!window.IntersectionObserver) return null;
@@ -697,7 +697,7 @@ function makeBox(item, tab){
   box.onclick = async () => {
     if (multiMode[tab]) { toggleSelect(tab, item, box); return; }
     try { if (!item._text) item._text = await item.file.text(); insert(item._text); }
-    catch(err){ showNotification('تعذّرت قراءة الملف: ' + item.name); }
+    catch(err){ showNotification('Could not read the file: ' + item.name); }
   };
   return box;
 }
@@ -706,22 +706,22 @@ async function renderItems(tab, items, folderName){
   clearSelection(tab);
   clearUrls(tab);
   const hint = $('hint-' + tab);
-  folderInfo[tab] = { name: folderName || 'مجلد', count: items.length };
+  folderInfo[tab] = { name: folderName || 'Folder', count: items.length };
   updateFolderBar();
 
   if (tab === 'icons'){
     const c = $('grid-icons-container');
     c.innerHTML = '';
-    if (!items.length){ hint.style.display = 'block'; showNotification('لا توجد ملفات SVG في المجلد'); return; }
+    if (!items.length){ hint.style.display = 'block'; showNotification('No SVG files in that folder'); return; }
     hint.style.display = 'none';
     const groups = new Map();
     items.forEach(it => {
-      const key = it.dir ? it.dir.split('/')[0] : 'بدون مجلد';
+      const key = it.dir ? it.dir.split('/')[0] : 'Ungrouped';
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(it);
     });
-    Array.from(groups.keys()).sort((a,b) => a.localeCompare(b,'ar')).forEach(key => {
-      const list = groups.get(key).sort((a,b) => a.name.localeCompare(b.name,'ar'));
+    Array.from(groups.keys()).sort((a,b) => a.localeCompare(b,'en')).forEach(key => {
+      const list = groups.get(key).sort((a,b) => a.name.localeCompare(b.name,'en'));
       const title = document.createElement('div');
       title.className = 'group-title';
       const nm = document.createElement('span'); nm.textContent = key + ' (' + list.length + ')';
@@ -737,21 +737,21 @@ async function renderItems(tab, items, folderName){
       list.forEach(it => grid.appendChild(makeBox(it, 'icons')));
       c.appendChild(title); c.appendChild(grid);
     });
-    showNotification('تم تحميل ' + items.length + ' أيقونة في ' + groups.size + ' مجموعة');
+    showNotification('Loaded ' + items.length + ' icons in ' + groups.size + ' groups');
   } else {
     const g = $('grid-' + tab);
     g.innerHTML = '';
-    if (!items.length){ hint.style.display = 'block'; showNotification('لا توجد ملفات SVG في المجلد'); return; }
+    if (!items.length){ hint.style.display = 'block'; showNotification('No SVG files in that folder'); return; }
     hint.style.display = 'none';
-    items.sort((a,b) => a.name.localeCompare(b.name,'ar'));
+    items.sort((a,b) => a.name.localeCompare(b.name,'en'));
     items.forEach(it => g.appendChild(makeBox(it, tab)));
-    showNotification('تم تحميل ' + items.length + ' ملف');
+    showNotification('Loaded ' + items.length + ' files');
   }
   filterGrid(tab);
   setTimeout(updateScrollbar, 30);
 }
 
-/* ==================== التحديد المتعدد ==================== */
+/* ==================== Multi-select ==================== */
 const multiMode = { logos:false, icons:false, shapes:false };
 const selected = { logos:[], icons:[], shapes:[] };
 const MAX_BATCH = 60;
@@ -760,11 +760,11 @@ function buildBatchBars(){
   TABS.forEach(tab => {
     const bar = document.createElement('div');
     bar.className = 'batch-bar'; bar.id = 'batch-' + tab;
-    bar.innerHTML = '<button type="button" class="mini" id="multi-btn-' + tab + '">☑ تحديد متعدد</button>'
-      + '<span class="batch-count" id="batch-count-' + tab + '">لا يوجد تحديد</span>'
-      + '<label title="0 = تلقائي">أعمدة: <input type="number" id="batch-cols-' + tab + '" value="0" min="0" max="12"></label>'
-      + '<button type="button" class="mini primary" id="batch-insert-' + tab + '" disabled>إدراج المحدد</button>'
-      + '<button type="button" class="mini" id="batch-clear-' + tab + '">مسح</button>';
+    bar.innerHTML = '<button type="button" class="mini" id="multi-btn-' + tab + '">☑ Multi-select</button>'
+      + '<span class="batch-count" id="batch-count-' + tab + '">Nothing selected</span>'
+      + '<label title="0 = automatic">Columns: <input type="number" id="batch-cols-' + tab + '" value="0" min="0" max="12"></label>'
+      + '<button type="button" class="mini primary" id="batch-insert-' + tab + '" disabled>Insert selected</button>'
+      + '<button type="button" class="mini" id="batch-clear-' + tab + '">Clear</button>';
     const z = $('zoom-' + tab).parentNode;
     z.parentNode.insertBefore(bar, z.nextSibling);
     $('multi-btn-' + tab).onclick = () => toggleMulti(tab);
@@ -775,8 +775,8 @@ function buildBatchBars(){
 function toggleMulti(tab){
   multiMode[tab] = !multiMode[tab];
   $('batch-' + tab).classList.toggle('on', multiMode[tab]);
-  $('multi-btn-' + tab).textContent = multiMode[tab] ? '✕ إنهاء التحديد' : '☑ تحديد متعدد';
-  if (!multiMode[tab]) clearSelection(tab); else showNotification('اضغط الأيقونات ثم «إدراج المحدد»');
+  $('multi-btn-' + tab).textContent = multiMode[tab] ? '✕ Done selecting' : '☑ Multi-select';
+  if (!multiMode[tab]) clearSelection(tab); else showNotification('Click the icons you want, then Insert selected');
   updateBatchUI(tab);
 }
 function clearSelection(tab){
@@ -787,27 +787,27 @@ function clearSelection(tab){
 function updateBatchUI(tab){
   const n = selected[tab].length;
   const c = $('batch-count-' + tab); if (!c) return;
-  c.textContent = n ? ('المحدد: ' + n) : 'لا يوجد تحديد';
+  c.textContent = n ? ('Selected: ' + n) : 'Nothing selected';
   $('batch-insert-' + tab).disabled = (n === 0);
 }
 function toggleSelect(tab, item, box){
   const i = selected[tab].indexOf(item);
   if (i === -1){
-    if (selected[tab].length >= MAX_BATCH){ showNotification('الحد الأقصى ' + MAX_BATCH + ' أيقونة'); return; }
+    if (selected[tab].length >= MAX_BATCH){ showNotification('Maximum ' + MAX_BATCH + ' icons'); return; }
     selected[tab].push(item); box.classList.add('selected');
   } else { selected[tab].splice(i,1); box.classList.remove('selected'); }
   updateBatchUI(tab);
 }
 
-/* ==================== محرّك SVG (مُختبَر) ==================== */
+/* ==================== SVG engine (tested) ==================== */
         /* ============================================================
-           محرّك تلوين SVG — النسخة المُصحَّحة
-           يعالج: قوائم الألوان الداكنة المحدودة، الـ CSS/classes،
-           أصناف MsftOfcThm_* التي يعيد بوربوينت تلوينها من الثيم،
-           والأقنعة/القصّ التي يجب ألّا تُلوَّن.
+           SVG recolouring engine — corrected build
+           Handles: limited dark-colour whitelists, CSS classes,
+           MsftOfcThm_* classes that PowerPoint re-binds to theme colours,
+           and masks/clip paths that must never be recoloured.
            ============================================================ */
 
-        /* ---------- 1) تحليل أي لون، لا قائمة بيضاء ---------- */
+        /* ---------- 1) Parse any colour, no whitelist ---------- */
         const NAMED_COLORS = {
           black:'#000000', white:'#ffffff', gray:'#808080', grey:'#808080',
           silver:'#c0c0c0', dimgray:'#696969', dimgrey:'#696969',
@@ -847,31 +847,32 @@ function toggleSelect(tab, item, box){
           return null;
         }
 
-        /* سطوع إدراكي 0..1 */
+        /* Perceptual brightness, 0..1 */
         function brightness(c) {
           return (0.299*c.r + 0.587*c.g + 0.114*c.b) / 255;
         }
 
-        /* عتبة: كل ما ليس أبيض/شبه أبيض يُلوَّن. عدّليها أو مرّر mode:'all' */
+        /* Threshold: anything that is not white or near-white gets recoloured.
+           Adjust it, or pass mode:'all' */
         const LIGHT_KEEP = 0.90;
 
         function isRecolorable(value, mode) {
           if (!value) return false;
           const v = String(value).trim().toLowerCase();
           if (!v || v === 'none' || v === 'transparent' || v === 'inherit') return false;
-          if (v.indexOf('url(') === 0) return false;          /* تدرّج/نمط موجود مسبقاً */
+          if (v.indexOf('url(') === 0) return false;          /* an existing gradient or pattern */
           if (v === 'currentcolor') return true;
           const c = parseColor(v);
           if (!c) return false;
           if (c.a === 0) return false;
           if (mode === 'all') return true;
           if (mode === 'dark') return brightness(c) <= 0.55;
-          return brightness(c) <= LIGHT_KEEP;                 /* الافتراضي */
+          return brightness(c) <= LIGHT_KEEP;                 /* default */
         }
 
-        /* ---------- 2) أدوات DOM ---------- */
+        /* ---------- 2) DOM helpers ---------- */
         const SHAPE_TAGS = ['path','circle','rect','polygon','polyline','ellipse','line','text','tspan','use'];
-        const SKIP_SUBTREES = ['clippath','mask','filter'];   /* تلوينها يُفسد القصّ والأقنعة */
+        const SKIP_SUBTREES = ['clippath','mask','filter'];   /* recolouring these breaks clipping and masking */
 
         function parseSvg(svgString) {
           const doc = new DOMParser().parseFromString(svgString, 'image/svg+xml');
@@ -909,11 +910,11 @@ function toggleSelect(tab, item, box){
           return null;
         }
 
-        /* ---------- 3) تسطيح الـ CSS: ينقل قواعد <style> إلى style مضمّن ثم يحذف الأصناف ----------
-           هذا ما يحلّ مشكلتين معاً:
-           (أ) الأيقونات التي يأتي لونها من class ولم يكن المحرّك يراه.
-           (ب) أصناف MsftOfcThm_* التي يعيد بوربوينت تلوينها من ألوان الثيم
-               متجاهلاً أيّ fill نكتبه — وهي سبب "بعض الأيقونات ما تتلوّن". */
+        /* ---------- 3) Flatten CSS: move <style> rules into inline styles, then drop the classes ----------
+           This solves two problems at once:
+           (a) icons whose colour came from a class the engine could not see;
+           (b) MsftOfcThm_* classes that PowerPoint re-binds to theme colours,
+               ignoring any fill we write — the reason some icons never recoloured. */
         function flattenStyles(doc) {
           const styles = Array.prototype.slice.call(doc.getElementsByTagName('style'));
           styles.forEach(st => {
@@ -930,7 +931,7 @@ function toggleSelect(tab, item, box){
                 try { nodes = Array.prototype.slice.call(doc.querySelectorAll(one)); }
                 catch (e) { return; }
                 nodes.forEach(n => {
-                  /* الـ style المضمّن أولى من قاعدة CSS ⇒ نضع القاعدة قبله */
+                  /* an inline style outranks a CSS rule, so the rule goes before it */
                   const prev = n.getAttribute('style') || '';
                   n.setAttribute('style', decls.replace(/;?\s*$/, ';') + prev);
                 });
@@ -938,12 +939,12 @@ function toggleSelect(tab, item, box){
             }
             if (st.parentNode) st.parentNode.removeChild(st);
           });
-          /* لم تعد الأصناف تعني شيئاً — وحذفها يمنع بوربوينت من إعادة التلوين */
+          /* the classes now mean nothing, and removing them stops PowerPoint re-binding them */
           Array.prototype.slice.call(doc.querySelectorAll('[class]'))
             .forEach(n => n.removeAttribute('class'));
         }
 
-        /* ---------- 4) المحرّك ---------- */
+        /* ---------- 4) The engine ---------- */
         function deepColorSVG(svgString, fillColor, opts) {
           opts = opts || {};
           const mode = opts.mode || 'default';        /* 'dark' | 'default' | 'all' */
@@ -957,7 +958,7 @@ function toggleSelect(tab, item, box){
           all.forEach(el => {
             if (insideSkipped(el)) return;
 
-            /* (1) كل طلاء مُصرَّح به: خاصيةً أو style مضمّن */
+            /* (1) every declared paint: attribute or inline style */
             ['fill', 'stroke'].forEach(prop => {
               const a = el.getAttribute(prop);
               if (a && isRecolorable(a, mode)) el.setAttribute(prop, fillColor);
@@ -973,13 +974,13 @@ function toggleSelect(tab, item, box){
               if (s !== style) el.setAttribute('style', s);
             }
 
-            /* (2) توحيد التدرّجات الداخلية للأيقونة (اختياري) */
+            /* (2) normalise the icon's own gradient stops (optional) */
             if (opts.recolorStops && el.tagName.toLowerCase() === 'stop') {
               const sc = ownPaint(el, 'stop-color') || el.getAttribute('stop-color');
               if (sc && isRecolorable(sc, mode)) el.setAttribute('stop-color', fillColor);
             }
 
-            /* (3) قاعدة «الأسود الافتراضي»: شكل بلا أي طلاء مُصرَّح في أيّ مستوى */
+            /* (3) the "default black" rule: a shape with no declared paint at any level */
             if (SHAPE_TAGS.indexOf(el.tagName.toLowerCase()) === -1) return;
             if (ownPaint(el, 'fill')) return;
             const os = ownPaint(el, 'stroke');
@@ -990,14 +991,14 @@ function toggleSelect(tab, item, box){
             el.setAttribute('fill', fillColor);
           });
 
-          /* بوربوينت يقرأ الخصائص (fill=) أوثق مما يقرأ style المضمّن ⇒ ننقلها */
+          /* PowerPoint trusts attributes (fill=) more than inline styles, so move them across */
           styleToAttributes(doc);
 
           return new XMLSerializer().serializeToString(doc);
         }
 
-        /* بعد حذف كل الـ CSS لم يعد للـ style المضمّن أفضلية على شيء،
-           فننقل fill/stroke إلى خصائص صريحة يفهمها بوربوينت بثقة */
+        /* With all CSS gone, an inline style no longer outranks anything, so fill/stroke
+           move to explicit attributes PowerPoint reads reliably */
         const PAINT_PROPS = ['fill','stroke','fill-opacity','stroke-opacity','stroke-width',
                              'stroke-linecap','stroke-linejoin','opacity','fill-rule'];
         function styleToAttributes(doc) {
@@ -1015,21 +1016,21 @@ function toggleSelect(tab, item, box){
           });
         }
 
-        /* ---------- 5) تشخيص: لماذا لم تتلوّن أيقونة؟ ---------- */
+        /* ---------- 5) Diagnostics: why did an icon not recolour? ---------- */
         function diagnoseIcon(svgString) {
           const doc = parseSvg(svgString);
-          if (!doc) return { ok:false, reasons:['ملف SVG غير صالح أو تالف'] };
+          if (!doc) return { ok:false, reasons:['Invalid or corrupted SVG file'] };
           const reasons = [];
           const s = svgString;
 
           if (/<image\b/i.test(s))
-            reasons.push('يحتوي صورة نقطية مضمّنة (<image>) — لا يمكن تلوينها برمجياً إطلاقاً.');
+            reasons.push('Contains an embedded raster image (<image>) — that can never be recoloured programmatically.');
           if (/MsftOfcThm_/.test(s))
-            reasons.push('يستعمل أصناف MsftOfcThm_* — بوربوينت يعيد تلوينها من ألوان الثيم ويتجاهل الـ fill.');
+            reasons.push('Uses MsftOfcThm_* classes — PowerPoint re-binds those to theme colours and ignores the fill.');
           if (/<style/i.test(s))
-            reasons.push('لونه يأتي من كتلة <style>/class وليس من خاصية fill مباشرة.');
+            reasons.push('Its colour comes from a <style> block or class rather than a direct fill attribute.');
           if (/fill\s*=\s*"url\(/i.test(s) || /fill\s*:\s*url\(/i.test(s))
-            reasons.push('مملوء بتدرّج أو نمط (url(#…)) — يحتاج تلوين نقاط التدرّج (stop-color).');
+            reasons.push('Filled with a gradient or pattern (url(#…)) — needs its stop-color values recoloured.');
 
           const paints = {};
           Array.prototype.slice.call(doc.querySelectorAll('*')).forEach(el => {
@@ -1040,19 +1041,19 @@ function toggleSelect(tab, item, box){
           });
           const odd = Object.keys(paints).filter(v => v.indexOf('url(') !== 0 && !isRecolorable(v, 'dark'));
           if (odd.length)
-            reasons.push('ألوان ليست ضمن قائمة الداكن القديمة: ' + odd.join('، '));
+            reasons.push('Colours outside the old dark whitelist: ' + odd.join(', '));
 
           return { ok: reasons.length === 0, reasons: reasons, paints: paints };
         }
 
-        /* ---------- التدرّجات: قيم ثابتة، قُطرية من الزاوية العليا اليسرى ---------- */
+        /* ---------- Gradients: fixed stops, diagonal from the top-left corner ---------- */
         const GRADS = [
-            { key: 'g1', label: 'G1', name: 'فاتح',  from: '#FFFFFF', mid: '#F4F6F8', to: '#DEE3E9' },
-            { key: 'g2', label: 'G2', name: 'متوسط', from: '#FFFFFF', mid: '#EDF0F4', to: '#C2C9D2' },
-            { key: 'g3', label: 'G3', name: 'قوي',   from: '#FAFBFC', mid: '#DFE3E8', to: '#9AA3AE' }
+            { key: 'g1', label: 'G1', name: 'Light',  from: '#FFFFFF', mid: '#F4F6F8', to: '#DEE3E9' },
+            { key: 'g2', label: 'G2', name: 'Medium', from: '#FFFFFF', mid: '#EDF0F4', to: '#C2C9D2' },
+            { key: 'g3', label: 'G3', name: 'Strong',   from: '#FAFBFC', mid: '#DFE3E8', to: '#9AA3AE' }
         ];
 
-        /* ---------- أدوات لونية للتدرّجات المبنية من الثيم ---------- */
+        /* ---------- Colour helpers for the theme-derived gradients ---------- */
         function hex2(v){ return ('0' + Math.round(Math.max(0, Math.min(255, v))).toString(16)).slice(-2); }
         function rgbToHex(c){ return ('#' + hex2(c.r) + hex2(c.g) + hex2(c.b)).toUpperCase(); }
         function mixColors(a, b, t){
@@ -1063,21 +1064,21 @@ function toggleSelect(tab, item, box){
         function shade(c, t){ return mixColors(c, '#000000', t); }
         function tint(c, t){ return mixColors(c, '#FFFFFF', t); }
 
-        /* تدرّجات تُبنى من ألوان ثيم العرض المقروءة — تتغيّر بتغيّر الثيم */
+        /* Gradients built from the deck's theme colours — they follow the theme */
         function themeGrads(){
             if (!themeColors || !themeColors.accent1) return [];
             const a1 = themeColors.accent1;
             const a2 = themeColors.accent2 || shade(a1, .35);
             return [
-                { key:'t1', label:'T1', name:'الثيم — أحادي',      from: tint(a1, .30), mid: a1, to: shade(a1, .35), theme:true },
-                { key:'t2', label:'T2', name:'الثيم — مميّز ١←٢',   from: a1, mid: mixColors(a1, a2, .5), to: a2, theme:true },
-                { key:'t3', label:'T3', name:'الثيم — غامق ٥٠٪',  from: a1, mid: shade(a1, .25), to: shade(a1, .50), theme:true }
+                { key:'t1', label:'T1', name:'Theme — monochrome',      from: tint(a1, .30), mid: a1, to: shade(a1, .35), theme:true },
+                { key:'t2', label:'T2', name:'Theme — accent 1 to 2',   from: a1, mid: mixColors(a1, a2, .5), to: a2, theme:true },
+                { key:'t3', label:'T3', name:'Theme — 50% darker',  from: a1, mid: shade(a1, .25), to: shade(a1, .50), theme:true }
             ];
         }
         function allGrads(){ return GRADS.concat(themeGrads()); }
 
-        /* ---------- تدرّج مخصّص: يُحفَظ باسمَي منفذَي الثيم لا برمزَيهما اللونيين،
-           فينتقل النمط بين العروض ويأخذ ألوان ثيم كل عرض تلقائياً ---------- */
+        /* ---------- Custom gradient: stored as the names of two theme slots rather than
+           two hex values, so a preset travels between decks and picks up each deck's colours ---------- */
         function slotKeys(){ return THEME_SLOTS.map(x => x.key); }
         function isCustomGrad(v){
             if (!v || typeof v !== 'object' || !v.c) return false;
@@ -1088,7 +1089,7 @@ function toggleSelect(tab, item, box){
             const s = THEME_SLOTS.filter(x => x.key === k)[0];
             return s ? s.label : k;
         }
-        /* يحوّل الوصف إلى تدرّج فعلي بألوان الثيم المقروء حالياً */
+        /* Resolves the descriptor into a real gradient using the theme colours currently loaded */
         function resolveCustom(v){
             if (!isCustomGrad(v) || !themeColors) return null;
             const from = themeColors[v.a], to = themeColors[v.b];
@@ -1097,7 +1098,7 @@ function toggleSelect(tab, item, box){
                      name: slotLabel(v.a) + ' ← ' + slotLabel(v.b),
                      from: from, mid: mixColors(from, to, .5), to: to };
         }
-        /* معرّف نصّي موحَّد للمقارنة بين مفتاح ثابت ووصف مخصّص */
+        /* One string id, so a fixed key and a custom descriptor can be compared alike */
         function gradId(v){
             if (!v) return '';
             return isCustomGrad(v) ? ('custom:' + v.a + '>' + v.b) : String(v);
@@ -1111,11 +1112,11 @@ function toggleSelect(tab, item, box){
 
         let gradSeq = 0;
 
-        /* اتجاه التدرّج: قُطري من الزاوية · خطّي مستقيم · دائري من المركز */
+        /* Gradient direction: diagonal from the corner, straight linear, or radial from the centre */
         const GRAD_DIRS = [
-            { key:'diag',   glyph:'◤', name:'قُطري — من الزاوية' },
-            { key:'linear', glyph:'▬', name:'خطّي — مستقيم' },
-            { key:'radial', glyph:'◉', name:'دائري — من المركز' }
+            { key:'diag',   glyph:'◤', name:'Diagonal — from the corner' },
+            { key:'linear', glyph:'▬', name:'Linear — straight' },
+            { key:'radial', glyph:'◉', name:'Radial — from the centre' }
         ];
         let gradDir = lsGet('shz_graddir', 'diag');
         function dirOk(k){ return GRAD_DIRS.some(d => d.key === k) ? k : 'diag'; }
@@ -1125,7 +1126,7 @@ function toggleSelect(tab, item, box){
             + '<stop offset="0.5" stop-color="' + g.mid + '"/>'
             + '<stop offset="1" stop-color="' + g.to + '"/>';
 
-        /* يبني تعريف التدرّج داخل صندوق (x, y, w, h) بالإحداثيات الفعلية */
+        /* Builds the gradient definition inside a box (x, y, w, h) in real coordinates */
         function gradDef(id, g, x, y, w, h, dir){
             dir = dirOk(dir || gradDir);
             if (dir === 'radial'){
@@ -1135,8 +1136,8 @@ function toggleSelect(tab, item, box){
                     + ' cx="' + cx + '" cy="' + cy + '" r="' + r.toFixed(2) + '">'
                     + gradStops(g) + '</radialGradient>';
             }
-            /* خطّي: من الحافة اليسرى إلى اليمنى على منتصف الارتفاع
-               قُطري: من الزاوية العليا اليسرى إلى السفلى اليمنى */
+            /* linear: left edge to right edge at mid-height
+               diagonal: top-left corner to bottom-right corner */
             const x1 = x, x2 = x + w;
             const y1 = (dir === 'linear') ? y + h / 2 : y;
             const y2 = (dir === 'linear') ? y + h / 2 : y + h;
@@ -1145,16 +1146,16 @@ function toggleSelect(tab, item, box){
                 + gradStops(g) + '</linearGradient>';
         }
 
-        /* توافق مع النداءات القديمة (زاويتان بدل صندوق) */
+        /* Kept for the older call shape (two corners instead of a box) */
         function linGradDef(id, g, x1, y1, x2, y2){
             return gradDef(id, g, x1, y1, x2 - x1, y2 - y1);
         }
-        /* يدسّ تعريفاً داخل وسم svg الافتتاحي */
+        /* Injects a definition into the opening svg tag */
         function injectDefs(svgString, defs){
             if (!defs) return svgString;
             return svgString.replace(/(<svg\b[^>]*>)/, '$1<defs>' + defs + '</defs>');
         }
-        /* تلوين الأيقونة بتدرّج: بإحداثيات viewBox حتى يمتدّ عبر الأيقونة كاملةً لا عبر كل مسار */
+        /* Gradient fill for an icon: in viewBox coordinates, so it spans the whole icon rather than each path */
         function deepGradSVG(svgString, g, dir){
             const doc = parseSvg(svgString);
             if (!doc) return svgString;
@@ -1163,7 +1164,7 @@ function toggleSelect(tab, item, box){
             const colored = deepColorSVG(svgString, 'url(#' + id + ')');
             return injectDefs(colored, gradDef(id, g, vb[0], vb[1], vb[2], vb[3], dir));
         }
-        /* رقم داخل الشكل الحاوي — يُعامَل معاملة الأيقونة تماماً */
+        /* A number inside the container shape — treated exactly like an icon */
         function numberSvg(n){
             const s = String(n);
             const fz = (s.length > 2) ? 38 : (s.length > 1 ? 50 : 64);
@@ -1173,7 +1174,7 @@ function toggleSelect(tab, item, box){
                 + ' font-weight="700" fill="#000">' + s + '</text></svg>';
         }
 
-        /* قراءة مقاس رقمي آمنة: ترفض النِّسب المئوية وتقبل الوحدات المطلقة */
+        /* Safe numeric attribute read: rejects percentages, accepts absolute units */
         function numAttr(el, name) {
             const v = el.getAttribute(name);
             if (!v) return NaN;
@@ -1194,7 +1195,7 @@ function toggleSelect(tab, item, box){
             return '0 0 100 100';
         }
 
-        /* تنظيف ما لا يُرسَم: تعليقات وبيانات وصفية — يقلّص حجم الحمولة المرسلة لبوربوينت */
+        /* Strip what is never painted — comments and metadata — shrinking the payload sent to PowerPoint */
         function cleanSvg(doc) {
             const drop = [];
             const walk = (n) => {
@@ -1213,7 +1214,7 @@ function toggleSelect(tab, item, box){
             return doc;
         }
 
-        /* ضبط مقاس الأيقونة مع الحفاظ على النسبة — يجعل خانة "الحجم" فعّالة دائماً */
+        /* Resize the icon while preserving its aspect ratio — this is what makes the Size box always effective */
         function resizeSvg(svgString, w) {
             const doc = parseSvg(svgString);
             if (!doc) return svgString;
@@ -1229,8 +1230,8 @@ function toggleSelect(tab, item, box){
             return new XMLSerializer().serializeToString(doc);
         }
 
-        /* يُدرِج الأيقونة داخل شكل حاوٍ مع الاحتفاظ بعنصر svg الأصلي كاملاً —
-           وبذلك تبقى خصائص الجذر (fill و stroke-width و stroke-linecap ومساحات الأسماء) سليمة */
+        /* Embeds the icon inside a container shape while keeping the original svg element intact —
+           so root attributes (fill, stroke-width, stroke-linecap and namespaces) survive */
         function embedSvg(svgString, w) {
             const doc = parseSvg(svgString);
             if (!doc) return '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + w + '"></svg>';
@@ -1245,7 +1246,7 @@ function toggleSelect(tab, item, box){
             return new XMLSerializer().serializeToString(el);
         }
 
-/* ==================== ألوان ثيم العرض ==================== */
+/* ==================== Presentation theme colours ==================== */
         const THEME_SLOTS = [
             { key: 'accent1', label: 'A1' }, { key: 'accent2', label: 'A2' }, { key: 'accent3', label: 'A3' },
             { key: 'accent4', label: 'A4' }, { key: 'accent5', label: 'A5' }, { key: 'accent6', label: 'A6' },
@@ -1255,12 +1256,12 @@ function toggleSelect(tab, item, box){
         ];
         const SLOT_NAMES = {
             accent1: 'Accent 1', accent2: 'Accent 2', accent3: 'Accent 3', accent4: 'Accent 4',
-            accent5: 'Accent 5', accent6: 'Accent 6', dk1: 'نص / داكن 1', dk2: 'نص / داكن 2',
-            lt1: 'خلفية / فاتح 1', lt2: 'خلفية / فاتح 2', hlink: 'ارتباط تشعّبي'
+            accent5: 'Accent 5', accent6: 'Accent 6', dk1: 'Text / dark 1', dk2: 'Text / dark 2',
+            lt1: 'Background / light 1', lt2: 'Background / light 2', hlink: 'Hyperlink'
         };
 
         const THEME_CACHE_KEY = 'shzThemeCache';
-        const SLICE = 262144;            /* 256 كيلوبايت: يكفي لالتقاط ملف الثيم بجزء أو جزأين */
+        const SLICE = 262144;            /* 256 KB: enough to capture the theme part in one or two slices */
         const THEME_TIMEOUT = 20000;
 
         let themeColors = null;
@@ -1273,7 +1274,7 @@ function toggleSelect(tab, item, box){
             return Promise.race([promise, guard]).finally(() => clearTimeout(t));
         }
 
-        /* ---------- ذاكرة داخل ملف العرض نفسه: تُبقي الألوان بعد إغلاق اللوحة ---------- */
+        /* ---------- Storage inside the presentation itself: colours survive closing the pane ---------- */
         function docSettingsGet(k) {
             try { return Office.context.document.settings.get(k); } catch (e) { return null; }
         }
@@ -1284,15 +1285,15 @@ function toggleSelect(tab, item, box){
             } catch (e) {}
         }
 
-        /* ---------- قراءة موجّهة: نجلب من ملف العرض الأجزاء اللازمة فقط ---------- */
+        /* ---------- Targeted reads: only the slices we actually need are fetched ---------- */
         function openPresentationFile() {
             return new Promise((resolve, reject) => {
                 if (!window.Office || !Office.context || !Office.context.document || !Office.context.document.getFileAsync) {
-                    return reject(new Error('غير متاح خارج بوربوينت'));
+                    return reject(new Error('Not available outside PowerPoint'));
                 }
                 Office.context.document.getFileAsync(Office.FileType.Compressed, { sliceSize: SLICE }, (res) => {
                     if (res.status !== Office.AsyncResultStatus.Succeeded) {
-                        return reject(new Error((res.error && res.error.message) || 'تعذّرت قراءة العرض'));
+                        return reject(new Error((res.error && res.error.message) || 'Could not read the presentation'));
                     }
                     resolve(res.value);
                 });
@@ -1310,7 +1311,7 @@ function toggleSelect(tab, item, box){
                 const p = new Promise((resolve, reject) => {
                     file.getSliceAsync(i, (r) => {
                         if (r.status !== Office.AsyncResultStatus.Succeeded) {
-                            return reject(new Error((r.error && r.error.message) || 'تعذّرت قراءة جزء من العرض'));
+                            return reject(new Error((r.error && r.error.message) || 'Could not read a slice of the presentation'));
                         }
                         const d = r.value.data;
                         resolve(d instanceof Uint8Array ? d : new Uint8Array(d));
@@ -1353,12 +1354,12 @@ function toggleSelect(tab, item, box){
                     const cdSize = dv.getUint32(i + 12, true);
                     const cdOff = dv.getUint32(i + 16, true);
                     if (count === 0xFFFF || cdOff === 0xFFFFFFFF || cdSize === 0xFFFFFFFF) {
-                        throw new Error('العرض بصيغة ZIP64 غير المدعومة');
+                        throw new Error('The presentation uses ZIP64, which is not supported');
                     }
                     return { count: count, cdSize: cdSize, cdOff: cdOff };
                 }
             }
-            throw new Error('الملف ليس أرشيف ZIP صالحاً');
+            throw new Error('The file is not a valid ZIP archive');
         }
 
         function parseCentralDirectory(bytes, count) {
@@ -1384,15 +1385,15 @@ function toggleSelect(tab, item, box){
         async function zipEntryText(reader, entry) {
             if (!entry) return null;
             const head = await reader.range(entry.lho, 30);
-            if (head.length < 30) throw new Error('ترويسة ناقصة داخل العرض');
+            if (head.length < 30) throw new Error('Truncated header inside the presentation');
             const dv = new DataView(head.buffer, head.byteOffset, head.byteLength);
-            if (dv.getUint32(0, true) !== 0x04034b50) throw new Error('ترويسة ZIP غير متوقّعة');
+            if (dv.getUint32(0, true) !== 0x04034b50) throw new Error('Unexpected ZIP header');
             const nameLen = dv.getUint16(26, true);
             const extraLen = dv.getUint16(28, true);
             const data = await reader.range(entry.lho + 30 + nameLen + extraLen, entry.compSize);
             if (entry.method === 0) return new TextDecoder('utf-8').decode(data);
-            if (entry.method !== 8) throw new Error('طريقة ضغط غير مدعومة داخل العرض');
-            if (typeof DecompressionStream === 'undefined') throw new Error('المتصفح لا يدعم فك الضغط');
+            if (entry.method !== 8) throw new Error('Unsupported compression method inside the presentation');
+            if (typeof DecompressionStream === 'undefined') throw new Error('This browser cannot decompress the data');
             const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
             return new TextDecoder('utf-8').decode(await new Response(stream).arrayBuffer());
         }
@@ -1453,7 +1454,7 @@ function toggleSelect(tab, item, box){
             return hit ? hit.part : null;
         }
 
-        /* يحدّد ملف الثيم الفعلي للشريحة النشطة: slide ← layout ← master ← theme */
+        /* Resolves the real theme part for the active slide: slide -> layout -> master -> theme */
         async function findThemePart(reader, idx, slideIndex) {
             try {
                 if (slideIndex) {
@@ -1479,7 +1480,7 @@ function toggleSelect(tab, item, box){
                         }
                     }
                 }
-            } catch (e) { /* نكمل للاحتياطي */ }
+            } catch (e) { /* fall through to the fallback */ }
 
             const master1 = idx['ppt/slideMasters/slideMaster1.xml'] ? 'ppt/slideMasters/slideMaster1.xml' : null;
             if (idx['ppt/theme/theme1.xml']) return { part: 'ppt/theme/theme1.xml', master: master1, exact: false };
@@ -1502,7 +1503,7 @@ function toggleSelect(tab, item, box){
             return out;
         }
 
-        /* خريطة ألوان الشريحة الرئيسية: بوربوينت قد يعكس النص والخلفية عمّا في ملف الثيم */
+        /* The master colour map: PowerPoint may swap text and background relative to the theme part */
         function parseClrMap(xml) {
             const m = (xml || '').match(/<p:clrMap\b[^>]*\/?>/);
             if (!m) return null;
@@ -1536,7 +1537,7 @@ function toggleSelect(tab, item, box){
                 tag.textContent = s.label;
                 d.appendChild(tag);
                 d.onclick = () => {
-                    if (gb.open){ gbPick(s.key, hex); return; }   /* وضع بناء التدرّج */
+                    if (gb.open){ gbPick(s.key, hex); return; }   /* gradient build mode */
                     const input = document.getElementById(themeTarget);
                     if (!input) return;
                     clearGrad(themeTarget);
@@ -1551,19 +1552,19 @@ function toggleSelect(tab, item, box){
             });
         }
 
-        /* يعرض ألوان آخر قراءة محفوظة داخل ملف العرض — بلا أي مسح، وفوراً */
+        /* Shows the colours from the last read stored in the presentation — instantly, with no scan */
         function showCachedThemeColors() {
             const status = document.getElementById('theme-status');
             const cached = docSettingsGet(THEME_CACHE_KEY);
             if (!cached || !cached.colors || !cached.colors.accent1) {
-                status.textContent = 'اختر الهدف ثم اضغط أي لون أو تدرّج · ⟳ لقراءة ألوان الثيم.';
+                status.textContent = 'Pick a target, then click any colour or gradient · ⟳ reads the theme colours.';
                 return false;
             }
             themeColors = cached.colors;
             renderSwatches();
             try { renderGradSwatches(); } catch(e){}
-            status.textContent = 'ألوان محفوظة' + (cached.themeName ? ' لثيم «' + cached.themeName + '»' : '')
-                + ' — اضغط ⟳ للتحديث إن غيّرت الثيم.';
+            status.textContent = 'Saved colours' + (cached.themeName ? ' for the theme "' + cached.themeName + '"' : '')
+                + ' — click ⟳ to refresh if you changed the theme.';
             return true;
         }
 
@@ -1575,11 +1576,11 @@ function toggleSelect(tab, item, box){
                 const eocd = await findEndOfCentralDirectory(reader);
                 const idx = parseCentralDirectory(await reader.range(eocd.cdOff, eocd.cdSize), eocd.count);
                 const found = await findThemePart(reader, idx, slideIndex);
-                if (!found) throw new Error('لم يُعثر على ملف الثيم داخل العرض');
+                if (!found) throw new Error('No theme part found inside the presentation');
 
                 const xml = await zipEntryText(reader, idx[found.part]) || '';
                 const colors = parseThemeColors(xml);
-                if (!colors.accent1) throw new Error('تعذّر قراءة مجموعة الألوان');
+                if (!colors.accent1) throw new Error('Could not read the colour scheme');
 
                 if (found.master && idx[found.master]) {
                     try { applyClrMap(colors, parseClrMap(await zipEntryText(reader, idx[found.master]))); } catch (e) {}
@@ -1597,10 +1598,10 @@ function toggleSelect(tab, item, box){
             }
         }
 
-        /* ---------- مقاس الشريحة بالنقاط: يلزم لتوزيع الأيقونات المدرَجة ---------- */
+        /* ---------- Slide size in points: needed to lay out inserted icons ---------- */
         const SLIDE_SIZE_KEY = 'shzSlideSize';
         const EMU_PER_PT = 12700;
-        const DEFAULT_SLIDE = { w: 960, h: 540 };   /* 16:9 عريضة */
+        const DEFAULT_SLIDE = { w: 960, h: 540 };   /* 16:9 widescreen */
         let slideSizePt = null;
 
         async function readSlideSize() {
@@ -1611,10 +1612,10 @@ function toggleSelect(tab, item, box){
                 const idx = parseCentralDirectory(await reader.range(eocd.cdOff, eocd.cdSize), eocd.count);
                 const xml = await zipEntryText(reader, idx['ppt/presentation.xml']) || '';
                 const tag = (xml.match(/<p:sldSz\b[^>]*>/) || [])[0];
-                if (!tag) throw new Error('لم يُعثر على مقاس الشريحة');
+                if (!tag) throw new Error('Slide size not found');
                 const cx = parseInt((tag.match(/\bcx="(\d+)"/) || [])[1], 10);
                 const cy = parseInt((tag.match(/\bcy="(\d+)"/) || [])[1], 10);
-                if (!(cx > 0) || !(cy > 0)) throw new Error('مقاس شريحة غير مفهوم');
+                if (!(cx > 0) || !(cy > 0)) throw new Error('Unrecognised slide size');
                 return { w: cx / EMU_PER_PT, h: cy / EMU_PER_PT };
             } finally {
                 try { file.closeAsync(); } catch (e) {}
@@ -1626,7 +1627,7 @@ function toggleSelect(tab, item, box){
             const cached = docSettingsGet(SLIDE_SIZE_KEY);
             if (cached && cached.w > 0 && cached.h > 0) { slideSizePt = cached; return slideSizePt; }
             try {
-                slideSizePt = await withTimeout(readSlideSize(), 15000, 'تأخّرت قراءة مقاس الشريحة');
+                slideSizePt = await withTimeout(readSlideSize(), 15000, 'Timed out while reading the slide size');
                 docSettingsSet(SLIDE_SIZE_KEY, slideSizePt);
             } catch (e) {
                 slideSizePt = DEFAULT_SLIDE;
@@ -1640,31 +1641,31 @@ function toggleSelect(tab, item, box){
             const btn = document.getElementById('theme-load');
             themeLoading = true;
             btn.disabled = true;
-            status.textContent = 'جارٍ قراءة ألوان الثيم…';
+            status.textContent = 'Reading theme colours…';
             try {
                 const res = await withTimeout(scanThemeColors(), THEME_TIMEOUT,
-                    'تأخّرت الاستجابة — جرّب حفظ العرض ثم أعد المحاولة');
+                    'Timed out — save the presentation, then try again');
                 themeColors = res.colors;
                 renderSwatches();
-                renderGradSwatches();          /* التدرّجات المبنية من الثيم تُعاد بناؤها */
+                renderGradSwatches();          /* theme-derived gradients are rebuilt */
                 docSettingsSet(THEME_CACHE_KEY, { colors: res.colors, themeName: res.themeName, at: Date.now() });
 
                 if (userTriggered) {
                     document.getElementById('icon-color').value = res.colors.accent1.toLowerCase();
                     renderPreview();
                 }
-                status.textContent = 'تم — ' + (res.exact ? 'ثيم الشريحة النشطة' : 'الثيم الرئيسي للعرض')
-                    + ' · اختر الهدف ثم اضغط أي لون.';
+                status.textContent = 'Done — ' + (res.exact ? 'active slide theme' : 'presentation master theme')
+                    + ' · pick a target, then click any colour.';
             } catch (err) {
-                status.textContent = 'تعذّرت القراءة: ' + err.message + ' — يمكنك اختيار اللون يدوياً.';
-                if (userTriggered) showNotification('تعذّرت قراءة ألوان الثيم: ' + err.message);
+                status.textContent = 'Read failed: ' + err.message + ' — you can still choose colours manually.';
+                if (userTriggered) showNotification('Could not read theme colours: ' + err.message);
             } finally {
                 themeLoading = false;
                 btn.disabled = false;
             }
         }
 
-/* ==================== بناء النتيجة ==================== */
+/* ==================== Building the result ==================== */
 let shadowSeq = 0;
 function shadowFilter(id, st){
   return '<defs><filter id="' + id + '" x="-35%" y="-35%" width="170%" height="170%">'
@@ -1679,7 +1680,7 @@ function currentSettings(){
   const r = document.querySelector('input[name="bg-shape"]:checked');
   return {
     w: clampSize($('icon-width').value),
-    applyColor: true,          /* التلوين مفعّل دائماً في تبويب الأيقونات */
+    applyColor: true,          /* recolouring is always on for the Icons tab */
     iconColor: $('icon-color').value || '#4472C4',
     shape: r ? r.value : 'none',
     shapeFill: $('bg-color').value || '#ffffff',
@@ -1780,7 +1781,7 @@ function buildWith(svg, st, styled){
   const c = total / 2;
   const inset = Math.max(5, st.outlineWidth);
 
-  /* تدرّجات الشكل والإطار تُرسم في فضاء الـsvg الخارجي: من زاوية إلى زاوية */
+  /* Shape and outline gradients are drawn in the outer svg space: corner to corner */
   let gdefs = '';
   let fill = st.shapeFill;
   const shapeGrad = gradByKey(st.shapeGrad);
@@ -1805,7 +1806,7 @@ function buildWith(svg, st, styled){
     + '<g transform="translate(' + padding + ',' + (padding + shiftY) + ')">' + inner + '</g></svg>';
 }
 
-/* نسخة بلا ظلّ من الإعدادات — تُستعمل لإعادة المحاولة إن رفض بوربوينت المرشّحات */
+/* A shadow-free variant of the settings — used to retry when PowerPoint rejects filters */
 function buildWithoutShadow(svg, st, styled){
   return buildWith(svg, Object.assign({}, st, { shadowOn: false }), styled);
 }
@@ -1815,7 +1816,7 @@ function buildContent(svg){
   return buildWith(svg, currentSettings(), currentTab === 'icons');
 }
 
-/* ==================== المعاينة ==================== */
+/* ==================== Preview ==================== */
 let previewSample = SAMPLE_SVG;
 function svgToDataUri(s){ return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s); }
 function renderPreview(){
@@ -1824,11 +1825,11 @@ function renderPreview(){
   try {
     const svg = (currentTab === 'shapes') ? previewSample
       : buildWith(previewSample, currentSettings(), currentTab === 'icons');
-    box.innerHTML = '<img alt="معاينة" src="' + svgToDataUri(svg) + '">';
+    box.innerHTML = '<img alt="preview" src="' + svgToDataUri(svg) + '">';
   } catch(e){ box.textContent = '—'; }
 }
 
-/* ==================== باني التدرّج المخصّص ==================== */
+/* ==================== Custom gradient builder ==================== */
 const gb = { open:false, a:null, b:null };
 
 function gbEl(id){ return $(id); }
@@ -1860,14 +1861,14 @@ function gbRefresh(){
 
 function gbOpen(){
     if (!themeColors || !themeColors.accent1){
-        showNotification('اقرأ ألوان الثيم أولاً بالضغط على ⟳');
+        showNotification('Read the theme colours first — press ⟳');
         return;
     }
     gb.open = true; gb.a = null; gb.b = null;
     $('gbuild').classList.remove('hidden');
     $('theme-swatches').classList.add('picking');
     gbRefresh();
-    showNotification('اضغط اللون الأول من صفّ ألوان الثيم');
+    showNotification('Click the first colour in the theme row');
     setTimeout(updateScrollbar, 30);
 }
 
@@ -1879,8 +1880,8 @@ function gbClose(){
 }
 
 function gbPick(slot){
-    if (!gb.a){ gb.a = slot; gbRefresh(); showNotification('اضغط اللون الثاني'); return; }
-    if (gb.a === slot){ showNotification('اختر لوناً مختلفاً للطرف الثاني'); return; }
+    if (!gb.a){ gb.a = slot; gbRefresh(); showNotification('Now click the second colour'); return; }
+    if (gb.a === slot){ showNotification('Pick a different colour for the second end'); return; }
     gb.b = slot;
     gbRefresh();
 }
@@ -1895,7 +1896,7 @@ function gbApply(){
     const desc = { c:true, a:gb.a, b:gb.b };
     customGrad = desc;
     gradFor[themeTarget] = desc;
-    /* نفس تسهيلات toggleGrad: نضمن أن الهدف مرئي فعلاً */
+    /* same courtesy as toggleGrad: make sure the target is actually visible */
     if (themeTarget === 'bg-color'){
         const cur = document.querySelector('input[name="bg-shape"]:checked');
         if (!cur || cur.value === 'none'){
@@ -1908,7 +1909,7 @@ function gbApply(){
     gbClose();
     renderGradSwatches();
     renderPreview();
-    showNotification('تدرّج ' + name + ' → ' + targetName(themeTarget));
+    showNotification('Gradient ' + name + ' → ' + targetName(themeTarget));
 }
 
 function wireBuilder(){
@@ -1919,10 +1920,10 @@ function wireBuilder(){
     $('gb-b').onclick = () => { gb.b = null; gbRefresh(); };
 }
 
-/* ==================== مربّعات التدرّج ==================== */
+/* ==================== Gradient swatches ==================== */
 let customGrad = null;
 function targetName(t){
-  return t === 'icon-color' ? 'الأيقونة' : (t === 'bg-color' ? 'الشكل' : 'الإطار');
+  return t === 'icon-color' ? 'Icon' : (t === 'bg-color' ? 'Shape' : 'Outline');
 }
 function renderGradSwatches(){
   const wrap = $('grad-swatches');
@@ -1931,7 +1932,7 @@ function renderGradSwatches(){
   const sep = document.createElement('span');
   sep.className = 'gsep';
   wrap.appendChild(sep);
-  /* أزرار اتجاه التدرّج */
+  /* gradient direction buttons */
   const dirWrap = document.createElement('span');
   dirWrap.className = 'dirbtns';
   GRAD_DIRS.forEach(d => {
@@ -1939,7 +1940,7 @@ function renderGradSwatches(){
     b.className = 'dirbtn' + (gradDir === d.key ? ' on' : '');
     b.dataset.dir = d.key;
     b.textContent = d.glyph;
-    b.setAttribute('data-tip', 'اتجاه التدرّج: ' + d.name);
+    b.setAttribute('data-tip', 'Gradient direction: ' + d.name);
     b.onclick = () => setGradDir(d.key);
     dirWrap.appendChild(b);
   });
@@ -1954,7 +1955,7 @@ function renderGradSwatches(){
     const d = document.createElement('div');
     d.className = 'swatch';
     d.dataset.grad = g.key;
-    d.title = 'تدرّج ' + g.name + ' — ' + g.from + ' ← ' + g.to;
+    d.title = 'Gradient ' + g.name + ' — ' + g.from + ' ← ' + g.to;
     d.style.background = gradCss(g);
     const t = document.createElement('span');
     t.textContent = g.label;
@@ -1962,13 +1963,13 @@ function renderGradSwatches(){
     d.onclick = () => toggleGrad(g.key);
     wrap.appendChild(d);
   });
-  /* مربّع التدرّج المخصّص الحالي، إن وُجد */
+  /* the current custom gradient swatch, if any */
   const cg = resolveCustom(customGrad);
   if (cg){
     const d = document.createElement('div');
     d.className = 'swatch';
     d.dataset.grad = gradId(customGrad);
-    d.title = 'تدرّج مخصّص ' + cg.name + ' — ' + cg.from + ' ← ' + cg.to;
+    d.title = 'Custom gradient ' + cg.name + ' — ' + cg.from + ' ← ' + cg.to;
     d.style.background = gradCss(cg);
     const t = document.createElement('span');
     t.textContent = 'C';
@@ -1977,11 +1978,11 @@ function renderGradSwatches(){
     wrap.appendChild(d);
   }
 
-  /* زرّ بناء تدرّج جديد من ألوان الثيم */
+  /* button that builds a new gradient from theme colours */
   const plus = document.createElement('div');
   plus.className = 'swatch gplus';
   plus.textContent = '＋';
-  plus.setAttribute('data-tip', 'بناء تدرّج من لونين تختارهما من ألوان الثيم');
+  plus.setAttribute('data-tip', 'Build a gradient from two theme colours');
   plus.onclick = () => (gb.open ? gbClose() : gbOpen());
   wrap.appendChild(plus);
 
@@ -2003,7 +2004,7 @@ function setGradDir(k, quiet){
   renderPreview();
   if (quiet || gradDir === prev) return;
   const d = GRAD_DIRS.filter(x => x.key === gradDir)[0];
-  if (d) showNotification('اتجاه التدرّج: ' + d.name);
+  if (d) showNotification('Gradient direction: ' + d.name);
 }
 function toggleGrad(key){
   const same = gradId(gradFor[themeTarget]) === gradId(key);
@@ -2018,9 +2019,9 @@ function toggleGrad(key){
       }
     }
     if (themeTarget === 'outline-color' && $('outline-width').value === '0') $('outline-width').value = '2';
-    showNotification('تدرّج ' + g.name + ' → ' + targetName(themeTarget));
+    showNotification('Gradient ' + g.name + ' → ' + targetName(themeTarget));
   } else {
-    showNotification('أُلغي التدرّج عن ' + targetName(themeTarget));
+    showNotification('Gradient cleared from ' + targetName(themeTarget));
   }
   syncGradUI();
   renderPreview();
@@ -2040,7 +2041,7 @@ function syncGradUI(){
   });
 }
 
-/* ==================== الأرقام ==================== */
+/* ==================== Numbers ==================== */
 const NUM_MAX = 99;
 function clampBound(v){
   let n = parseInt(v, 10);
@@ -2049,15 +2050,15 @@ function clampBound(v){
 }
 async function insertNumbers(){
   if (!window.Office || !Office.context || !Office.context.document){
-    showNotification('الإضافة غير متصلة ببوربوينت'); return;
+    showNotification('The add-in is not connected to PowerPoint'); return;
   }
   const a = clampBound($('num-from').value), b = clampBound($('num-to').value);
   const from = Math.min(a, b);
   let to = Math.max(a, b);
-  /* الإدراج يجري كائناً كائناً، فنحترم حدّ الدفعة نفسه المطبَّق على الأيقونات */
+  /* insertion happens object by object, so honour the same batch cap as icons */
   if (to - from + 1 > MAX_BATCH){
     to = from + MAX_BATCH - 1;
-    showNotification('الحد الأقصى ' + MAX_BATCH + ' رقماً في العملية الواحدة — أُدرجت ' + from + '–' + to);
+    showNotification('Maximum ' + MAX_BATCH + ' numbers per action — inserted ' + from + '–' + to);
   }
   $('num-from').value = from; $('num-to').value = to;
 
@@ -2070,22 +2071,22 @@ async function insertNumbers(){
     const colsEl = $('batch-cols-icons');
     const cols = colsEl ? (parseInt(colsEl.value, 10) || 0) : 0;
     await insertEachSeparately('icons', texts, currentSettings(), true, cols);
-  } catch(err){ showNotification('تعذّر الإدراج: ' + err.message); }
+  } catch(err){ showNotification('Could not insert: ' + err.message); }
   finally { btn.disabled = false; }
 }
 
-/* ==================== الأنماط ==================== */
+/* ==================== Presets ==================== */
 const MAX_PRESETS = 12;
 const PRESET_FILE_KIND = 'shaza-toolkit-presets';
 
-/* تنقية نمط قادم من ملف أو من تخزين قديم:
-   قيم الألوان تُكتب داخل خصائص SVG، فلا يُقبل إلا ما طابق الصيغة تماماً. */
+/* Sanitises a preset arriving from a file or from older storage:
+   colour values end up inside SVG attributes, so only exact formats are accepted. */
 function sanitizePreset(p){
   if (!p || typeof p !== 'object') return null;
   const hex = (v, d) => (typeof v === 'string' && /^#[0-9a-f]{3,8}$/i.test(v.trim())) ? v.trim() : d;
   const shapeOk = SHAPES.some(x => x.v === p.shape);
   const gradOk = (k) => {
-    if (isCustomGrad(k)) return { c:true, a:k.a, b:k.b };      /* منفذان من الثيم */
+    if (isCustomGrad(k)) return { c:true, a:k.a, b:k.b };      /* two theme slots */
     return (typeof k === 'string' && allGrads().some(g => g.key === k)) ? k : null;
   };
   const widths = [0,1,2,3,4,5,6,8,10];
@@ -2116,10 +2117,10 @@ function presetKey(p){
 function getPresets(){ return lsGet('shz_presets', []).map(sanitizePreset).filter(Boolean); }
 function setPresets(p){ lsSet('shz_presets', p); renderPresets(); }
 
-/* ---------- التصدير: ملف JSON واحد يحمل كل الأنماط ---------- */
+/* ---------- Export: one JSON file carrying every preset ---------- */
 function exportPresets(){
   const ps = getPresets();
-  if (!ps.length){ showNotification('لا توجد أنماط لتصديرها'); return; }
+  if (!ps.length){ showNotification('No presets to export'); return; }
   const payload = {
     kind: PRESET_FILE_KIND,
     app: 'Shaza Toolkit',
@@ -2135,11 +2136,11 @@ function exportPresets(){
     a.href = url; a.download = name;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => { try { URL.revokeObjectURL(url); } catch(e){} }, 4000);
-    showNotification('صُدِّرت ' + ps.length + ' أنماط إلى ' + name);
+    showNotification('Exported ' + ps.length + ' presets to ' + name);
   } catch(e){
-    /* بعض مضيفات أوفيس تمنع التنزيل — ننسخ إلى الحافظة بدلاً منه */
-    if (copyToClipboard(text)) showNotification('تعذّر التنزيل — نُسخت الأنماط إلى الحافظة');
-    else showNotification('تعذّر التصدير: ' + e.message);
+    /* some Office hosts block downloads — fall back to the clipboard */
+    if (copyToClipboard(text)) showNotification('Download blocked — the presets were copied to the clipboard instead');
+    else showNotification('Export failed: ' + e.message);
   }
 }
 
@@ -2156,21 +2157,21 @@ function copyToClipboard(text){
   } catch(e){ return false; }
 }
 
-/* ---------- الاستيراد: يُدمج مع الموجود ولا يمسحه ---------- */
+/* ---------- Import: merges with what is there, never wipes it ---------- */
 function importPresetsFromText(text){
   let data;
   try { data = JSON.parse(text); }
-  catch(e){ showNotification('الملف ليس JSON صالحاً'); return; }
+  catch(e){ showNotification('That file is not valid JSON'); return; }
 
   const raw = Array.isArray(data) ? data
             : (data && Array.isArray(data.presets)) ? data.presets : null;
-  if (!raw){ showNotification('لا يحتوي الملف على أنماط'); return; }
+  if (!raw){ showNotification('The file contains no presets'); return; }
   if (data && data.kind && data.kind !== PRESET_FILE_KIND){
-    showNotification('ملف أنماط من مصدر غير معروف — تعذّر الاستيراد'); return;
+    showNotification('Presets file from an unknown source — import refused'); return;
   }
 
   const clean = raw.map(sanitizePreset).filter(Boolean);
-  if (!clean.length){ showNotification('لا توجد أنماط صالحة في الملف'); return; }
+  if (!clean.length){ showNotification('No valid presets in that file'); return; }
 
   const current = getPresets();
   const seen = {};
@@ -2185,9 +2186,9 @@ function importPresetsFromText(text){
   });
 
   setPresets(current);
-  let msg = 'أُضيف ' + added + ' نمطاً';
-  if (dup) msg += ' · ' + dup + ' مكرّر';
-  if (over) msg += ' · ' + over + ' تجاوز الحدّ (' + MAX_PRESETS + ')';
+  let msg = 'Added ' + added + ' presets';
+  if (dup) msg += ' · ' + dup + ' duplicate';
+  if (over) msg += ' · ' + over + ' over the limit (' + MAX_PRESETS + ')';
   showNotification(msg);
 }
 
@@ -2202,7 +2203,7 @@ function importPresets(){
     inp.remove();
     if (!f) return;
     try { importPresetsFromText(await f.text()); }
-    catch(e){ showNotification('تعذّرت قراءة الملف: ' + e.message); }
+    catch(e){ showNotification('Could not read the file: ' + e.message); }
   });
   inp.click();
 }
@@ -2226,46 +2227,46 @@ function renderPresets(){
   if (!ps.length){
     const e = document.createElement('span');
     e.className = 'pempty';
-    e.textContent = 'لا توجد أنماط — اضبط الإعدادات ثم اضغط «حفظ».';
+    e.textContent = 'No presets yet — set the controls the way you like them, then click Save.';
     strip.appendChild(e);
   }
   ps.forEach((st, i) => {
     const d = document.createElement('div');
     d.className = 'pchip';
-    d.title = 'تطبيق هذا النمط';
+    d.title = 'Apply this preset';
     let img;
-    try { img = '<img alt="نمط" src="' + svgToDataUri(buildWith(SAMPLE_SVG, st, true)) + '">'; }
+    try { img = '<img alt="preset" src="' + svgToDataUri(buildWith(SAMPLE_SVG, st, true)) + '">'; }
     catch(e){ img = '?'; }
-    d.innerHTML = '<span class="x" title="حذف">✕</span>' + img;
+    d.innerHTML = '<span class="x" title="Delete">✕</span>' + img;
     d.onclick = (ev) => {
       if (ev.target.classList.contains('x')){
         ev.stopPropagation();
         const all = getPresets(); all.splice(i,1); setPresets(all);
-        showNotification('حُذف النمط');
+        showNotification('Preset deleted');
         return;
       }
       applySettings(st);
       document.querySelectorAll('#preset-strip .pchip').forEach(x => x.classList.remove('on'));
       d.classList.add('on');
-      showNotification('طُبِّق النمط');
+      showNotification('Preset applied');
     };
     strip.appendChild(d);
   });
   const add = document.createElement('button');
-  add.className = 'padd'; add.title = 'حفظ الإعدادات الحالية كنمط'; add.textContent = '＋';
+  add.className = 'padd'; add.title = 'Save the current settings as a preset'; add.textContent = '＋';
   add.onclick = savePreset;
   strip.appendChild(add);
 }
 function savePreset(){
   const ps = getPresets();
-  if (ps.length >= MAX_PRESETS){ showNotification('الحد الأقصى ' + MAX_PRESETS + ' نمطاً — احذف واحداً أولاً'); return; }
+  if (ps.length >= MAX_PRESETS){ showNotification('Maximum ' + MAX_PRESETS + ' presets — delete one first'); return; }
   ps.push(currentSettings());
   setPresets(ps);
-  showNotification('حُفظ النمط الحالي');
+  showNotification('Current settings saved as a preset');
 }
 
-/* ==================== الإدراج ==================== */
-const INSERT_LIMIT = 900 * 1024;   /* حدّ أمان لحجم الحمولة المرسلة لبوربوينت */
+/* ==================== Insertion ==================== */
+const INSERT_LIMIT = 900 * 1024;   /* safety cap on the payload handed to PowerPoint */
 
 function payloadBytes(s){ try { return new Blob([s]).size; } catch(e){ return s.length; } }
 
@@ -2274,8 +2275,9 @@ function setSelectedSvg(content, place){
     try {
       const opts = { coercionType: Office.CoercionType.XmlSvg };
       if (place){
-        /* بوربوينت يشترط تمرير الموضعين معاً، والقياس بالنقاط.
-           لا نمرّر imageHeight — بوربوينت يستنتج الارتفاع من النسبة، وهو المسار المُوثَّق. */
+        /* PowerPoint requires both coordinates together, measured in points.
+           imageHeight is deliberately omitted — PowerPoint derives the height from the
+           aspect ratio, which is the documented path. */
         opts.imageLeft = place.left;
         opts.imageTop = place.top;
         if (place.width > 0) opts.imageWidth = place.width;
@@ -2288,20 +2290,20 @@ function setSelectedSvg(content, place){
   });
 }
 
-/* رسالة أوفيس الأصلية غامضة — نترجمها إلى سبب مفهوم */
+/* Office's own message is opaque — translate it into something a user can act on */
 function insertHint(msg){
   const m = (msg || '').toLowerCase();
   if (m.indexOf('internal') !== -1 || m.indexOf('5001') !== -1)
-    return 'رفض بوربوينت هذا الشكل. تأكّد أن شريحة مفتوحة ومحدّدة (لا فارز الشرائح ولا الشريحة الرئيسية)، وجرّب أيقونة أبسط أو حجماً أصغر.';
+    return 'PowerPoint rejected this shape. Make sure a slide is open and selected (not Slide Sorter, not the Slide Master), then try a simpler icon or a smaller size.';
   if (m.indexOf('selection') !== -1 || m.indexOf('invalid') !== -1)
-    return 'لا يوجد موضع إدراج صالح — اضغط داخل الشريحة أولاً ثم أعد المحاولة.';
-  return msg || 'تأكّد من وجود شريحة مفتوحة ومحدّدة.';
+    return 'No valid insertion point — click inside the slide first, then try again.';
+  return msg || 'Make sure a slide is open and selected.';
 }
 
-/* يحاول الإدراج، وإن رفض بوربوينت المرشّحات يُعيد المحاولة بلا ظلّ — فتبقى الأيقونة متجهاً */
+/* Tries the insert; if PowerPoint rejects the filter it retries without the shadow, so the icon still lands as a vector */
 async function sendToSlide(content, buildPlain){
   if (payloadBytes(content) > INSERT_LIMIT){
-    showNotification('الحمولة كبيرة جداً — قلّل عدد الأيقونات المحدّدة أو الحجم');
+    showNotification('Payload too large — select fewer icons or reduce the size');
     return false;
   }
   let res = await setSelectedSvg(content);
@@ -2311,31 +2313,31 @@ async function sendToSlide(content, buildPlain){
     if (plain && plain !== content){
       const again = await setSelectedSvg(plain);
       if (again.ok){
-        showNotification('تم الإدراج بلا ظلّ — بوربوينت لا يدعم ظلّ SVG في هذا الملف ✨');
+        showNotification('Inserted without the shadow — PowerPoint rejected the SVG filter in this file ✨');
         return true;
       }
       res = again;
     }
   }
-  if (res.ok){ showNotification('تم الإدراج بنجاح ✨'); return true; }
-  showNotification('تعذّر الإدراج: ' + insertHint(res.message));
+  if (res.ok){ showNotification('Inserted ✨'); return true; }
+  showNotification('Could not insert: ' + insertHint(res.message));
   return false;
 }
 
 function insert(svg){
   try {
     if (!window.Office || !Office.context || !Office.context.document){
-      showNotification('الإضافة غير متصلة ببوربوينت'); return;
+      showNotification('The add-in is not connected to PowerPoint'); return;
     }
     if (currentTab === 'shapes'){ sendToSlide(buildContent(svg), null); return; }
     const st = currentSettings();
     const styled = currentTab === 'icons';
     const retry = st.shadowOn ? (() => buildWithoutShadow(svg, st, styled)) : null;
     sendToSlide(buildWith(svg, st, styled), retry);
-  } catch(err){ console.error(err); showNotification('حدث خطأ: ' + err.message); }
+  } catch(err){ console.error(err); showNotification('Something went wrong: ' + err.message); }
 }
 
-/* وحدات SVG تُقرأ في بوربوينت كبكسل عند 96 نقطة/إنش */
+/* PowerPoint reads SVG units as pixels at 96 DPI */
 const PX_TO_PT = 0.75;
 
 function svgPixelSize(svgString){
@@ -2351,13 +2353,13 @@ function svgPixelSize(svgString){
   return { w: w, h: h };
 }
 
-/* يوزّع مقاسات الأيقونات على شبكة داخل الشريحة، ويعيد موضع كلٍّ منها بالنقاط */
+/* Lays the icon sizes out on a grid inside the slide and returns each position in points */
 function planGrid(sizes, cols, slide){
   const n = sizes.length;
   const cellW = Math.max.apply(null, sizes.map(s => s.w)) * PX_TO_PT;
   const cellH = Math.max.apply(null, sizes.map(s => s.h)) * PX_TO_PT;
   const gap = Math.max(4, Math.round(Math.max(cellW, cellH) * .15));
-  /* في الوضع التلقائي نختار عدداً من الأعمدة يتّسع له عرض الشريحة فعلاً */
+  /* In automatic mode, pick a column count the slide width can actually hold */
   const fit = Math.max(1, Math.floor((slide.w - 12 + gap) / (cellW + gap)));
   const c = (cols > 0) ? Math.min(cols, n) : Math.max(1, Math.min(fit, Math.ceil(Math.sqrt(n)), n));
   const rows = Math.ceil(n / c);
@@ -2378,21 +2380,21 @@ function planGrid(sizes, cols, slide){
   return { spots: spots, overflow: (totalW > slide.w - 12 || totalH > slide.h - 12), cols: c, rows: rows };
 }
 
-/* إدراج كل أيقونة ككائن مستقل على الشريحة — لا تجميع، فلا حاجة لفكّه ولا يضيع الظل */
+/* Insert every icon as its own object on the slide — nothing is grouped, so nothing has to be ungrouped and no shadow is lost */
 async function insertEachSeparately(tab, texts, st, styled, cols){
   const built = texts.map(t => (tab === 'shapes') ? t : buildWith(t, st, styled));
   const sizes = built.map(s => svgPixelSize(s) || { w: 100, h: 100 });
 
   const tooBig = built.filter(s => payloadBytes(s) > INSERT_LIMIT).length;
-  if (tooBig){ showNotification('أيقونة أو أكثر أكبر من الحدّ المسموح — صغّر الحجم'); return; }
+  if (tooBig){ showNotification('One or more icons exceed the payload limit — reduce the size'); return; }
 
   const slide = await getSlideSize();
   const plan = planGrid(sizes, cols, slide);
-  const spill = plan.overflow ? ' — بعضها خارج حدود الشريحة، صغّر الحجم أو غيّر الأعمدة' : '';
+  const spill = plan.overflow ? ' — some land outside the slide; reduce the size or change the column count' : '';
 
   let done = 0, failed = 0, noShadow = 0;
   for (let i = 0; i < built.length; i++){
-    if (built.length > 3) showNotification('جارٍ الإدراج… ' + (i + 1) + ' من ' + built.length);
+    if (built.length > 3) showNotification('Inserting… ' + (i + 1) + ' of ' + built.length);
     let res = await setSelectedSvg(built[i], plan.spots[i]);
     if (!res.ok && styled && st.shadowOn){
       let plain = null;
@@ -2407,18 +2409,18 @@ async function insertEachSeparately(tab, texts, st, styled, cols){
   }
 
   if (!failed){
-    showNotification('أُدرجت ' + done + ' أيقونة ككائنات مستقلة'
-      + (noShadow ? ' (' + noShadow + ' منها بلا ظلّ)' : '') + ' ✨' + spill);
+    showNotification('Inserted ' + done + ' icons as separate objects'
+      + (noShadow ? ' (' + noShadow + ' of them without a shadow)' : '') + ' ✨' + spill);
   } else if (done){
-    showNotification('أُدرجت ' + done + ' من ' + built.length + ' — تعذّر إدراج ' + failed + spill);
+    showNotification('Inserted ' + done + ' of ' + built.length + ' — could not insert ' + failed + spill);
   } else {
-    showNotification('تعذّر الإدراج: ' + insertHint(''));
+    showNotification('Could not insert: ' + insertHint(''));
   }
 }
 
 async function insertSelected(tab){
   const items = selected[tab].slice();
-  if (!items.length){ showNotification('لم تحدّد أي أيقونة'); return; }
+  if (!items.length){ showNotification('No icons selected'); return; }
   const btn = $('batch-insert-' + tab);
   btn.disabled = true;
   try {
@@ -2429,11 +2431,11 @@ async function insertSelected(tab){
     }
     const cols = parseInt($('batch-cols-' + tab).value, 10) || 0;
     await insertEachSeparately(tab, texts, currentSettings(), tab === 'icons', cols);
-  } catch(err){ showNotification('تعذّر الإدراج: ' + err.message); }
+  } catch(err){ showNotification('Could not insert: ' + err.message); }
   finally { btn.disabled = (selected[tab].length === 0); }
 }
 
-/* ==================== شريط التمرير ==================== */
+/* ==================== Scrollbar ==================== */
 function updateScrollbar(){
   const sc = $('scroller'), bar = $('sbar'), th = $('sthumb');
   if (!sc || !bar) return;
@@ -2488,7 +2490,7 @@ function wireScrollbar(){
   updateScrollbar();
 }
 
-/* ==================== التشغيل ==================== */
+/* ==================== Start-up ==================== */
 function wireControls(){
   ['icon-color','bg-color','outline-color','outline-width','apply-shadow'].forEach(id => {
     const el = $(id); if (!el) return;
@@ -2523,10 +2525,10 @@ function wireControls(){
 }
 
 
-/* ==================== تلميحات عائمة ====================
-   تُغني عن نصوص الشرح المطبوعة في اللوحة: تظهر عند الوقوف بالمؤشّر
-   على العنصر، وتقرأ إمّا data-tip أو title (فنمنع تلميح النظام مؤقتاً)
-   أو نصّ عنصر حيّ عبر data-tip-live. */
+/* ==================== Floating tooltips ====================
+   They replace the explanatory text printed in the pane: shown on hover-and-dwell,
+   reading data-tip, or title (the native tooltip is suppressed meanwhile),
+   or the live text of another element via data-tip-live. */
 const TIP_DELAY = 320;
 let tipBox = null, tipTimer = null, tipOwner = null;
 
@@ -2571,7 +2573,7 @@ function initTips(){
     const text = tipText(el);
     if (!text) return;
     tipOwner = el;
-    /* نمنع تلميح النظام البطيء ونعيده عند المغادرة */
+    /* suppress the slow native tooltip, restore it on leave */
     const t = el.getAttribute('title');
     if (t){ el._shzTitle = t; el.removeAttribute('title'); }
     const x = e.clientX, y = e.clientY;
@@ -2635,11 +2637,11 @@ Office.onReady(async (info) => {
   switchTab('logos');
   renderPreview();
 
-  /* لا مسح تلقائي للعرض بعد الآن: نعرض آخر ألوان محفوظة داخل الملف فوراً،
-     والمسح الحقيقي لا يجري إلا بضغطة ⟳ */
+  /* No automatic scan of the presentation: the colours stored in the file are shown
+     immediately, and a real scan happens only when ⟳ is pressed */
   try { showCachedThemeColors(); } catch(e){}
 
-  /* استعادة المجلدات بالتسلسل، والتبويب المفتوح أولاً — بدل ثلاث عمليات متوازية عند الإقلاع */
+  /* Restore folders one after another, open tab first — instead of three parallel jobs at start-up */
   const order = [currentTab].concat(TABS.filter(t => t !== currentTab));
   for (let i = 0; i < order.length; i++){
     try { await restoreLastFolder(order[i]); } catch(e){}

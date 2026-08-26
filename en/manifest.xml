@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="TaskPaneApp">
-  <Id>7ded74c6-e865-4d39-b1f0-042406f9c0ef</Id>
+  <Id>25bfe623-d1d7-4b1b-842e-8bd1a4e399b0</Id>
   <Version>2.0.0.0</Version>
   <ProviderName>Shaza Add-ins</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Shaza Toolkit"/>
-  <Description DefaultValue="Insert, recolour and frame your own SVG icon library on PowerPoint slides — theme-aware, fully offline, vector output."/>
+  <Description DefaultValue="Insert, recolour and frame your own SVG icon library directly on PowerPoint slides — theme-aware, fully offline, vector output."/>
   <IconUrl DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza/assets/icon-32.png"/>
   <HighResolutionIconUrl DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza/assets/icon-64.png"/>
-  <SupportUrl DefaultValue="https://github.com/engshaza2025/pptxLibrary_byshaza"/>
+  <SupportUrl DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza/en/support.html"/>
   <AppDomains>
-    <AppDomain>https://engshaza2025.github.io/pptxLibrary_byshaza/</AppDomain>
+    <AppDomain>https://engshaza2025.github.io</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Presentation"/>
   </Hosts>
+  <Requirements>
+    <Sets DefaultMinVersion="1.1">
+      <Set Name="ImageCoercion" MinVersion="1.2"/>
+    </Sets>
+  </Requirements>
   <DefaultSettings>
-    <SourceLocation DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza/"/>
+    <SourceLocation DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza/en/"/>
   </DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
@@ -67,18 +72,18 @@
         <bt:Image id="Icon.80x80" DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza/assets/icon-80.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://github.com/engshaza2025/pptxLibrary_byshaza"/>
-        <bt:Url id="Commands.Url" DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza/"/>
-        <bt:Url id="Taskpane.Url" DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza/"/>
+        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza/en/"/>
+        <bt:Url id="Commands.Url" DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza/en/"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://engshaza2025.github.io/pptxLibrary_byshaza/en/"/>
       </bt:Urls>
       <bt:ShortStrings>
-        <bt:String id="GetStarted.Title" DefaultValue="Shaza Toolkit"/>
+        <bt:String id="GetStarted.Title" DefaultValue="Shaza Toolkit is ready"/>
         <bt:String id="CommandsGroup.Label" DefaultValue="Shaza Icons"/>
         <bt:String id="TaskpaneButton.Label" DefaultValue="Open Library"/>
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="GetStarted.Description" DefaultValue="Your professional icon library is ready. Insert Drawing Objects with theme support. Click 'Open Library' in the Home tab."/>
-        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to open the SVG Icon Library"/>
+        <bt:String id="GetStarted.Description" DefaultValue="Your icon library is ready. Point it at a folder of SVG files, then insert them as theme-coloured vector objects. Click 'Open Library' on the Home tab."/>
+        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open the SVG icon library pane"/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>

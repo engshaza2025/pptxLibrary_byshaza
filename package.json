@@ -1,7 +1,7 @@
 {
-  "name": "pptx-icon-styler",
+  "name": "shaza-toolkit",
   "version": "2.0.0",
-  "description": "PowerPoint Add-in for inserting and coloring SVG icons with enhanced support for all icon types",
+  "description": "Shaza Toolkit — PowerPoint add-in for inserting and recolouring your own SVG icon library",
   "main": "index.html",
   "scripts": {
     "dev": "http-server -p 3000 -c-1"
