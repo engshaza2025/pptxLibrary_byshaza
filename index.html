@@ -96,7 +96,8 @@ input[type=checkbox]{accent-color:var(--acc)}
 .sgrid input:checked + span{color:var(--onTxt)}
 .sgrid label.on{background:var(--acc);color:var(--onTxt);border-color:var(--acc);font-weight:700}
 
-.swrow{display:flex;gap:4px;direction:ltr;flex-wrap:wrap;align-items:center}
+.swrow{display:flex;gap:4px;direction:rtl;flex-wrap:wrap;align-items:center;
+  max-width:134px}                       /* ٦ مربّعات في السطر: 6×19 + 5×4 */
 #num-row input{width:40px}
 .gsep{width:1px;align-self:stretch;background:var(--line);margin:0 2px}
 .swatch{width:19px;height:19px;border-radius:4px;border:1px solid rgba(0,0,0,.25);cursor:pointer;position:relative}
@@ -185,7 +186,8 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
 <div id="scroller">
 <div class="bar">
   <div class="head">
-    <button class="mini" id="theme-toggle" title="تبديل الوضع الداكن">🌙</button>
+    <button class="mini" id="theme-toggle" data-tip="تبديل الوضع الداكن">🌙</button>
+    <button class="mini" id="lang-toggle" data-tip="التبديل إلى الواجهة الإنكليزية">EN</button>
     <h3>Shaza Toolkit</h3>
     <span class="ver" id="app-version" title="رقم نسخة الصفحة المحمّلة">v2</span>
   </div>
@@ -223,9 +225,9 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
             <select id="size-preset" title="اختيار سريع للحجم"></select>
           </div>
         </div>
-        <div class="r" style="gap:4px"><span class="lbl">لون الأيقونة</span>
+        <div class="r" id="row-icon-color" style="gap:4px"><span class="lbl">لون الأيقونة</span>
           <input type="color" id="icon-color" value="#4472C4"></div>
-        <div class="r" style="gap:4px"><span class="lbl">ثيم</span>
+        <div class="r" id="row-theme" style="gap:4px"><span class="lbl">ثيم</span>
           <span class="info" id="theme-info" data-tip-live="theme-status">i</span>
           <button class="mini" id="theme-load" title="قراءة ألوان ثيم العرض">⟳</button>
           <div class="swrow" id="theme-swatches"></div>
@@ -241,7 +243,7 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
           <button type="button" class="mini" id="gb-cancel" data-tip="إلغاء">✕</button>
         </div>
         <div class="r" style="gap:3px" id="theme-target">
-          <span class="chip active" data-target="icon-color">الأيقونة</span>
+          <span class="chip active" id="chip-icon" data-target="icon-color">الأيقونة</span>
           <span class="chip" data-target="bg-color">الشكل</span>
           <span class="chip" data-target="outline-color">الإطار</span></div>
         <div class="theme-status" id="theme-status">اختر الهدف ثم اضغط أي لون أو تدرّج · ⟳ لقراءة ألوان الثيم.</div>
@@ -263,13 +265,16 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
             <option value="6">6px</option><option value="8">8px</option><option value="10">10px</option>
           </select></div>
         <div class="r" style="gap:4px">
-          <span class="lbl"><input type="checkbox" id="apply-shadow"> ظل</span></div>
+          <span class="lbl"><input type="checkbox" id="apply-shadow"> ظل</span>
+          <span class="lbl hidden" id="row-logo-white"
+                data-tip="يجعل الشعار كلّه أبيض — للخلفيات الغامقة">
+            <input type="checkbox" id="logo-white"> شعار أبيض</span></div>
         <div class="r" id="num-row" style="gap:4px;flex-wrap:nowrap;border-top:1px solid var(--line);padding-top:6px;margin-top:2px">
           <span class="lbl">أرقام</span>
           <input type="number" id="num-from" value="1" min="1" max="99">
           <span class="lbl">–</span>
           <input type="number" id="num-to" value="10" min="1" max="99"></div>
-        <div class="r"><button type="button" class="mini primary" id="num-insert" style="width:100%">إدراج الأرقام</button></div>
+        <div class="r" id="num-insert-row"><button type="button" class="mini primary" id="num-insert" style="width:100%">إدراج الأرقام</button></div>
       </div>
     </div>
   </div>
@@ -383,7 +388,7 @@ function toggleBlock(key){
 }
 
 /* ==================== إعدادات مستقلة لكل تبويب ==================== */
-const CONTROL_IDS = ['icon-width','icon-color','bg-color','outline-color','outline-width','apply-shadow'];
+const CONTROL_IDS = ['icon-width','icon-color','bg-color','outline-color','outline-width','apply-shadow','logo-white'];
 const SHADOW_BLUR = 2.5, SHADOW_SLOPE = 0.35, SHADOW_OFFSET = 2;
 const tabSettings = {};
 /* لكل هدف: مفتاح تدرّج أو null (لون صلب) */
@@ -466,13 +471,25 @@ function switchTab(tabName){
   TABS.forEach(n => { $('section-' + n).style.display = (n === tabName) ? 'block' : 'none'; });
   restoreSettings(tabSettings[tabName]);
 
-  const isIcons = tabName === 'icons', isShapes = tabName === 'shapes';
-  $('blk-presets').style.display = isIcons ? '' : 'none';
-  $('blk-shape').style.display   = isIcons ? '' : 'none';
+  const isIcons = tabName === 'icons';
+  const isLogos = tabName === 'logos';
+  const isShapes = tabName === 'shapes';
+  const styling = isIcons || isLogos;          /* التبويبان اللذان يقبلان شكلاً حاوياً */
+
+  $('blk-presets').style.display = styling ? '' : 'none';
+  $('blk-shape').style.display   = styling ? '' : 'none';
   $('blk-icon').style.display    = isShapes ? 'none' : '';
-  document.querySelectorAll('#blk-icon .bb > .r, #blk-icon .theme-status').forEach((el, i) => {
-    if (i > 0) el.style.display = isIcons ? '' : 'none';   // الشعارات: الحجم فقط
-  });
+
+  /* الشعارات: حجم + ألوان الثيم للشكل والإطار، بلا لون أيقونة وبلا أرقام */
+  $('row-icon-color').style.display = isIcons ? '' : 'none';
+  $('row-theme').style.display      = styling ? '' : 'none';
+  $('theme-target').style.display   = styling ? '' : 'none';
+  $('chip-icon').style.display      = isIcons ? '' : 'none';
+  $('num-row').style.display        = isIcons ? '' : 'none';
+  $('num-insert-row').style.display = isIcons ? '' : 'none';
+  $('row-logo-white').classList.toggle('hidden', !isLogos);
+  if (!isIcons && themeTarget === 'icon-color') pickTarget('bg-color');
+  if (!styling) gbClose();
   updateFolderBar();
   renderPreview();
   setTimeout(updateScrollbar, 30);
@@ -1680,6 +1697,8 @@ function currentSettings(){
   return {
     w: clampSize($('icon-width').value),
     applyColor: true,          /* التلوين مفعّل دائماً في تبويب الأيقونات */
+    logoMode: (currentTab === 'logos'),
+    whiteLogo: !!($('logo-white') && $('logo-white').checked),
     iconColor: $('icon-color').value || '#4472C4',
     shape: r ? r.value : 'none',
     shapeFill: $('bg-color').value || '#ffffff',
@@ -1695,6 +1714,7 @@ function currentSettings(){
 }
 function applySettings(st){
   $('icon-width').value = st.w;
+  if ($('logo-white')) $('logo-white').checked = !!st.whiteLogo;
   $('icon-color').value = st.iconColor;
   const r = document.querySelector('input[name="bg-shape"][value="' + st.shape + '"]');
   if (r) r.checked = true;
@@ -1753,13 +1773,20 @@ function shapeMarkup(shape, c, total, inset, fill, strokeAttr, filterAttr){
 
 function buildWith(svg, st, styled){
   const w = st.w;
+  /* الشعارات: شكل حاوٍ وظلّ نعم، تلوين بلون الأيقونة لا — إلا خيار «شعار أبيض» */
+  const logo = !styled && !!st.logoMode;
+  const dressed = styled || logo;
+
   const applyColor = styled && st.applyColor;
-  const shape = styled ? st.shape : 'none';
-  const shadowOn = styled && st.shadowOn;
+  const shape = dressed ? st.shape : 'none';
+  const shadowOn = dressed && st.shadowOn;
 
   const iconGrad = styled ? gradByKey(st.iconGrad) : null;
   let processed = svg;
   if (applyColor) processed = iconGrad ? deepGradSVG(svg, iconGrad, st.gradDir) : deepColorSVG(svg, st.iconColor);
+  else if (logo && st.whiteLogo)
+    /* قلب الشعار كلّه إلى الأبيض: كل طلاء مهما كان لونه، ونقاط التدرّج معه */
+    processed = deepColorSVG(svg, '#FFFFFF', { mode: 'all', recolorStops: true });
 
   if (shape === 'none' && !shadowOn) return resizeSvg(processed, w);
 
@@ -2100,6 +2127,7 @@ function sanitizePreset(p){
     outlineColor: hex(p.outlineColor, '#000000'),
     outlineWidth: (widths.indexOf(ow) !== -1 ? ow : 0),
     shadowOn: !!p.shadowOn,
+    whiteLogo: !!p.whiteLogo,
     iconGrad: gradOk(p.iconGrad),
     shapeGrad: gradOk(p.shapeGrad),
     outlineGrad: gradOk(p.outlineGrad),
@@ -2489,8 +2517,16 @@ function wireScrollbar(){
 }
 
 /* ==================== التشغيل ==================== */
+function pickTarget(target){
+  themeTarget = target;
+  document.querySelectorAll('#theme-target .chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.target === target);
+  });
+  syncGradUI();
+}
+
 function wireControls(){
-  ['icon-color','bg-color','outline-color','outline-width','apply-shadow'].forEach(id => {
+  ['icon-color','bg-color','outline-color','outline-width','apply-shadow','logo-white'].forEach(id => {
     const el = $(id); if (!el) return;
     const onEdit = () => {
       if (id === 'icon-color' || id === 'bg-color' || id === 'outline-color') clearGrad(id);
@@ -2506,6 +2542,7 @@ function wireControls(){
   });
   document.querySelectorAll('.chev').forEach(ch => { ch.onclick = () => toggleBlock(ch.dataset.toggle); });
   $('theme-toggle').onclick = () => applyTheme(!document.body.classList.contains('dark'));
+  $('lang-toggle').onclick = () => { try { location.href = LANG_ALT; } catch(e){} };
   $('folder-change').onclick = () => pickFolder(currentTab);
   $('folder-reload').onclick = () => reloadFolder(currentTab);
   $('preset-save').onclick = savePreset;
@@ -2513,12 +2550,7 @@ function wireControls(){
   $('preset-import').onclick = importPresets;
   $('theme-load').onclick = () => loadThemeColors(true);
   document.querySelectorAll('#theme-target .chip').forEach(ch => {
-    ch.onclick = () => {
-      document.querySelectorAll('#theme-target .chip').forEach(c => c.classList.remove('active'));
-      ch.classList.add('active');
-      themeTarget = ch.dataset.target;
-      syncGradUI();
-    };
+    ch.onclick = () => pickTarget(ch.dataset.target);
   });
 }
 
@@ -2539,11 +2571,14 @@ function tipText(el){
   return el.getAttribute('data-tip') || el.getAttribute('title') || '';
 }
 
-function tipPlace(x, y){
-  if (!tipBox) return;
+/* يُثبَّت التلميح أسفل العنصر (أو فوقه إن ضاق المكان) — لا يتبع المؤشّر */
+function tipPlace(el){
+  if (!tipBox || !el) return;
+  const r = el.getBoundingClientRect();
   const pad = 8, w = tipBox.offsetWidth, h = tipBox.offsetHeight;
-  let left = x - w / 2, top = y + 16;
-  if (top + h + pad > window.innerHeight) top = y - h - 12;
+  let left = r.left + r.width / 2 - w / 2;
+  let top = r.bottom + 8;
+  if (top + h + pad > window.innerHeight) top = r.top - h - 8;
   left = Math.max(pad, Math.min(window.innerWidth - w - pad, left));
   tipBox.style.left = Math.round(left) + 'px';
   tipBox.style.top = Math.round(Math.max(pad, top)) + 'px';
@@ -2574,22 +2609,17 @@ function initTips(){
     /* نمنع تلميح النظام البطيء ونعيده عند المغادرة */
     const t = el.getAttribute('title');
     if (t){ el._shzTitle = t; el.removeAttribute('title'); }
-    const x = e.clientX, y = e.clientY;
     tipTimer = setTimeout(() => {
       if (tipOwner !== el) return;
       tipBox.textContent = tipText(el);
       tipBox.classList.add('show');
-      tipPlace(x, y);
+      tipPlace(el);
     }, TIP_DELAY);
   }, true);
 
   document.addEventListener('mouseout', (e) => {
     const el = e.target && e.target.closest ? e.target.closest('[data-tip],[data-tip-live],[title]') : null;
     if (el && el === tipOwner) tipHide();
-  }, true);
-
-  document.addEventListener('mousemove', (e) => {
-    if (tipBox && tipBox.classList.contains('show')) tipPlace(e.clientX, e.clientY);
   }, true);
 
   ['scroll', 'wheel', 'mousedown'].forEach(ev =>
@@ -2617,6 +2647,8 @@ function initUI(){
 }
 
 const APP_VERSION = '2';
+/* الواجهة الأخرى: العربية في الجذر والإنكليزية في /en/ */
+const LANG_ALT = 'en/';
 
 Office.onReady(async (info) => {
   initUI();

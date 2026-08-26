@@ -3,27 +3,30 @@
 ## 2 — August 2026
 
 ### Fixed
-- **Office stock icons stayed black in PowerPoint.** Microsoft's built-in icons paint through
-  CSS classes named `MsftOfcThm_*`, which PowerPoint re-binds to the document theme colour,
-  ignoring whatever fill is written in the SVG. The engine now flattens every `<style>` rule
-  onto the elements and deletes the classes, so PowerPoint has nothing left to re-bind.
+- **Office stock icons stayed black in PowerPoint.** Microsoft's built-in icons paint through CSS
+  classes named `MsftOfcThm_*`, which PowerPoint re-binds to the document theme colour, ignoring
+  whatever fill is written in the SVG. The engine now flattens every `<style>` rule onto the
+  elements and deletes the classes, so PowerPoint has nothing left to re-bind.
+- The gradient builder no longer reappears on its own when switching back to the Icons tab.
 
 ### Added
-- **Gradients built from the deck's theme** (T1 monochrome, T2 accent 1→2, T3 accent→50% darker),
-  rebuilt automatically whenever the theme changes.
-- **Custom gradient builder** — pick any two theme colours. The preset stores the *slot names*
+- **Gradients built from the deck's theme** — T1 monochrome, T2 accent 1 to 2, T3 accent to 50%
+  darker — rebuilt whenever the theme changes.
+- **Custom gradient builder**: pick any two theme colours. The preset stores the *slot names*
   (`accent1` → `accent2`), not hex values, so the same preset adapts to every client's deck.
 - **Gradient direction** — diagonal, linear or radial; stored in the preset.
-- **Preset export / import** as a single JSON file, with merge-not-wipe, duplicate skipping
-  and strict sanitising of imported values.
+- **Preset export / import** as one JSON file: merge-not-wipe, duplicate skipping, strict sanitising.
 - **Numbers up to 99** (was 20), honouring the 60-object batch cap.
-- **Floating tooltips** replacing the printed help text in the pane.
+- **Container shapes for logos** — all nine shapes, outline, shadow and gradients.
+- **White logo** switch: knocks a whole logo out to white for dark backgrounds.
+- **Language button** in the header, switching between the Arabic interface and the English one.
+- **Floating tooltips** anchored under each control, replacing the printed help text.
 
 ### Changed
-- Recolouring is always on for the Icons tab; the checkbox is gone. Use the Shapes tab for
-  artwork that must keep its original colours.
-- Recolouring now uses a perceptual brightness threshold instead of a fixed list of dark colours,
-  parses any colour notation, and never touches `clipPath`, `mask` or `filter` subtrees.
+- Recolouring is always on for the Icons tab; the checkbox is gone. Use the Shapes tab for artwork
+  that must keep its original colours.
+- Recolouring uses a perceptual brightness threshold instead of a fixed list of dark colours, parses
+  any colour notation, and never touches `clipPath`, `mask` or `filter` subtrees.
 - Paint moves to explicit attributes before insertion, which PowerPoint reads more reliably.
-- Product name unified as **Shaza Toolkit**; version unified as **2** across `index.html`,
-  `manifest.xml` and `package.json`.
+- Swatch rows start from the right in Arabic, from the left in English, and wrap at six per row.
+- Product name unified as **Shaza Toolkit**; version unified as **2**.

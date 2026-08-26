@@ -16,11 +16,14 @@ No server. No account. Nothing uploaded.**
   `slide → layout → master → theme` chain, so decks with several slide masters resolve correctly.
 - Recolours solid icons, line icons, CSS-class icons, Microsoft's own stock icons, and icons
   carrying no colour information at all.
-- Nine container shapes, outlines, soft shadows, and gradients — neutral, theme-built, or
-  two theme colours you pick yourself.
-- Multi-select up to 60 icons and insert them in one action, laid out on a grid that fits the slide.
+- Nine container shapes — for icons **and logos** — with outlines, soft shadows and gradients:
+  neutral, built from the deck's theme, or from two theme colours you pick yourself.
+- **White logo** switch for placing a logo on a dark background.
+- Multi-select up to 60 icons and insert them in one action, laid out to fit the slide.
 - Numbered markers 1–99 in the same style.
-- Up to 12 saved presets, exportable as a single file for a whole team.
+- Up to 12 saved presets, exportable as a single file for a whole team — a preset built from theme
+  slots re-resolves to each new deck's colours automatically.
+- Arabic and English interfaces, switchable from a button in the header.
 
 ## Requirements
 
@@ -60,6 +63,8 @@ No build step, no dependencies, no framework. The only external script is Micros
 4. If your user or repository name differs from the URLs already in the manifests, update
    `SourceLocation`, `AppDomains`, `IconUrl`, `HighResolutionIconUrl` and `SupportUrl`
    in **both** manifest files.
+
+The language button relies on this layout: Arabic at the root, English one level down at `/en/`.
 
 ## Installing the add-in
 
