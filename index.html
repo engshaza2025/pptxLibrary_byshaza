@@ -473,7 +473,15 @@ function syncShapeUI(){
     l.classList.toggle('on', l.querySelector('input').checked);
   });
 }
-function padFor(shape){
+/* حشوة الشعار أضيق من حشوة الأيقونة: الشعار غالباً عريض (كلمة أو كلمتان)،
+   فيُفَتّ داخل المربّع بعرضه ويبقى قصيراً، ثم تبتلعه الحشوة الواسعة فيبدو ضائعاً.
+   هذه القيم تُطبَّق على تبويب الشعارات وحده، والأيقونات تبقى على حشوتها الأصلية. */
+const LOGO_PAD = {
+  none: 0, circle: .24, square: .12, rounded: .13, diamond: .46,
+  hexagon: .26, octagon: .18, ring: .30, shield: .40
+};
+function padFor(shape, logo){
+  if (logo && Object.prototype.hasOwnProperty.call(LOGO_PAD, shape)) return LOGO_PAD[shape];
   const s = SHAPES.filter(x => x.v === shape)[0];
   return s ? s.pad : .40;
 }
@@ -1825,7 +1833,7 @@ function buildWith(svg, st, styled){
       + fdef + '<g transform="translate(' + pad + ',' + pad + ')"' + fattr + '>' + inner + '</g></svg>';
   }
 
-  const padding = Math.round(w * padFor(shape));
+  const padding = Math.round(w * padFor(shape, logo));
   const total = w + padding * 2;
   const c = total / 2;
   const inset = Math.max(5, st.outlineWidth);

@@ -473,7 +473,15 @@ function syncShapeUI(){
     l.classList.toggle('on', l.querySelector('input').checked);
   });
 }
-function padFor(shape){
+/* A logo gets tighter padding than an icon: a logo is usually wide (a word or two),
+   so it fits the square by its width and stays short — and the icon's generous padding
+   then swallows it. These values apply to the Logos tab only; icons keep their own padding. */
+const LOGO_PAD = {
+  none: 0, circle: .24, square: .12, rounded: .13, diamond: .46,
+  hexagon: .26, octagon: .18, ring: .30, shield: .40
+};
+function padFor(shape, logo){
+  if (logo && Object.prototype.hasOwnProperty.call(LOGO_PAD, shape)) return LOGO_PAD[shape];
   const s = SHAPES.filter(x => x.v === shape)[0];
   return s ? s.pad : .40;
 }
@@ -1826,7 +1834,7 @@ function buildWith(svg, st, styled){
       + fdef + '<g transform="translate(' + pad + ',' + pad + ')"' + fattr + '>' + inner + '</g></svg>';
   }
 
-  const padding = Math.round(w * padFor(shape));
+  const padding = Math.round(w * padFor(shape, logo));
   const total = w + padding * 2;
   const c = total / 2;
   const inset = Math.max(5, st.outlineWidth);
