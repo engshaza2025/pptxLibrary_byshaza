@@ -20,9 +20,15 @@
 - **Container shapes for logos** — all nine shapes, outline, shadow and gradients.
 - **White logo** switch: knocks a whole logo out to white for dark backgrounds.
 - **Language button** in the header, switching between the Arabic interface and the English one.
-- **Floating tooltips** anchored under each control, replacing the printed help text.
 
 ### Changed
+- **Printed help text removed from the pane.** Controls carry a standard `title` and PowerPoint
+  renders the tooltip itself — the add-in draws no tooltip box of its own, so no empty black box
+  can appear and nothing follows the cursor. The theme-reading status lives on the ⓘ badge.
+- **Logo size scale**: the Logos tab now starts at **150 px** and its quick-pick list runs
+  **50 → 400 px in steps of 50**. Icons and Shapes keep 10 → 200 px in steps of 10.
+- The Logos tab is trimmed to size and container shape only — no presets, theme colour row,
+  gradients, direction buttons or target chips.
 - Recolouring is always on for the Icons tab; the checkbox is gone. Use the Shapes tab for artwork
   that must keep its original colours.
 - Recolouring uses a perceptual brightness threshold instead of a fixed list of dark colours, parses

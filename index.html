@@ -168,10 +168,6 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
   color:var(--mut);font-size:10px;line-height:17px;text-align:center;cursor:pointer;user-select:none}
 .dirbtn:hover{border-color:var(--acc);color:var(--acc)}
 .dirbtn.on{background:var(--acc);border-color:var(--acc);color:var(--onTxt)}
-#shz-tip{position:fixed;z-index:200;max-width:230px;padding:6px 9px;border-radius:6px;
-  background:#252423;color:#fff;font-size:10.5px;line-height:1.7;pointer-events:none;
-  box-shadow:0 4px 14px rgba(0,0,0,.28);opacity:0;transition:opacity .12s;display:none}
-#shz-tip.show{opacity:1;display:block}
 .info{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;
   border-radius:50%;border:1px solid var(--inpLine);background:var(--inp);color:var(--acc);
   font:700 10px/1 'Segoe UI',sans-serif;cursor:help;flex:none}
@@ -186,8 +182,8 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
 <div id="scroller">
 <div class="bar">
   <div class="head">
-    <button class="mini" id="theme-toggle" data-tip="تبديل الوضع الداكن">🌙</button>
-    <button class="mini" id="lang-toggle" data-tip="التبديل إلى الواجهة الإنكليزية">EN</button>
+    <button class="mini" id="theme-toggle" title="تبديل الوضع الداكن">🌙</button>
+    <button class="mini" id="lang-toggle" title="التبديل إلى الواجهة الإنكليزية">EN</button>
     <h3>Shaza Toolkit</h3>
     <span class="ver" id="app-version" title="رقم نسخة الصفحة المحمّلة">v2</span>
   </div>
@@ -221,26 +217,26 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
           <div class="pv" id="preview-box" title="معاينة النتيجة"></div>
           <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
             <div class="r" style="gap:3px"><span class="lbl">حجم</span>
-              <input type="number" id="icon-width" value="50" min="10" max="200" step="1"></div>
+              <input type="number" id="icon-width" value="150" min="10" max="400" step="1"></div>
             <select id="size-preset" title="اختيار سريع للحجم"></select>
           </div>
         </div>
         <div class="r" id="row-icon-color" style="gap:4px"><span class="lbl">لون الأيقونة</span>
           <input type="color" id="icon-color" value="#4472C4"></div>
         <div class="r" id="row-theme" style="gap:4px"><span class="lbl">ثيم</span>
-          <span class="info" id="theme-info" data-tip-live="theme-status">i</span>
+          <span class="info" id="theme-info" title="حالة قراءة ألوان الثيم">i</span>
           <button class="mini" id="theme-load" title="قراءة ألوان ثيم العرض">⟳</button>
           <div class="swrow" id="theme-swatches"></div>
           <div class="swrow" id="grad-swatches"></div></div>
         <div class="r hidden" id="gbuild">
           <span class="lbl">تدرّج مخصّص</span>
-          <span class="gslot" id="gb-a" data-tip="اللون الأول — اضغط مربّعاً من صفّ ألوان الثيم">١</span>
+          <span class="gslot" id="gb-a" title="اللون الأول — اضغط مربّعاً من صفّ ألوان الثيم">١</span>
           <span class="garrow">←</span>
-          <span class="gslot" id="gb-b" data-tip="اللون الثاني — اضغط مربّعاً من صفّ ألوان الثيم">٢</span>
+          <span class="gslot" id="gb-b" title="اللون الثاني — اضغط مربّعاً من صفّ ألوان الثيم">٢</span>
           <span class="gprev" id="gb-prev"></span>
-          <button type="button" class="mini" id="gb-swap" data-tip="عكس اتجاه اللونين">⇄</button>
-          <button type="button" class="mini" id="gb-apply" data-tip="تطبيق التدرّج على الهدف المختار" disabled>طبّق</button>
-          <button type="button" class="mini" id="gb-cancel" data-tip="إلغاء">✕</button>
+          <button type="button" class="mini" id="gb-swap" title="عكس اتجاه اللونين">⇄</button>
+          <button type="button" class="mini" id="gb-apply" title="تطبيق التدرّج على الهدف المختار" disabled>طبّق</button>
+          <button type="button" class="mini" id="gb-cancel" title="إلغاء">✕</button>
         </div>
         <div class="r" style="gap:3px" id="theme-target">
           <span class="chip active" id="chip-icon" data-target="icon-color">الأيقونة</span>
@@ -267,7 +263,7 @@ body.dark .icon-box.selected{background:#dbeeff;border-color:var(--acc)}
         <div class="r" style="gap:4px">
           <span class="lbl"><input type="checkbox" id="apply-shadow"> ظل</span>
           <span class="lbl hidden" id="row-logo-white"
-                data-tip="يجعل الشعار كلّه أبيض — للخلفيات الغامقة">
+                title="يجعل الشعار كلّه أبيض — للخلفيات الغامقة">
             <input type="checkbox" id="logo-white"> شعار أبيض</span></div>
         <div class="r" id="num-row" style="gap:4px;flex-wrap:nowrap;border-top:1px solid var(--line);padding-top:6px;margin-top:2px">
           <span class="lbl">أرقام</span>
@@ -320,7 +316,14 @@ let currentTab = 'logos';
 let notifSeq = 0;
 const objectUrls = { logos: [], icons: [], shapes: [] };
 const iconObservers = { logos: null, icons: null, shapes: null };
-const SIZE_MIN = 10, SIZE_MAX = 200;
+const SIZE_MIN = 10, SIZE_MAX = 400;
+/* سلّم الأحجام السريعة وقيمته الافتراضية يختلفان بين تبويب وآخر */
+const SIZE_SCALE = {
+  logos:  { min: 50, max: 400, step: 50, def: 150 },
+  icons:  { min: 10, max: 200, step: 10, def: 50  },
+  shapes: { min: 10, max: 200, step: 10, def: 50  }
+};
+function sizeScale(tab){ return SIZE_SCALE[tab] || SIZE_SCALE.icons; }
 
 const SAMPLE_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
   + '<path fill="#000" d="M12 2 2 7v10l10 5 10-5V7L12 2zm0 2.3 7.5 3.7-7.5 3.8L4.5 8 12 4.3zM4 9.6l7 3.5v6.3l-7-3.5V9.6zm9 9.8v-6.3l7-3.5v6.3l-7 3.5z"/></svg>';
@@ -420,13 +423,26 @@ function restoreSettings(s){
 }
 
 /* ==================== الحجم ==================== */
-function clampSize(v){ let n = parseInt(v,10); if (!isFinite(n)) n = 50; return Math.max(SIZE_MIN, Math.min(SIZE_MAX, n)); }
-function buildSizePresets(){
-  const sel = $('size-preset');
+function clampSize(v){
+  const sc = sizeScale(currentTab);
+  let n = parseInt(v,10); if (!isFinite(n)) n = sc.def;
+  return Math.max(sc.min, Math.min(sc.max, n));
+}
+/* يعيد بناء قائمة الأحجام السريعة بحسب التبويب: الشعارات 50→400 كل 50 */
+function buildSizeOptions(tab){
+  const sel = $('size-preset'); if (!sel) return;
+  const sc = sizeScale(tab || currentTab);
+  const num = $('icon-width');
+  if (num){ num.min = String(sc.min); num.max = String(sc.max); }
   sel.innerHTML = '<option value="">يدوي</option>';
-  for (let v = SIZE_MIN; v <= SIZE_MAX; v += 10){
+  for (let v = sc.min; v <= sc.max; v += sc.step){
     const o = document.createElement('option'); o.value = String(v); o.textContent = v + ' px'; sel.appendChild(o);
   }
+  syncSizeUI();
+}
+function buildSizePresets(){
+  const sel = $('size-preset');
+  buildSizeOptions(currentTab);
   sel.onchange = () => { if (!sel.value) { $('icon-width').focus(); return; } $('icon-width').value = sel.value; renderPreview(); };
   const num = $('icon-width');
   num.oninput = () => { syncSizeUI(); renderPreview(); };
@@ -469,6 +485,7 @@ function switchTab(tabName){
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   $('tab-' + tabName).classList.add('active');
   TABS.forEach(n => { $('section-' + n).style.display = (n === tabName) ? 'block' : 'none'; });
+  buildSizeOptions(tabName);
   restoreSettings(tabSettings[tabName]);
 
   const isIcons = tabName === 'icons';
@@ -476,20 +493,19 @@ function switchTab(tabName){
   const isShapes = tabName === 'shapes';
   const styling = isIcons || isLogos;          /* التبويبان اللذان يقبلان شكلاً حاوياً */
 
-  $('blk-presets').style.display = styling ? '' : 'none';
+  /* الشعارات: الحجم + الشكل الحاوي فقط — بلا أنماط ولا ألوان ثيم ولا تدرّجات */
+  $('blk-presets').style.display = isIcons ? '' : 'none';
   $('blk-shape').style.display   = styling ? '' : 'none';
   $('blk-icon').style.display    = isShapes ? 'none' : '';
 
-  /* الشعارات: حجم + ألوان الثيم للشكل والإطار، بلا لون أيقونة وبلا أرقام */
   $('row-icon-color').style.display = isIcons ? '' : 'none';
-  $('row-theme').style.display      = styling ? '' : 'none';
-  $('theme-target').style.display   = styling ? '' : 'none';
+  $('row-theme').style.display      = isIcons ? '' : 'none';
+  $('theme-target').style.display   = isIcons ? '' : 'none';
   $('chip-icon').style.display      = isIcons ? '' : 'none';
   $('num-row').style.display        = isIcons ? '' : 'none';
   $('num-insert-row').style.display = isIcons ? '' : 'none';
   $('row-logo-white').classList.toggle('hidden', !isLogos);
-  if (!isIcons && themeTarget === 'icon-color') pickTarget('bg-color');
-  if (!styling) gbClose();
+  if (!isIcons) gbClose();
   updateFolderBar();
   renderPreview();
   setTimeout(updateScrollbar, 30);
@@ -1568,19 +1584,26 @@ function toggleSelect(tab, item, box){
             });
         }
 
-        /* يعرض ألوان آخر قراءة محفوظة داخل ملف العرض — بلا أي مسح، وفوراً */
+        /* نصّ الحالة يُكتب في العنصر المخفي وفي تلميح النظام على شارة ⓘ معاً */
+        function setStatus(text){
+            const el = document.getElementById('theme-status');
+            if (el) el.textContent = text;
+            const info = document.getElementById('theme-info');
+            if (info) info.title = text;
+        }
+
         function showCachedThemeColors() {
             const status = document.getElementById('theme-status');
             const cached = docSettingsGet(THEME_CACHE_KEY);
             if (!cached || !cached.colors || !cached.colors.accent1) {
-                status.textContent = 'اختر الهدف ثم اضغط أي لون أو تدرّج · ⟳ لقراءة ألوان الثيم.';
+                setStatus('اختر الهدف ثم اضغط أي لون أو تدرّج · ⟳ لقراءة ألوان الثيم.');
                 return false;
             }
             themeColors = cached.colors;
             renderSwatches();
             try { renderGradSwatches(); } catch(e){}
-            status.textContent = 'ألوان محفوظة' + (cached.themeName ? ' لثيم «' + cached.themeName + '»' : '')
-                + ' — اضغط ⟳ للتحديث إن غيّرت الثيم.';
+            setStatus('ألوان محفوظة' + (cached.themeName ? ' لثيم «' + cached.themeName + '»' : '')
+                + ' — اضغط ⟳ للتحديث إن غيّرت الثيم.');
             return true;
         }
 
@@ -1657,7 +1680,7 @@ function toggleSelect(tab, item, box){
             const btn = document.getElementById('theme-load');
             themeLoading = true;
             btn.disabled = true;
-            status.textContent = 'جارٍ قراءة ألوان الثيم…';
+            setStatus('جارٍ قراءة ألوان الثيم…');
             try {
                 const res = await withTimeout(scanThemeColors(), THEME_TIMEOUT,
                     'تأخّرت الاستجابة — جرّب حفظ العرض ثم أعد المحاولة');
@@ -1670,10 +1693,10 @@ function toggleSelect(tab, item, box){
                     document.getElementById('icon-color').value = res.colors.accent1.toLowerCase();
                     renderPreview();
                 }
-                status.textContent = 'تم — ' + (res.exact ? 'ثيم الشريحة النشطة' : 'الثيم الرئيسي للعرض')
-                    + ' · اختر الهدف ثم اضغط أي لون.';
+                setStatus('تم — ' + (res.exact ? 'ثيم الشريحة النشطة' : 'الثيم الرئيسي للعرض')
+                    + ' · اختر الهدف ثم اضغط أي لون.');
             } catch (err) {
-                status.textContent = 'تعذّرت القراءة: ' + err.message + ' — يمكنك اختيار اللون يدوياً.';
+                setStatus('تعذّرت القراءة: ' + err.message + ' — يمكنك اختيار اللون يدوياً.');
                 if (userTriggered) showNotification('تعذّرت قراءة ألوان الثيم: ' + err.message);
             } finally {
                 themeLoading = false;
@@ -1966,7 +1989,7 @@ function renderGradSwatches(){
     b.className = 'dirbtn' + (gradDir === d.key ? ' on' : '');
     b.dataset.dir = d.key;
     b.textContent = d.glyph;
-    b.setAttribute('data-tip', 'اتجاه التدرّج: ' + d.name);
+    b.title = 'اتجاه التدرّج: ' + d.name;
     b.onclick = () => setGradDir(d.key);
     dirWrap.appendChild(b);
   });
@@ -2008,7 +2031,7 @@ function renderGradSwatches(){
   const plus = document.createElement('div');
   plus.className = 'swatch gplus';
   plus.textContent = '＋';
-  plus.setAttribute('data-tip', 'بناء تدرّج من لونين تختارهما من ألوان الثيم');
+  plus.title = 'بناء تدرّج من لونين تختارهما من ألوان الثيم';
   plus.onclick = () => (gb.open ? gbClose() : gbOpen());
   wrap.appendChild(plus);
 
@@ -2555,79 +2578,7 @@ function wireControls(){
 }
 
 
-/* ==================== تلميحات عائمة ====================
-   تُغني عن نصوص الشرح المطبوعة في اللوحة: تظهر عند الوقوف بالمؤشّر
-   على العنصر، وتقرأ إمّا data-tip أو title (فنمنع تلميح النظام مؤقتاً)
-   أو نصّ عنصر حيّ عبر data-tip-live. */
-const TIP_DELAY = 320;
-let tipBox = null, tipTimer = null, tipOwner = null;
-
-function tipText(el){
-  const live = el.getAttribute('data-tip-live');
-  if (live){
-    const src = $(live);
-    return src ? (src.textContent || '').trim() : '';
-  }
-  return el.getAttribute('data-tip') || el.getAttribute('title') || '';
-}
-
-/* يُثبَّت التلميح أسفل العنصر (أو فوقه إن ضاق المكان) — لا يتبع المؤشّر */
-function tipPlace(el){
-  if (!tipBox || !el) return;
-  const r = el.getBoundingClientRect();
-  const pad = 8, w = tipBox.offsetWidth, h = tipBox.offsetHeight;
-  let left = r.left + r.width / 2 - w / 2;
-  let top = r.bottom + 8;
-  if (top + h + pad > window.innerHeight) top = r.top - h - 8;
-  left = Math.max(pad, Math.min(window.innerWidth - w - pad, left));
-  tipBox.style.left = Math.round(left) + 'px';
-  tipBox.style.top = Math.round(Math.max(pad, top)) + 'px';
-}
-
-function tipHide(){
-  clearTimeout(tipTimer);
-  if (tipOwner && tipOwner._shzTitle){
-    tipOwner.setAttribute('title', tipOwner._shzTitle);
-    tipOwner._shzTitle = null;
-  }
-  tipOwner = null;
-  if (tipBox) tipBox.classList.remove('show');
-}
-
-function initTips(){
-  tipBox = document.createElement('div');
-  tipBox.id = 'shz-tip';
-  document.body.appendChild(tipBox);
-
-  document.addEventListener('mouseover', (e) => {
-    const el = e.target && e.target.closest ? e.target.closest('[data-tip],[data-tip-live],[title]') : null;
-    if (!el || el === tipOwner) return;
-    tipHide();
-    const text = tipText(el);
-    if (!text) return;
-    tipOwner = el;
-    /* نمنع تلميح النظام البطيء ونعيده عند المغادرة */
-    const t = el.getAttribute('title');
-    if (t){ el._shzTitle = t; el.removeAttribute('title'); }
-    tipTimer = setTimeout(() => {
-      if (tipOwner !== el) return;
-      tipBox.textContent = tipText(el);
-      tipBox.classList.add('show');
-      tipPlace(el);
-    }, TIP_DELAY);
-  }, true);
-
-  document.addEventListener('mouseout', (e) => {
-    const el = e.target && e.target.closest ? e.target.closest('[data-tip],[data-tip-live],[title]') : null;
-    if (el && el === tipOwner) tipHide();
-  }, true);
-
-  ['scroll', 'wheel', 'mousedown'].forEach(ev =>
-    document.addEventListener(ev, tipHide, true));
-}
-
 function initUI(){
-  initTips();
   buildSizePresets();
   buildShapeGrid();
   buildZoomBars();
@@ -2640,7 +2591,12 @@ function initUI(){
   if (!localStorage.getItem('shz_presets')) setPresets(defaultPresets()); else renderPresets();
   syncSizeUI(); syncShapeUI();
   const base = snapshotSettings();
-  TABS.forEach(t => { if (!tabSettings[t]) tabSettings[t] = JSON.parse(JSON.stringify(base)); });
+  TABS.forEach(t => {
+    if (tabSettings[t]) return;
+    const s = JSON.parse(JSON.stringify(base));
+    s['icon-width'] = String(sizeScale(t).def);   /* لكل تبويب حجمه الافتراضي */
+    tabSettings[t] = s;
+  });
   TABS.forEach(t => updateBatchUI(t));
   const saved = lsGet('shz_dark', null);
   applyTheme(saved === null ? false : saved);

@@ -16,9 +16,10 @@ No server. No account. Nothing uploaded.**
   `slide → layout → master → theme` chain, so decks with several slide masters resolve correctly.
 - Recolours solid icons, line icons, CSS-class icons, Microsoft's own stock icons, and icons
   carrying no colour information at all.
-- Nine container shapes — for icons **and logos** — with outlines, soft shadows and gradients:
-  neutral, built from the deck's theme, or from two theme colours you pick yourself.
-- **White logo** switch for placing a logo on a dark background.
+- Nine container shapes, with outlines, soft shadows and gradients: neutral, built from the deck's
+  theme, or from two theme colours you pick yourself.
+- A deliberately simple **Logos** tab — size and container shape only. Logo size starts at 150 px
+  and runs 50 → 400 px in steps of 50, with a **White logo** switch for dark backgrounds.
 - Multi-select up to 60 icons and insert them in one action, laid out to fit the slide.
 - Numbered markers 1–99 in the same style.
 - Up to 12 saved presets, exportable as a single file for a whole team — a preset built from theme
